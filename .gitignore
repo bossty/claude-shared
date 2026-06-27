@@ -1,3 +1,6 @@
 *.pre-symlink/
 .backup/
 node_modules/
+skills/agent-browser
+skills/find-skills
+skills/learned/
