@@ -1,0 +1,85 @@
+commit 1a9caf62979f55fda2f0238758c88c522d7a34b8
+Author: developer <dev@newworld.local>
+Date:   Thu Jun 18 01:16:57 2026 +0800
+
+    fix(perf-rca): PR-3 根治 :05 脉冲 — Lettuce shareNativeConnection=false + DB 缓存 jitter
+    
+    活体峰窗 jstack 坐死根因：:05 时 ~800 web 线程同堵 io.lettuce.AsyncCommand.await，.128 服务端
+    loopback 16ms 健康 → 单共享 Lettuce 连接 HOL（shareNativeConnection 未设=默认true）。配套 DB 惊群
+    HIKARI_DB_PENDING=5 = SettingsReadCache 5个category同时到期。
+    
+    Part B (主)：ReplicaRedisConfig.setShareNativeConnection(false) + replica 池 max-active 40→128
+      (max-idle 32/min-idle 8)。热读改走连接池，:05 单连接抖动不再 HOL 全部800命令。
+    Part A (辅)：SettingsReadCache domainListCache+channelCache 5min 固定TTL → jitter 5min±0..60s
+      错开各 category 到期，消 :05 DB reload 惊群。jitter 保留同步 get(key,loader) 的 @Transactional
+      readOnly slave 路由（refreshAfterWrite 异步刷会旁路代理丢路由，故不用）。
+    
+    mvn -pl newworld-web compile + SettingsReadCache/ReplicaRedis 测试 12 run 0 fail。
+    设计/风险/回滚见 docs/sprint/2026-06-16-perf-rca/PR3-DESIGN.md。
+    
+    Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+diff --git a/newworld-web/src/main/java/org/earth/newworld/web/service/SettingsReadCache.java b/newworld-web/src/main/java/org/earth/newworld/web/service/SettingsReadCache.java
+index b0b42497..d7801a52 100644
+--- a/newworld-web/src/main/java/org/earth/newworld/web/service/SettingsReadCache.java
++++ b/newworld-web/src/main/java/org/earth/newworld/web/service/SettingsReadCache.java
+@@ -2,6 +2,7 @@ package org.earth.newworld.web.service;
+ 
+ import com.github.benmanes.caffeine.cache.Cache;
+ import com.github.benmanes.caffeine.cache.Caffeine;
++import com.github.benmanes.caffeine.cache.Expiry;
+ import org.earth.newworld.common.entity.Domain;
+ import org.earth.newworld.common.entity.PromotionChannel;
+ import org.earth.newworld.common.mapper.DomainMapper;
+@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
+ import org.springframework.transaction.annotation.Transactional;
+ 
+ import java.util.List;
++import java.util.concurrent.ThreadLocalRandom;
+ import java.util.concurrent.TimeUnit;
+ 
+ /**
+@@ -54,7 +56,9 @@ public class SettingsReadCache {
+      * category 种类极少（A/P/B/C/S），maximumSize 20 充裕。
+      */
+     private final Cache<String, List<Domain>> domainListCache = Caffeine.newBuilder()
+-            .expireAfterWrite(5, TimeUnit.MINUTES)
++            // PR-3（2026-06-18 perf-rca）：5min 固定 TTL → 5 个 category(A/P/B/C/S) 同写同到期，
++            // :05 同时 miss 回源 DB 惊群（实证 HIKARI_DB_PENDING=5）。改 jitter 5min±0..60s 错开各 key 到期。
++            .expireAfter(SettingsReadCache.<String, List<Domain>>jitteredExpiry(5, 60))
+             .maximumSize(20)
+             .build();
+ 
+@@ -63,10 +67,31 @@ public class SettingsReadCache {
+      * maximumSize 200 覆盖渠道上限（实际 ≤50）。
+      */
+     private final Cache<String, java.util.Optional<PromotionChannel>> channelCache = Caffeine.newBuilder()
+-            .expireAfterWrite(5, TimeUnit.MINUTES)
++            // PR-3：同 domainListCache，jitter 错开到期消 :05 惊群。
++            .expireAfter(SettingsReadCache.<String, java.util.Optional<PromotionChannel>>jitteredExpiry(5, 60))
+             .maximumSize(200)
+             .build();
+ 
++    /**
++     * 带 jitter 的 Caffeine 过期策略（PR-3 perf-rca）：到期 = baseMinutes + [0, jitterSeconds] 随机秒。
++     * 错开多个同时写入的 key 的到期时刻，消除 wall-clock :05 边界的「集体到期→同时回源」DB 惊群。
++     * 只 jitter 创建时刻（expireAfterCreate）；update/read 不延长（保持原 expireAfterWrite 语义）。
++     */
++    private static <K, V> Expiry<K, V> jitteredExpiry(long baseMinutes, int jitterSeconds) {
++        return new Expiry<K, V>() {
++            @Override public long expireAfterCreate(K key, V value, long currentTime) {
++                return TimeUnit.MINUTES.toNanos(baseMinutes)
++                        + TimeUnit.SECONDS.toNanos(ThreadLocalRandom.current().nextInt(jitterSeconds + 1));
++            }
++            @Override public long expireAfterUpdate(K key, V value, long currentTime, long currentDuration) {
++                return currentDuration;
++            }
++            @Override public long expireAfterRead(K key, V value, long currentTime, long currentDuration) {
++                return currentDuration;
++            }
++        };
++    }
++
+     /**
+      * 查询指定 category 的 active 域名列表（带缓存 + readOnly 事务路由）。
+      *

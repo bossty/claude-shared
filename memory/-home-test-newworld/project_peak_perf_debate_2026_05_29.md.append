@@ -1,0 +1,27 @@
+## 5/29 14:50 update — boce 公平对比拿到金证据
+
+**owner 揪头发 reset**：之前 boce 测 uspoc.17.rip orange cloud 走 CF Anycast = 跟 17.rip 同组 POP，源站位置差异被 CF 抹平不公平。
+
+**3 步修法绕陷阱**：
+1. CF API uspoc.17.rip proxied=true→false grey cloud — boce DNS 仍缓存旧 CF IP **失败**
+2. 全新建 uspocb.17.rip A=44.249.182.197 proxied=false — boce 必新 lookup **成功**
+3. us nginx :80 only 无 SSL → HTTPS 测 status=610 → AWS SG :443 没开 + EC2 无 IAM role → 切 HTTP 测试
+
+**135 nodes 真公平对比** (boce Advanced Configuration 全国 + 海外):
+- 17.rip CF Anycast HTTP→HTTPS: Construction p50=201ms / Total p50=1746ms / avg=2118ms
+- uspocb us-west-2 直 IP HTTP: Construction p50=200ms / Total p50=785ms / avg=972ms
+
+**3 个真发现 (PUA 实事求是)**:
+- 🟢 #1 Construction Time 几乎相同 (~200ms) → **CF Anycast 在 CN 视角不省网络延迟**（CF 把 CN anycast 到欧美 POP，等价 us-west-2 距离）
+- 🟡 #2 Total 差异 1146ms 主要是 SSL/redirect (~700ms) + tunnel tax (~400ms)，非 origin 位置功劳
+- 🔴 #3 Phase 11 真生产仍需 HTTPS + CF → SSL/redirect 优势消失 → 真 ROI 上限 ~10-15%（远不如 Phase 10 verdict 推荐的 Argo trial -99%）
+
+**Phase 11 角色转换** — 保资产作应急/fallback，不上 production 流量；回收 5 个 POC EC2 中的 3 个省 $60/月。
+
+**4 条新铁律 sink 候选**：
+- 🔥 boce DNS resolver 持久缓存 → cache busting 用新子域名而非改 proxied
+- 🔥 公平对比 origin 位置必 strip SSL/redirect 变量（差异 ~700ms 非业务）
+- 🔥 EC2 启动必 attach IAM role 含 SG 自管理权限
+- 🔥 **Construction Time (TCP RTT) 是网络延迟优化判定金标** — 看 Total 会得错误结论
+
+文档 `docs/sprint/2026-05-29-peak-perf-debate/phase11-boce-cn-fair-comparison.md`

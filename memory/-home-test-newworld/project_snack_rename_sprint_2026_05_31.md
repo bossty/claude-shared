@@ -1,0 +1,78 @@
+---
+name: project_snack_rename_sprint_2026_05_31
+description: 广告→snack 全栈脱敏重构 sprint（2026-05-31 起）；TeamCreate 团队 + main session inline；五维 grep + mvn test 真验 + bulk sed 越界回退；**2026-06-02 已真 cutover 上线 prod**（DB v36 + 后端 + 前端 + CF），3 轮失败后第 4 次成功；post-cutover UI 回归 + 播放页 p01 修复（bulk-sed 改名漏改一边的 3 类）
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 5af436db-ae9f-44c6-bf7a-db0bc88f7f41
+---
+
+# 广告脱敏重构 sprint（2026-05-31，worktree dry-run 未上线）
+
+**需求**：项目代码+数据零英文 ad 关键字 → 统一 snack（owner 拍板：中文"广告"保留，UI label 不动）。置顶字段 → snack_seq 连续整数；图标 snack seq≤6 播放页/列表页 sticky。worktree 隔离，E2E 验证，**不部署线上**。
+
+**owner 关键拍板**：① API 路径全改 `/q/*`→`/snack/*` + Q01-11→Snack01-11 + CSS class（owner 原话"snack 肯定不触发广告拦截，既脱敏可读性还在"，EasyList/EasyChina 实证 snack 零命中）② 不留 301 直接切 ③ UI 中文"广告"保留 ④ worktree dry-run cutover SOP 下 sprint ⑤ BucketPurpose.AD + channel_daily_report.ad_* + ~150 cosmetic 局部标识符**全纳入达字面零 ad**。
+
+**产出**：24 commit on `worktree-snack-rename`（未 push）。后端 mvn 1797 tests 0F0E / fe-admin 69/69 / fe-web 593/597（4F=cdn-failover.failure-paths+fetch pre-existing，git diff master 零改）。全栈英文 ad 功能残留=0（仅剩外部产品名 adguard/adtidy + 中文广告）。DB migration `sql/v36_snack_rename.sql` 6 步（表 RENAME + snack_seq + ad_id→snack_id + menuKey + cdn_prefix.bucket='SNACK' + channel_daily_report 列 + rollback）。
+
+**真功能 bug 揪出 2 个（rename sprint 副产品）**：① SnackList.vue `map['R_AD']` → 后端 /public 已返 R_SNACK → admin 预览裂图 ② EasyListWatchScheduler 监控自家资产盯死 `q-*`/`/api/v1/q/`，rename 后真资产已 snack-*/`/api/v1/snack/` → 漏监控新 snack 资产被广告拦截。**owner "全扫干净" 指令意外揪出真 bug = 认证扫的价值**。
+
+## 核心教训（durable）
+
+1. **`mvn compile` ≠ `mvn test`**：compile 不编 test 源码。dev-backend 拿 compile PASS 当通过证据，埋 5 类雷（test 类名/字段 setter setAdId/常量名 CDN_AD_URL/menuKey 字符串"AD"/cache 常量名 AD_VERSION 改值不改名）。**rename sprint 验收必 `mvn test` 全模块真编译+跑断言**。
+
+2. **五维 grep（缺一漏）**：rename 零关键字验收必扫 ① 类名 Ad*→Snack* ② 字段 setter/getter（setAdId/getAdType）③ **大写枚举值**（CdnUrlType.AD/BucketPurpose.AD，小写 `\bad`/`\bAd` 模式盖不到）④ 字符串字面量（menuKey "AD"/JSON key "adId"/config key R_AD）⑤ **变量名 word-boundary 边缘**（`z02Ads` 因 `2A` 间无 word boundary，`\bads\b`/`\bAds\b` 漏命中 → 蓝军揪出）。注释/javadoc/CSS class/test fixture/SQL 列名/Mapper XML 同样要扫。
+
+3. **bulk sed 越界铁律**：word-boundary sed 仍会碰**邻接同名字段**——`\badImpressions\b` 误改 channel_daily_report（独立 stats 表 ad_impressions 列，out of scope）→ MyBatis 映射找不存在的 snack_impressions 列。治法：bulk sed 必 mvn/npm 兜底 + **越界即回退 + 升级 owner 决策**（不擅自扩 scope 也不擅自跳过）。owner 后拍板纳入则正式全层改（entity+XML+service+task+test+base schema+migration+rollback）。
+
+4. **lead 必 ls/grep 实测，sub-agent 自报 ≠ 实证**：本 sprint sub-agent（dev-backend/dev-fe-admin/dev-fe-web/dev-cleanup）反复半吊子——copy-rename 不 git rm 旧 zombie（连删 20 文件靠 lead ls 揪）/ 改完不 commit 不跑 mvn 就 idle（dev-cleanup 三次）/ grep 类名=0 当完成漏字段+常量。main session inline 接管收尾比 flaky agent 可靠。
+
+5. **改功能模式必同步 test fixture**：EasyListWatchScheduler patterns q→snack 改了，EasyListWatchSchedulerTest fixture（##.q-hero / ##.Q01 / /api/v1/q/）失配 → 改 snack fixture（5/21 HstsPreloadService 教训 N 次实证）。
+
+6. **蓝军可误报，main 实代码仲裁（双向 crossfire）**：reviewer-final MAJOR#1 报 v36 rollback 索引列名 bug，实代码追执行顺序=误报（rollback 索引步用 snack_id 时列名仍 snack_id，列改回 ad_id 在后续步，MySQL CHANGE COLUMN 自动更新索引引用）。不盲从蓝军（5/16 铁律）。
+
+7. **stale recap 串档防呆**：会话中途 /recap 误载别会话总结（WAF referer 主线）——recap/resume 的"已收官"声明可能串档，以 worktree git log 实际状态为准。
+
+## ★6/01 post-compact 续：merge master(F2 fix)+蓝军漏审残留补完（commit `21201802`+`10283375`）
+- **merge master 引入 3 前端 test 失败修法**：重复注入测试旧 `ad-1` 断言 / `reportFailure('ad')` 漏网 / encrypted-image test 补 headers mock(master content-length 截断校验需)+`vi.resetModules` 隔离 2026-05-31 重引入的进程级 `_blobCache`(test3 同 url 命中 test2 缓存不 reject)。
+- **WebKit feed 回归双独立验证 GO**(蓝军 reviewer-e2e + 本会话自跑)：卡死 maxVideo=1+无单调泄漏 / 震动 jitter=0 / 闪烁 docY trimJumps=[0,0]+residual=0。⚠️ blue-team 原 harness 指向 prod 对 snack build 死路(新前端 `/snack`+`/api/v1/courses` vs prod 旧 `/q`)→造 `local-backend-proxy.mjs` 全本地桥(转发 `/api`→本地7777,零碰 prod;本地 Dragonfly feed 池 609key+34515movie 够触发 FEED_CAP trim 压力)。
+- 🔴 **蓝军 reviewer 给 GO+"全栈零 ad 残留"仍是确认偏误(只验 snack 新名存在,没审残留旧 ad)**——5 维 grep 铁律二次实证,蓝军漏掉一大批真残留藏在**易漏维度**：① **API 路径**(`/api/v1/upload/ad-image`+encrypted+`/api/v1/analytics/ads`,@Mapping path 不绑方法名故查类名查不到) ② **跨栈网络契约 JSON key**(409 `conflictAdId/Title` 后端 data.put 字面量↔前端 SnackList.vue 解构;遥测 `realAdsHiddenCount/totalAdsCount` VisibilityReport 字段+getter/setter↔baseline.js POST body) ③ **metric label 值**(`ads_total/ads_hidden` Prometheus,N9E PromQL 依赖,adblocker 看不到但字面 ad) ④ **OpenResty guard.lua 路径白名单** ⑤ **SQL fresh-db pipeline**(import-all.sh→ad_tables.sql 建旧表致 fresh db 与 snack 代码不一致;但历史迁移 v34/standalone 不在 import-all 别动破坏 replay) ⑥ 方法名。**治本铁律**：审 rename 完整性必 grep **残留旧关键字**(不只验新名存在),显式覆盖 API路径/网络契约JSON key/metric label/路径白名单/fresh-db seed pipeline 这 5 维;`mvn test 三模块 exit 0` 是 rename 验收金标。
+
+## ★6/01 cutover SOP + 本地 prod 保真演练（commit `2191cdc8`+`80a7fc6e`+`2e8db8ab`）
+- **SOP 设计底层逻辑**：API 路径无 301 + DB 表名改 + 缓存键改 → 三者**原子切换** → 短维护窗口(~2-3min)非滚动（滚动必出现"旧后端读已改名 ad 表"炸窗口）。顺序铁律：停旧后端→v36→起新后端→切前端→reload guard×5→热身缓存。
+- 🔴🔴 **演练揪出 v36 rollback 真 BUG（migration rollback 必对称 + 必演练 round-trip）**：v36 forward Step2c 改 `snack_slot.ad_type→snack_type`，但 rollback 段**漏了反向** `snack_type→ad_type`。后果 prod 灾难级——rollback 后 ad_slot 残留 snack_type 列，重试 forward `CHANGE COLUMN ad_type snack_type` 找不到 ad_type → ERROR 1054 卡半截不可恢复。**治本铁律**：① migration rollback 段必**逐 forward step 对称反转**（审计法：forward N 步 ↔ rollback N 步一一配对）② 上线前必在 prod 保真本地**演练完整 round-trip（rollback→forward）**，光跑 forward dry-run 不够 ③ `CHECKSUM TABLE` 跨 round-trip 比对是**零数据丢失金标**（rename 表/列不改 CHECKSUM，故 round-trip 后必须全等）④ 提取 rollback SQL 用 `sed 's/^-- //'` 保多行语句续行，**别用 awk 行类型过滤**（会漏多行 ALTER 的 `--  DROP INDEX` 续行致拼接成废 SQL，我踩过）。
+- ✅ **附录A Redis stats copy 脚本 PASS**：Dragonfly v1.38.1 支持 `COPY src dst REPLACE`；`ad:stats:*→snack:stats:*` 累加器 hash 数据一致、旧键保留可回滚。**关键洞察**：`snack:slot:`/`snack:pinned:` 是 lazy read-through（Listener 只 evict），v36 改完 DB **自动从 snack 表重建,无需 copy**，publish `shared:ch:snack-refresh` 热身即可 → 大幅降低"广告蒸发"风险，只 `snack:stats:` 累加器需小 copy。
+- 🔴 **P1.7 揪出 fresh-db seed 管线 stale（判定 PRE-EXISTING 非 snack 回归）**：`snack_tables.sql`(fresh)缺 snack_seq/encrypt_ts/encrypted_image_url/orig_ext，snack_slot 缺 client_filter/component_code/display_name。**实证 origin/master ad_tables.sql 本来就缺(0处)+import-all.sh 零 ALTER 迁移** → **通用陷阱：ALTER 加列只改 prod 没回写 base seed → 多 sprint 累积 import-all.sh seed 与 prod schema 渐行渐远**；验证手法=fresh DB 跑 seed 后 `diff information_schema.columns vs migrated`。不阻 prod cutover（prod 走 v36 到现有全 schema），fresh-db 重建=独立 tech-debt。**诚实更正**：之前称"fresh-db pipeline 一致"被 P1.7 证伪。
+
+## 待办（下 sprint）
+- 生产 cutover SOP（v36 migration 上线时机 / Redis ad:*→snack:* 切量 / cache 实例重启 / 4 节点验证 / **N9E dashboard PromQL `metric=ads_*`→snacks_* + guard.lua reload**）
+- ⚠️ **3 个 standalone/历史 SQL 含 ad** owner 决策归档 vs 改名（`ad_import_production.sql`/`v34_ad_pinned_order.sql` 改了破坏 replay/`add_missing_indexes.sql`）
+- MINOR: `docs/AD_SYSTEM.md` 文件名含 AD（文档改名，owner 决策）/ migration Step 2+3 合并减 MDL
+- Phase 5 reviewer-final 终审：条件 GO（0 BLOCKER / 3 MAJOR 已闭环 / 2 MINOR 非阻塞）
+
+## ★6/02 真上线实战 + 上线后 UI 回归修复（cutover 成功 + 广告样式修复，全 live 验证）
+snack 全栈脱敏 2026-06-02 真上线 prod 成功（attempt#4），上线后发现广告样式回归、TeamCreate 团队 crossfire 修复。**5 条 durable 教训**：
+
+1. **自写 cutover 编排脚本 4 次失败的 prod 实战 bug（都在自写编排脚本，非标准 deploy 脚本/非 v36，标准脚本 git status 实证零改动）**：
+   - **bare `wait` 死锁在 `exec > >(tee)` 进程替换的 tee 子进程上**（tee 永不退出→`wait` 永久阻塞，pstree 只见 tee 子进程是诊断金标）→ 改 `exec >> LOG`(去 tee) + 顺序执行不用 bare wait。**attempt#1#2 都卡这，我第一次误判成 deploy-backend SQL prompt**。
+   - 回滚 SQL `sed -n '/marker/,/marker/p'` 区间提取**漏滤 `==== ROLLBACK ====` 标记行**→语法错首行→回滚失败→ `grep -vE '^={2,}|ROLLBACK'`；preflight 必加文本校验(首行须 SQL 关键字+无 marker 泄漏)，禁真执行 DDL 验证(DDL 自动提交回不去)。
+   - **deploy-frontend/deploy-openresty 是【编排器】**（自己 ssh 到 web-01/02 干活），必须在 aws-data 以 **newworld 直跑**，禁 `ssh web 'sudo deploy-frontend'`（嵌套+root→root 无主机密钥→`Host key verification failed`）。deploy-backend 不 ssh 出去故 `ssh web 'sudo deploy-backend'` OK。
+   - deploy-backend 非交互 SSH 必带 **`--skip-sql-check`**（否则新 SQL 文件触发 migration 确认 `read -p` 在无 stdin 下 hung）。
+   - **治本铁律**：自写 prod 编排前**每个危险步先在 prod 隔离验证**（如 web-02 单节点跑 deploy-backend 验不 hung）再组装；每步加 timeout 兜底防 hung 掩盖；禁 `tail -N`+无超时 bare wait 掩盖；**v36 forward→rollback round-trip + `CHECKSUM TABLE` 实证零丢失**是 DB 迁移金标；**auto-rollback 实证可靠 3 次=敢反复试的底气**（每次失败立即回滚、站点零数据损、degraded 窗口 ~90s）。
+2. **CF purge 必含 public/ 静态固定 URL 资源**：Vite 内容寻址 hash 保护 `/assets/[hash].js|css`（新 build 新 hash→CF miss→取新），但 **`public/` 静态文件(如 `/css/app.css`)是固定 URL→CF 缓存→必单独 purge**。cutover 只 purge `index.html/sw.js/version.txt` **漏了 /css/app.css**→旧 CSS 缓存是广告样式坏的**放大器**。purge 验证 GET 看 `cf-cache-status=MISS`+内容比对（非 HEAD）。
+3. **bulk-sed 改名两处漏致上线后 UI 回归**：① sed 扫 `src/` **漏 `public/`**（`public/css/app.css` CSS 变量 `--q-card-gradient` 没改，组件用 `var(--snack-card-gradient)`→解析空→**所有广告渐变/标签/底色失效**）② `<Q09>→<Snack09>` 模板标签改了但 **import 漏补**（commit 4ea6e6c5；Vue resolveComponent 失败→渲染未知 element→无 data-v scoped 属性注入→`.snack-tile-grid display:grid` 不生效→**图标栏竖堆 348px**）。**铁律**：bulk 改名必覆盖 `public/` 静态资源 + grep `<Tag>` 用法 vs `import` 配对(对照 master 数 import 行数)。
+4. **UI 视觉回归 E2E 铁律**：检查"图加载"(`naturalWidth>0`)**不充分**——图能加载但布局/样式可坏（cutover 后我只验图加载漏了样式=教训）；必查 **computed style**(`display:grid`/`gridTemplateColumns` 列数/`backgroundImage` 含 gradient/变量 `getPropertyValue('--snack-card-gradient')` 解析出值) + **4 象限**(PC/Mobile×Chromium/WebKit)；本地 proxy 不代理 R2 图域→图标图灰是 proxy 限制非真问题，**真视觉验证在 live 部署后**。
+5. **团队 crossfire 真起作用（多根因场景）**：reviewer 独立揪 `public/css/app.css` 变量三岔口(BLOCKER-1)、dev-fe 对照 master 揪 Snack09 漏导入、lead 证伪自己错误假设(per-component 类名错位，实际组件内一致)后多源印证；**4 症状 → 2 独立根因**，单一视角只会找到一个。sub-agent 易 idle 不产出→lead 必要时接手验证+部署保持 momentum。
+
+6. **播放页 p01 不显示 = bulk-sed 漏改第 3 类「prop 定义/绑定只改一边」（2026-06-02，commit `671531b5`）**：`5031db6a` 改 VideoPlayer 属性 `:player-below-ads→:player-below-snacks` + Snack08 子 prop `:ads→:snacks`，**但漏改 PlayerDesktop 的 `defineProps` 定义名 `playerBelowAds`**→Vue 绑 `playerBelowSnacks` ↔ 定义 `playerBelowAds` 错位→**prop 解绑静默收默认空 `[]`**→Snack08 `v-if="snacks.length>0"` 不成立→p01 不渲染。修法 PlayerDesktop prop `playerBelowAds→playerBelowSnacks`(+2/-2)。**误判教训**：先猜"key-map 值对不上 / 漏 import"全错(getSnackBySlots 是 alias、key 对、后端真返 id=22)→**系统性扫 16 个 prop 绑定**锁定仅此 1 对错位(吻合 owner 只报 p01)，比逐个猜快。验收 live `17.rip/lessons/70296` 4 象限全 PASS(`.snack-card[data-snack-id=22]` 真渲染)；src/ 被 content-hash + index.html no-cache→**本次无需 CF purge**(对照教训 2 public/ 才需)。
+   - **★bulk-sed 改名「漏改一边」3 类合集**（治本=rename 后必 grep 旧名全仓库残留 + 关键链路 live 4 象限验真渲染）：① 漏 import（标签改、import 没补→resolveComponent 失败无 data-v）② 漏 public/ 静态（src 改、public/css 没改→CSS 变量解析空 + CF 缓存需 purge）③ prop 定义/绑定只改一边（绑定/子 prop 改、defineProps 定义没改→prop 解绑静默空）。共性=**「用方↔定义方」跨文件解耦对，sed 单侧替换静默断链**。
+
+7. **cutover 漏部署 frontend-admin → 管理后台广告页 404 坏 2.5h（2026-06-02 12:12→14:48）**：cutover 部署了 admin **后端**(jar 含 19 snack 类 + v36 表 RENAME) + frontend-**web**，**漏了 frontend-admin**(dist 停 5/30)。后端广告 controller 改名 `/q-admin/slot→/snack-admin/slot`，旧前端仍调 `/q-admin/slot`→后端 `code:404 Resource not found`→admin「广告位」「广告管理」两页拉不到数据(推广渠道页 `/q-admin/channel` 后端保留→正常)。**根因=cutover 范围漏第二个前端 app**(rename 改了 fe-web+fe-admin 双前端，cutover 只部 fe-web)。修=`deploy-frontend.sh admin`→隧道登录态 E2E 广告位 19 行+广告管理 55 行真数据渲染无 404。**★铁律**：①改 admin API 路径/表名的 cutover **必同时部署 frontend-admin**(双前端易漏一个)②**cutover 后必登录态 E2E 验 admin 关键页真拉数据**(非只验 fe-web)③**admin 响应加密**致脚本 `code:0` 判定失效→**DOM 渲染行数/截图才是权威**非 API code(我误判 ❌ 实则 PASS，owner 在场纠偏)。**部署机制 2 坑**(环境差异非脚本 bug)：`ADMIN_HOST=aws-data` 在 aws-data 自身跑会 `ssh newworld@127.0.0.1` 自连 publickey 失败→**必从控制机发起**；控制机无 secrets.env→`INTERNAL_API_SECRET` 从 server `grep secrets.env` source 进 env **不落盘**。诊断金标：`/q-admin/slots` 返 `code:404 Resource not found`(路由不存在=坏) vs `/snack-admin/slot` 返 `未登录`(路由存在=对)——**业务封套 HTTP 恒 200，必看 body code 非 HTTP status**。
+
+8. **广告分析菜单跳 dashboard = router path 偏离 menu-keys 注册表（第4类 rename 不一致，2026-06-02 commit `e23629c5`）**：router path `snack-analytics`/name `SnackAnalytics` 与 `menu-keys.yaml` canonical `/promotion-snack-analytics`/`PromotionSnackAnalytics` 不一致。菜单 `el-menu-item :index=m.path`(来自静态 generated/menuKeys.js)导航到 `/promotion-snack-analytics`→router 无此路径→catch-all `/:pathMatch redirect /dashboard`→广告分析页**显示 dashboard 内容**。全量比对 26 项仅此 1 处偏离。修=router 对齐注册表(前端单文件,菜单数据是静态 MENU_CATALOG 非后端 API,无需后端/regen)。**诊断金标**：症状"显示别的页内容"=路由 catch-all 重定向,先比对 menu path↔router path 全量。**rename 4 类不一致合集**：①漏 import ②漏 public/ ③prop 定义/绑定单边 ④菜单注册表 path↔router path。
+
+9. **全栈"漏部署 ad 残留"扫描方法论 + 2 类非服务残留清理（2026-06-02，owner 主动要求扫）**：核心=**扫"实际部署/运行的产物"非源码**(源码 snack≠部署 snack,admin/web 都中招)。6 surface：①前端 dist×3 ②运行 jar×4 ③DB 表/列/config/menu ④Redis key ⑤nginx ⑥CF。**结论：live 服务的一切+app 真用数据全干净**(4 jar 0 Ad 类/DB 0 ad/web 活跃 app=index.html 引用的 41 chunk 0 残留/admin dist 干净)；**2 类非服务残留**：(A) **web dist 旧 chunk**——部署脚本 `deploy-frontend.sh` line129 `cp dist/assets/* dist.new/assets/`(给翻页中老用户兜底)**无 pruning**→822 chunk 累积,pre-snack 旧 chunk(含 R_AD//v1/q//--q-card)被永久接力 mtime 每次重刷永不老化;**但 index.html 不引用→不服务新用户**(active app 干净);清理=双台删 49 孤儿脏chunk(tar 备份+严格排除 index 引用的活跃chunk,删后 R_AD/q/--q-card=0,live smoke 200)。(B) **Redis 286 个 `ad:stats:*` 永久key**(TTL=-1)——pre-snack 遗留,snack 后端已改写 `snack:stats:*`(源码 SnackStatsService SNACK_STATS_HASH_PREFIX),历史分析读 DB 非 Redis buffer→删安全;清理=HGETALL 备份 16K 文件后 DEL 286,验 ad:*=0 snack:stats 完好。**判定金标**：active vs 孤儿——`grep index.html 引用的 entry chunk` 干净=live 安全,脏 token 只在孤儿 chunk=磁盘垃圾非 live 残留;Redis 看源码 key 前缀(live 写=真残留)+TTL(-1 永久=搁浅)。**★治本已实现**(commit `f10b637b`,owner 反诘揪出后授权)：deploy-frontend.sh 新增 **Step 8** chunk 版本裁剪——owner 直觉对(保留旧chunk是有意设计防CF边缘旧HTML引用404,且应只留几版),但版本上限 `SOURCEMAP_KEEP_VERSIONS=5` 只接到 sourcemap(Step7)没对称接到 chunk→无界增长。修法**复用 sourcemap sha-dir 作版本登记表**(每 `/web-sourcemaps/<sha>/` 的 `*.js.map` basename=那版build的js chunk集,Step7已裁5版),保留集=最近5版登记表 ∪ 当前 index.html 引用(双保险),只裁.js(.css无.map登记全留),DRY_RUN只报不删/登记表空SKIP防过删/误删活跃chunk则abort。DRY双台验证 total=779 kept=172 del=607 active_safe=yes。**教训**：①cp(无-p)重置mtime抹掉真实年龄→mtime裁剪失效是关键卡点,改用 sourcemap sha-dir 版本登记表绕过 ②owner"应该只保留几版吧"业务直觉再次碾压我"无prune"的粗结论——版本上限策略只拉通一半(sourcemap有chunk无)是真相,fact-check 精读全脚本才看清。
+
+10. **团队 crossfire adblock 关键词复审 + 完整零关键字清理（2026-06-02，commit `1c3fcc87` 39文件 +417/-150）**：owner 要求基于反 adblock sprint 成果(EasyListWatchScheduler 5 源)组团队重扫。**TeamCreate 4 员**(3 扫描 backend/frontend/config + 蓝军 reviewer crossfire)。**核心价值=蓝军揪出三扫描员全漏的 2 个真 adblock 可见 BLOCKER**(三人只盯"ad"漏了同源词)：① `snack-preroll-*` CSS class ×29(Snack03,`##[class*=preroll]`命中) ② `rel="noopener sponsored"` ×9(`##a[rel~=sponsored]`命中)——**CSS class/rel 属性不被 Vite mangle=真 DOM 可见**，区别于扫描员找的内部 JS 变量(minify掉)。**判定金标=adblock 可见面(DOM class/rel/网络URL) vs 内部残留(JS变量/服务端常量/注释)**：可见面才是真威胁，内部是完整性。**lead 仲裁铁律全用上**：蓝军 BLOCKER 必 main 实代码核(grep Snack03 真 template class + rel 真在`<a>`)→坐实；DB slug 真值自查(g/l/p/z 混淆码 clean)；F4 snack_type 值不进 DOM 仲裁;MAJOR-3 v7_004 历史migration 降级KEPT。**多个自身假阳性纠偏**(诚实)：①DB"clean"是 root auth 静默失败被`||echo✅`兜底(R_AD/R_SNACK对照空是征兆)→换 app 用户`newworld`真查19行连通性 ②admin"1 ERROR"是 grep 命中 metric 名`itdog_probe_error_total`子串 ③sed `preroll`只改小写漏 `Preroll`(onPrerollComplete)/`PREROLL`(PLAYER_PREROLL键)→大写变体铁律再现。**清理范围**：轴一2 BLOCKER + 轴二(key-map BANNER/SPONSOR/POPUP/PROMO/PREROLL 键名+全引用 / isAd·fetchNavAds·playerBelowAds·filteredAds·bannerQ 变量 / splash_ad·list_ad·app_promo_pos_ 字面量 / 注释 / 后端 CDN_PREFIX_AD·allAds·Javadoc·backfill脚本改名)。promotion 业务簇按 owner FLAG 保留。**部署**：fe-web(2 BLOCKER live验证 active chunk干净+purge 14孤儿)+fe-admin+admin/data后端(jar CDN_PREFIX_AD=0,web搭便车下次)；验证全绿(失败仅预存 cdn-failover/fetch+环境 X11/AWT headless,git diff+异常类型实证非本改动)；4节点health 200。**chunk 版本裁剪 Step 8 首次 live**(total=205 kept=175 del=30)。
+
+参考前序：[[project_anti_adblock_sprint_2026_05_21]]（Q01-Q11 命名体系起源 + EasyList 监控）/ [[project_ad_image_encrypt_sprint_2026_05_22]]（R_AD 加密 pipeline）/ [[project_admin_menu_sprint_2026_05_24]]（@RequireMenu 启动期 fail-fast）。
