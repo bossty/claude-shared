@@ -224,3 +224,10 @@
 - [CF 缓存配置 + Browser Cache TTL 陷阱](reference_cf_zone_17rip_cache.md) — CF zone Browser Cach…
 - [CF Speed Optimization + DNS TTL audit + HSTS Preload 自动化 + N9E↔yaml 双向对齐（5/20→5/21）](project_cf_speed_audit_2026_05_20.md) — N9E 50 ↔ yaml 50 完全对…
 - [首屏边缘缓存提速 + CF全规则实测(2026-06-06)](project_firstscreen_edge_cache_2026_06_06.md) — Tier1 version.js SWR…
+
+<!-- orphan 补索引 2026-06-27 toolchain 统一 -->
+- [worktree Bash cwd 重置](feedback_agent_bash_cwd_reset_worktree.md) — agent Bash cwd 每次调用重置到主 repo，worktree 任务每条命令 cd 或用绝对路径
+- [CF API 必先查文档](feedback_cf_api_docs.md) — Cloudflare API 调用前必查官方文档，不凭记忆判断是否支持
+- [禁手写工具返回的数字](feedback_no_handwritten_numbers_from_tools.md) — 绝不手写/转述工具数字与引文，逐字复制脚本原始输出
+- [web 模块永远第一优先](feedback_web_module_top_priority.md) — owner 铁律：任何情况 web 用户前台优先，处置/汇报先确认 web 状态
+- [移动端改版+封面方案](project_mobile_redesign.md) — 2026-04-04 一列全宽/封面原尺寸+thumbnail 480px/CRF24/五层fallback待实施
