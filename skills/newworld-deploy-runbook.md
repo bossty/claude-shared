@@ -165,16 +165,14 @@ drop-in 目录：`/etc/systemd/system/newworld-web.service.d/`
 
 | 节点 | 必备 drop-in（sprint 相关） | 关键 Environment |
 |---|---|---|
-| **region US** (aws-region-us) | `slave-datasource.conf` | `SPRING_DATASOURCE_SLAVE_URL=jdbc:mysql://`**172.32.9.19**`:3306/newworld?...` + `_SLAVE_USERNAME=newworld` + `_SLAVE_PASSWORD` |
-| | `redis-replica.conf` | `REDIS_REPLICA_HOST=`**172.32.9.19** + `REDIS_REPLICA_PORT=6379` |
-| | `route-mode.conf` | `APP_RUM_ROUTE_MODE=lb-cohort` |
-| **region EU** (aws-region-eu) | `slave-datasource.conf` | `SPRING_DATASOURCE_SLAVE_URL=jdbc:mysql://`**172.33.8.248**`:3306/newworld?...` |
-| | `replica-redis.conf` ⚠️文件名与US不同 | `REDIS_REPLICA_HOST=`**172.33.8.248** + `_PORT=6379` + `REDIS_REPLICA_PASSWORD` |
+| ~~**region US** (aws-region-us)~~ ⚠️**已退役**（终态B砍俄勒冈 2026-06-10） | ~~`slave-datasource.conf`~~ | 历史死配置：SLAVE_URL→172.32.9.19、REDIS_REPLICA_HOST→172.32.9.19（节点已 terminate，勿复用） |
+| **region EU** (aws-region-eu) | `slave-datasource.conf` | `SPRING_DATASOURCE_SLAVE_URL=jdbc:mysql://`**172.33.8.248**`:3306/newworld?...`（EU MySQL replica） |
+| | `replica-redis.conf` ⚠️文件名与US不同 | `REDIS_REPLICA_HOST=`**172.33.3.184**（EU 独立 redis，2026-06-14 从 eu-db-slave .248 分离，实证线上注入；见 memory `project_eu_redis_separation`） + `_PORT=6379` + `REDIS_REPLICA_PASSWORD` |
 | | `route-mode.conf` | `APP_RUM_ROUTE_MODE=lb-cohort` |
 | **CA web** (ca-web-01/02/03/04) | **无 slave/replica drop-in**（正确，CA 同区直读 master） | `DB_HOST=172.34.1.222` / `REDIS_HOST=172.34.1.128` |
 | **ca-admin** (admin/data) | **无 slave/replica drop-in**（正确） | 单机直读 CA master |
 
-> replica IP 映射：US→172.32.9.19 / EU→172.33.8.248 / HK master→172.31.19.174。CIDR：HK 172.31 / US(usw2) 172.32 / EU 172.33。
+> replica IP 映射（终态B，2026-06-27 实证更正）：EU MySQL replica→172.33.8.248、EU Redis replica→**172.33.3.184**（独立 eu-redis）；CA web 直读 master 172.34.1.222（同区无 replica drop-in）。⚠️ 旧 US(usw2 172.32.9.19)/HK master(172.31.19.174) 均已退役。CIDR：HK 172.31(退役)/US-usw2 172.32(退役)/EU 172.33/CA 172.34。
 
 **⚠️ 已知不一致（重建/编脚本时务必按内容而非文件名校验）：**
 1. **Redis drop-in 文件名 US/EU 不一致**：US=`redis-replica.conf`，EU=`replica-redis.conf`。**按 `grep REDIS_REPLICA_HOST` 内容校验，别按固定文件名**（按名找会漏一个 = 该区 Redis 读悄悄回退 HK）。
