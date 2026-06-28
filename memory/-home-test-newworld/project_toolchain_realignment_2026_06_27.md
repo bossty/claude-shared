@@ -20,13 +20,13 @@ metadata:
 ## 账户/plugin 状态
 - A 补装 4 plugin：lua-lsp/playwright/skill-creator/claude-api（A 原缺；newworld plugin **不装**，软链已覆盖防双载）。
 - B 的 newworld plugin（v0.1.0/32skill 陈旧子集）**已 disable**（软链给 B 最新35，消双载，可 enable 回滚）。
-- repo plugin `claude-plugin/newworld` bump 0.1.6→0.1.7（35 skills）。
+- repo plugin `claude-plugin/newworld` bump 0.1.6→**0.1.8**（35 skills，**已合 origin/master `b067900c`**；reconcile 过别会话的 0.1.7+dev-workflow 撞车）。
 
 ## staleness 退役（Owner 逐条审 + 实证）
 - `cf-tunnel-edge-region-placement` §1/§2「US需俄勒冈+加州双region」结论被终态B推翻，加 superseded 横幅（方法论保留）。
 - `deploy-runbook`：region US(俄勒冈)行标退役；**EU REDIS_REPLICA_HOST .248→172.33.3.184**（eu-web-01 /proc/environ 实证更正，旧值错）。
 
 ## 未完（Owner 节奏）
-S7 settings 共享片段甄别 + plugin 版本对齐(chrome-devtools/pua)；P4 三战略项（SkillSpector 制度化/RED-GREEN 压测/codebase-memory 试点）；分支 `chore/2026-06-27-toolchain-realignment` 待测+Owner 授权合 master。
+**已合 origin/master**（`b067900c` 双账户统一+plugin 0.1.8 + `d1c98ba8` README/一致性修复 + 独立审纠正）。剩 S7 settings 共享片段甄别 + plugin 版本对齐(chrome-devtools/pua)；P4 三战略项（SkillSpector 制度化/RED-GREEN 压测/codebase-memory 试点）；A 桶降级逐条 Owner 审。★crossocean 教训：RED-GREEN 没度量到它，prod 模式 sound 但非 PROVEN（我判 3 次靠独立审兜底）。
 
 关联 [[project_terminal_arch_B_single_california]] [[project_eu_redis_separation]] [[feedback_feature_branch_deploy_test_then_merge]]
