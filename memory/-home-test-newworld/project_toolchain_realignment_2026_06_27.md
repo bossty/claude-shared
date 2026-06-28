@@ -27,6 +27,6 @@ metadata:
 - `deploy-runbook`：region US(俄勒冈)行标退役；**EU REDIS_REPLICA_HOST .248→172.33.3.184**（eu-web-01 /proc/environ 实证更正，旧值错）。
 
 ## 未完（Owner 节奏）
-**已合 origin/master**（`b067900c` 双账户统一+plugin 0.1.8 + `d1c98ba8` README/一致性修复 + 独立审纠正）。剩 S7 settings 共享片段甄别 + plugin 版本对齐(chrome-devtools/pua)；P4 三战略项（SkillSpector 制度化/RED-GREEN 压测/codebase-memory 试点）；A 桶降级逐条 Owner 审。★crossocean 教训：RED-GREEN 没度量到它，prod 模式 sound 但非 PROVEN（我判 3 次靠独立审兜底）。
+**已合 origin/master**（`b067900c` 双账户统一+plugin 0.1.8 + `d1c98ba8` README/一致性修复 + 独立审纠正）。S7 已做(2026-06-28):settings 拉平(~/claude-shared/settings/shared.json+scripts/sync-settings.{py,sh},两账户43 union权限+DISPLAY,私有偏好保留)+PUA hook两账户自门控(A3.1.0/B3.2.2)。剩 plugin**版本**对齐(chrome-devtools1.2↔1.4)、P4三战略项、A桶降级逐条审。★crossocean 教训：RED-GREEN 没度量到它，prod 模式 sound 但非 PROVEN（我判 3 次靠独立审兜底）。
 
 关联 [[project_terminal_arch_B_single_california]] [[project_eu_redis_separation]] [[feedback_feature_branch_deploy_test_then_merge]]
