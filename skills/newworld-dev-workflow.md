@@ -1,6 +1,6 @@
 ---
 name: newworld-dev-workflow
-description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界最佳实践固化:TBD/DORA/Fowler/Atlassian/GitHub-GitLab merge queue/Claude Code worktree)。master=唯一可部署 mainline;每会话各自 worktree(用 Claude Code 原生 claude -w / isolation:worktree,别手搓);从 origin/master 开;短命 feature/fix 每日并 master(≤1-2天本地放宽,DORA原文 a few hours)、rebase-FF;长命安全/发布 track 禁 rebase+禁 flag、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;build/部署前必 sync 最新 master 重测(单 jar 漏并=revert master);禁 rebase 已 push/共享分支;master 串行合+合前重基重测(人肉 merge queue 防 semantic conflict);删 worktree 前 merged+pushed;~/.m2 不隔离用 -am reactor;DB/端口不隔离。triggers: 分支策略, worktree, git worktree, 多会话, 多agent并行, rebase, merge, --no-ff, feature flag, trunk-based, keep main green, merge queue, semantic conflict, 从master开, build前merge master, 单jar revert, isolation worktree, claude -w, 删worktree, .m2隔离, 部署前同步master, 短命分支, 长命track, master可部署基线
+description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界最佳实践固化:TBD/DORA/Fowler/Atlassian/GitHub-GitLab merge queue/Claude Code worktree)。master=唯一可部署 mainline;每会话各自 worktree(用 Claude Code 原生 claude -w / isolation:worktree,别手搓);从 origin/master 开;短命 feature/fix 每日并 master(≤1-2天本地放宽,DORA原文 a few hours)、rebase-FF;长命安全/发布 track 禁 rebase+禁 flag、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;build/部署前必 sync 最新 master 重测(单 jar 漏并=revert master);禁 rebase 已 push/共享分支;master 串行合+合前重基重测(人肉 merge queue 防 semantic conflict);删 worktree 前 merged+pushed;~/.m2 不隔离用 -am reactor;DB/端口不隔离。triggers: 分支策略, worktree, git worktree, 多会话, 多agent并行, rebase, merge, --no-ff, feature flag, trunk-based, keep main green, merge queue, semantic conflict, 从master开, build前merge master, 单jar revert, isolation worktree, claude -w, 删worktree, .m2隔离, 部署前同步master, 短命分支, 长命track, master可部署基线, git add -A, 共享checkout
 ---
 
 # newworld 开发工作流铁律
@@ -15,6 +15,14 @@ description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界
 - **同一分支禁两 worktree 并检**(git 默认 refuse);并行看同一基线 → `git worktree add -b <new> <dir> <base>`。
 - **删 worktree 前必 clean+merged+pushed**(= Claude Code 自动 sweep 判据);`rm -rf` 后必 `git worktree prune` 清孤儿;脏的 `--force`。
 - `.gitignore` 加 `.claude/worktrees/`;`.worktreeinclude` 带 gitignored 本地配置(只拷 gitignored 文件 → 先 `git check-ignore -v secrets.env` 确认它真被 ignore)。
+
+## 1b — 多会话共享单 checkout 的生存铁律(worktree 未隔离时;2026-06-27 实战踩出)
+理想是 §1 每会话独立 worktree;现实常是多会话共享同一 checkout(本 sprint 实测撞过两次)。无隔离时必守:
+- **合并/部署/push 前必 `git fetch origin master` 看真历史**——别会话可能已推进/已 revert/**已 bump 同版本号**。基于陈旧 master 直接合=撞车(实测:别会话已 bump plugin 0.1.7+加同名 skill,我在新 master 上重新派生才解)。
+- **禁 `git add -A` / `git add .`**——共享工作树里有别会话的未提交 WIP(`M`/`??`),全量 add 会把别人的活误纳进你的 commit。永远 `git add <具体路径>`,commit 前 `git diff --cached --name-only` 自验只含你的文件。
+- **撞版本号/同名文件 = reconcile 不硬 rebase**:派生件(plugin/分发副本)从 truth source 在**新 master 上重新派生**(确定性、零冲突),别在版本号/同名 skill 上手解 merge 冲突。
+- **别碰别会话的未提交 WIP**(`M`/`??` 但不是你改的):不 commit、不 revert、不"顺手清理"(承 CLAUDE.md「不碰你没创建的」);要提醒它就留独立 untracked note 文件。
+- **引用代码做结论前确认它在 master 不是 WIP**:`git ls-files <path>` / `git show origin/master:<path>` 核它真已提交,**别把别会话未提交的树内改动当 production 引用**(实测踩过:把未提交的 `recentRywExecutor` 当 prod 写进结论,被独立审揪出事实错)。
 
 ## 2 — 分支策略
 - feature/* 新功能、fix/* 修复,**从 `origin/master` 开**(先 `git fetch`)。
