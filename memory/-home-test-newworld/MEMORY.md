@@ -232,3 +232,4 @@
 - [web 模块永远第一优先](feedback_web_module_top_priority.md) — owner 铁律：任何情况 web 用户前台优先，处置/汇报先确认 web 状态
 - [移动端改版+封面方案](project_mobile_redesign.md) — 2026-04-04 一列全宽/封面原尺寸+thumbnail 480px/CRF24/五层fallback待实施
 - [工具链调研+双账户统一 sprint](project_toolchain_realignment_2026_06_27.md) — ★建 ~/claude-shared git 真相源(skill+memory)、两账户 symlink 同步、13源取长补短 copy-not-install
+- [skill 验证方法规格 v3](reference_skill_verification_redgreen_v3.md) — RED-GREEN 教训+偷自 SkillOpt 的 held-out 门控；下次验 skill 直接用,SkillOpt steal-idea不adopt裁决也在内
