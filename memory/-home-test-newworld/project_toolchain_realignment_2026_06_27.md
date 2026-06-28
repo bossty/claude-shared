@@ -8,7 +8,7 @@ metadata:
 2026-06-27 toolchain-realignment sprint（13 外部源取长补短 + 双账户工程化体系统一）。
 
 ## ★ 最关键 durable 事实：~/claude-shared 是 skill+memory 唯一真相源
-- `~/claude-shared/`（本地 git，**无远端**，Owner 定单人开发风险可控）= skills(35) + memory(230 并集) + scripts(治理) + plugin-manifest。
+- `~/claude-shared/`（本地 git，**无远端**，Owner 定单人开发风险可控）= skills(35) + memory(232 .md 并集) + scripts(治理) + plugin-manifest。
 - 两账户已 **symlink** 到它：`~/.claude/skills` 与 `~/.claude-work/skills` → `~/claude-shared/skills`；两账户 `projects/-home-test-newworld/memory` → `~/claude-shared/memory/-home-test-newworld`。**改一处两账户同步**。原目录留 `.pre-symlink` 兜底。全备份 `~/.claude-backups/toolchain-20260627-211430`。
 - 漂移根因（已止血）：A 曾 34skill/91memory、B 0skill/143memory，memory 近乎全裂脑（重叠<1%），已非破坏并集合并（零丢失实证）。
 - 治理脚本：`scripts/skill-drift-check.js`（真相源↔repo plugin `claude-plugin/newworld` byte-compare，陈旧即红，替代人肉「home 改必同步 plugin」）+ `skill-lint.js`（description 体检）。**改 skill 后必跑 drift-check 回绿 + 同步 plugin + bump version**。
