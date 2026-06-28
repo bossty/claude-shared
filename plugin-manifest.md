@@ -37,3 +37,8 @@
 - 第三方 plugin 装前过 SkillSpector `--no-llm`（P0）。
 - superpowers 等已装本体：pin 版本 + 关 auto-update + 设 `DISABLE_TELEMETRY`。
 - newworld 自有 plugin 随 repo `claude-plugin/newworld` 分发，与真相源 `skills/` 用 `skill-drift-check.js` 对齐。
+
+## 版本对齐执行记录（2026-06-28）
+- ✅ pua A 3.1.0→3.2.2（copy B 的 patched cache，A 白嫖 hook 自门控）；chrome-devtools B 1.2.0→1.4.0（copy A cache）。两账户磁盘已齐。
+- context-mode 两账户磁盘本就 1.0.89（A installed_plugins 元数据误写 1.0.162+跨账户路径=预存坏数据，未触碰）。
+- 机制：文件级 copy cache + 改 installed_plugins.json（不碰凭证/不用 CLAUDE_CONFIG_DIR claude）；次会话生效，B 待重登。claude-api SHA 差异=cosmetic 未对齐。
