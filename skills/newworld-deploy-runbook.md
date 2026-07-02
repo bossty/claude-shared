@@ -15,7 +15,8 @@ description: Newworld 完整部署流程 — Step1 推送 → Step2 后端按模
 - **feature 分支 build 前必先 `merge` 最新 master** —— 否则全量 jar（web/admin 是单 jar 含全部代码）缺 master 新改 = 回退。这是 Owner 关心的"打包部署不覆盖之前修改"的**根本保证**。
 - 部署/测试用 **feature 分支产物**（下面 Step 1 推送到 **feature 分支，不是 master**）；测试绿 + Owner **显式授权**后才 `--no-ff` 合 master。
 - 部署/合并前先 `git fetch` 看 master 真实历史（多会话共享仓库，别会话可能已改/已 revert）。
-- **反例（2026-06-26）**：GFW 未测就合 master（merge 22fb37b2）→ 被纠 + revert。GFW（`gfw-breakthrough-arch`）是本流程实例：走自己 DEPLOY-RUNBOOK（组A暗部署 + 组B灰度），测试 + 授权前不合 master。
+- **反例（2026-06-26）**：GFW 未测就合 master（merge 22fb37b2）→ 被纠 + revert。
+- **正例（2026-06-29，单基线收口）**：GFW track 走完整流程整合并入 master（feature 分支先 `merge` 最新 master → 全量回归 + 蓝军 0 BLOCKER → Owner 授权 `--no-ff` 合 master `5ed76306` → 零停机部署 web×6+admin+双前端 → 退役旧分叉）。**自此 master = 含 GFW 的单基线，「master GFW-free / gfw=track 双线」之说作废**；后续增量 GFW 工作在 off master 重建的 `gfw-breakthrough-arch` 走标准 feature 流程。详见 memory `project_gfw_consolidation_2026_06_29`。
 
 ## 前端部署铁律
 - **禁止各 web 节点各自 build**：Vite chunk hash 不同 → 跨机请求 404 → 白屏

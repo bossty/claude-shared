@@ -7,6 +7,8 @@ metadata:
   originSessionId: 6eecae1c-95e0-4231-a84e-4ccc79979b6c
 ---
 
+> ★★ 已被取代（2026-06-29）：master 已重新整合 GFW（`--no-ff` merge `5ed76306` + 零停机部署），**不再 GFW-free**；`gfw-breakthrough-arch` 已退役。本档"master=GFW-free / gfw=track 双线分叉"模型**作废**。现状见 [[project_gfw_consolidation_2026_06_29]]。（下文保留作历史。）
+
 **2026-06-26 结构手术：GFW W3 从 master 撤出，master 回归 GFW-free 可直接部署。**
 
 **起因(gauge landmine)**：admin gauge fix(`f36cc028`：RetentionTableGaugeTask 摘 rum_image_load + COUNT(*)→TABLE_ROWS 估算)**部署到 ca-admin 但从没合进 master**(只活在 prod jar，baseline=ab3d6be9 cherry-pick 链)。2026-06-26 我把 backlog 批次 off GFW-free baseline(d1766b93=read-sprint，不含 gauge fix)部署 admin → **revert 了 gauge fix**，rum_image_load COUNT(*)(~5s,每10min)复活 → MYSQL-SLOW-QUERY。已回滚 admin 到 f36cc028 止血。**根因不是孤立失误，是机制**：GFW 在 master 上 → 部署必须 GFW-free → 只能 off 老 baseline 手工 cherry-pick → 每次漏带 master 新 fix。
