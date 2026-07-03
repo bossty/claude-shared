@@ -31,7 +31,19 @@ metadata:
 - 修=根pom(唯一surefire配置)`<argLine>`加`-Djava.awt.headless=true`→纯软件渲染不连X11→11 tests全绿(DISPLAY=:99仍在证明真修)。
 - **★附带:根pom `<skipTests>false</skipTests>`硬编码=之前"-DskipTests被pom无视"之因;要跳测试用`-Dmaven.test.skip=true`(跳编译+运行)**。
 
-## 未做（backlog）
-- **批次0**在`feat/recently-watched`(最近观看async best-effort+monitor bucketInfix+死代码删+附录7/9抑制,已提交`b7839755`+`627c6ab2`)**未部署**,可另议部署批次。
-- 剩余P1:P1-1~5/8(web/common:ConfigController请求线程写/StatsCoalescingBuffer/feed游标/afterCommit/渠道双计)、P1-14~20(前端泄漏/openresty SNI)、P1-21/22(MySQL密码进git+root==app,**运维级**:轮换/scrub git史非纯代码)、P1-23(import-all.sh缺迁移)。
+## 批次2 web/common P1(5项,合master `f17177d8`,已部署 web×6+admin/data)
+同样 pattern-复用修法:
+- **P1-1** ConfigController.resolveFirstVisitDate(GET /settings→isMigrateGrayHit)两处请求线程同步跨洋 master 写→改 statsAsyncExecutor fire-and-forget。★注释称"保 RYW"但读已走 replica=本就非 RYW,改 async 不损失现存保证。
+- **P1-2** StatsCoalescingBuffer 无界(永不 remove(key)防 orphan-race)→ **race-safe 驱逐**:4写路径 synchronized 内 re-check「map.get(key)==bucket」才 add + drain 对空快照键同锁 remove+清 keyTtlSeconds。零丢门禁 DrainRaceTest(48)过=证据。★部署前 qa-senior 应重跑 strict-160000。
+- **P1-3** drain snapshot-clear-then-fail 丢≤1窗 → **by-design 进 audit-suppressions**(故意不重试避 HINCRBY/SADD 非幂等双计,有 metric+告警)。
+- **P1-4** feed hot/latest 游标 nextIdx=idx+rawCount(3×size) 只展示 size → 永久跳过 2/3 内容;修=按【实际消耗 rank】前进(页满 consumed=第size展示项在 rawIds 位置+1)。feed tab(shuffle re-cycle)不改。
+- **P1-5** SystemConfigService.afterCommit 先 Redis increment 后本地 L1 失效→Redis 抖动 increment 抛异常跳过本地失效→本实例返旧值(旧CDN域)达 L1 TTL 30min;修=**本地失效提前**。common 改动影响全模块。
+- 部署:**deploy-web.sh 是 web×6 零停机正解**(硬测试闸 mvn -pl web -am test 含 arch 护栏 + peer-gate 同区 backup READY + readiness 业务端点门 p50<50ms;cloudflared 不停);★**峰窗护栏 20:00-03:00 HKT 拒部,需 --force-peak + Owner 授权**(Phase-1 教训)。
+
+## CI headless 修复(合master `4217fb98`)
+根 pom surefire `<argLine>` 加 `-Djava.awt.headless=true`——CI/dev 全局 DISPLAY=:99(/etc/environment)无 Xvfb + surefire fork 不继承 MAVEN_OPTS → R2UploadServiceV5Test 等 AWT 图像测试抛 X11 AWTError(7 errors)。★根 pom `<skipTests>false</skipTests>` 硬编码=`-DskipTests` 被无视之因,跳测试用 `-Dmaven.test.skip=true`。
+
+## 未做(backlog)
+- **批次0**在`feat/recently-watched`(最近观看async+monitor+死代码+附录7/9抑制,`b7839755`+`627c6ab2`)**未部署**。
+- 剩余P1:P1-8(admin CF渠道日报双计)、P1-14~20(前端泄漏/openresty SNI cache投毒/io.popen)、P1-21/22(MySQL密码进git+root==app,**运维级**轮换/scrub史)、P1-23(import-all.sh缺迁移)。
 - P2~87条。
