@@ -1,8 +1,10 @@
 ---
 name: project_toolchain_realignment_2026_06_27
 description: 2026-06-27 工具链调研+双账户统一 sprint：建 ~/claude-shared git 真相源、13源取长补短、A/B 账户漂移止血
-metadata:
+metadata: 
+  node_type: memory
   type: project
+  originSessionId: db5508e8-b38b-4064-957a-fc8f2119f138
 ---
 
 2026-06-27 toolchain-realignment sprint（13 外部源取长补短 + 双账户工程化体系统一）。
@@ -28,5 +30,8 @@ metadata:
 
 ## 未完（Owner 节奏）
 **已合 origin/master**（`b067900c` 双账户统一+plugin 0.1.8 + `d1c98ba8` README/一致性修复 + 独立审纠正）。S7 已做(2026-06-28):settings 拉平(~/claude-shared/settings/shared.json+scripts/sync-settings.{py,sh},两账户43 union权限+DISPLAY,私有偏好保留)+PUA hook两账户自门控(A3.1.0/B3.2.2)。剩 plugin**版本**对齐(chrome-devtools1.2↔1.4)、P4三战略项、A桶降级逐条审。★crossocean 教训：RED-GREEN 没度量到它，prod 模式 sound 但非 PROVEN（我判 3 次靠独立审兜底）。
+
+## 2026-07-03 第二批 13 源评估（copy-not-install 复验）
+Owner 又抛 13 个 skill/plugin/mcp 源评估。规律同前：**0 装整包**。唯一取长=**alibaba/open-code-review** 的 Java 缺陷规则(NPE/线程安全/SQL注入/XSS，阿里大规模验证、Token 1/9)→ 已抄成新 skill `newworld-java-review` checklist(缝合已有 sql-safety/mybatis-plus-camel-mapping/multiregion-crossocean-hotpath/batch-oom/auth-revocation-failopen)。可借思路(不装)：addyosmani agent-skills「每 skill 内嵌反理性化借口→反驳表」、ponytail「写码前决策阶梯」、microsoft/SkillOpt「轨迹驱动+验证门控」系统优化 skill 触发率(backlog，日常 skill-creator 够)。明确无用：karpathy-skills(全重叠 CLAUDE.md/Owner 铁律)、taste-skill/impeccable/awesome-design-md(前端美学/distinctive UI，**反发现伪装场景要平庸不显眼=反效果**)、obsidian-skills(不用 Obsidian)、playwright-agent-cli(agent-browser 已占轻量浏览器 CLI 生态位)、headroom(上次已评，proxy/wrap 基础设施侵入大，维持不装)、mattpocock/skills(/grill-me 消歧 brainstorming 已覆盖)、skill-creator(已装)。**结论落此防第三次重复评估**。
 
 关联 [[project_terminal_arch_B_single_california]] [[project_eu_redis_separation]] [[feedback_feature_branch_deploy_test_then_merge]]
