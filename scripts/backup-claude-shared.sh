@@ -11,7 +11,7 @@
 set -euo pipefail
 
 SRC="$HOME/claude-shared"
-REMOTE="${CLAUDE_SHARED_REMOTE:-buyvm}"   # 异地 git 远端名
+REMOTE="${CLAUDE_SHARED_REMOTE:-origin}"  # 异地 git 远端名(2026-07-03 Owner 定:GitHub 私有仓库,remote=origin)
 MIRROR="$HOME/.claude-backups/claude-shared.git"
 SNAPDIR="$HOME/.claude-backups/snapshots"
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -20,6 +20,9 @@ KEEP=14
 [ -d "$SRC/.git" ] || { echo "[backup] $SRC 不是 git 仓库，中止" >&2; exit 1; }
 mkdir -p "$SNAPDIR"
 cd "$SRC"
+
+# -1. 双账户 toolchain 同步（settings 共享域 harvest+apply;失败不阻断备份）
+python3 "$SRC/scripts/sync-toolchain.py" --quiet || echo "[backup] ⚠ sync-toolchain 失败,备份继续" >&2
 
 # 0. 自动提交未落盘改动（备份用途，确保异地/镜像不漏未提交状态）
 git add -A

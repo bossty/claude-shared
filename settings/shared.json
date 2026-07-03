@@ -62,7 +62,8 @@
     "lua-lsp@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
-    "claude-api@anthropic-agent-skills": true
+    "claude-api@anthropic-agent-skills": true,
+    "newworld@newworld-marketplace": false
   },
   "extraKnownMarketplaces": {
     "pua-skills": {

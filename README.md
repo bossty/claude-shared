@@ -2,7 +2,8 @@
 
 > 建立：2026-06-27 toolchain-realignment sprint（`~/newworld/docs/sprint/2026-06-27-toolchain-realignment/`）。
 > 解决：`~/.claude`（账户 A）与 `~/.claude-work`（账户 B）的 skills/memory/规范漂移（A 34 skill/91 memory，B 0 skill/143 memory，重叠 <1%）。
-> 机制：本 git repo 为唯一真相源，两账户 symlink 引入 → 改一处两账户同步 → git 记录每次演进。**仅本地 git，无远端**（Owner 定，单人开发风险可控）。
+> 机制：本 git repo 为唯一真相源，两账户 symlink 引入 → 改一处两账户同步 → git 记录每次演进。
+> 远端：**GitHub 私有仓库 `bossty/claude-shared`（2026-07-03 Owner 定,推翻此前"无远端"）**,由 backup cron 每日推送;主项目 repo 不承载本仓（多会话分支切换会让真相源随分支漂移 + 部署到生产节点扩大暴露面）。
 
 ## 结构
 ```
@@ -32,4 +33,16 @@ SKILL-DRIFT-REPORT.md    首轮 skill 漂移基线
 ~/.claude/projects/-home-test-newworld/memory     -> ~/claude-shared/memory/-home-test-newworld
 ~/.claude-work/skills                             -> ~/claude-shared/skills
 ~/.claude-work/projects/-home-test-newworld/memory-> ~/claude-shared/memory/-home-test-newworld
+~/.claude/plugins                                 -> ~/.claude-work/plugins   # 2026-07-03:插件实体/marketplace/安装登记共享(B 为物理主,plugins 大缓存不入本 repo 防 tar 快照膨胀)
 ```
+
+## 双账户自动同步（2026-07-03 起）
+四层,任一账户改动另一边自动拿到:
+| 层 | 机制 | 时效 |
+|---|---|---|
+| skills / memory | symlink 同一物理文件 | 即时 |
+| plugin/marketplace 安装与卸载 | `~/.claude/plugins` symlink → B 的 plugins | 即时 |
+| MCP | 全部经 plugin 或项目 `.mcp.json` 交付(两账户均无 user-scope MCP,保持此姿态) | 即时 |
+| settings 共享域(enabledPlugins/permissions.allow/env/marketplace 登记/skillOverrides/disabledMcpjsonServers) | `scripts/sync-toolchain.py` harvest+apply,由**两账户 SessionStart hook** + 每日 backup cron 触发 | 下次开会话 |
+
+语义:已声明的值账户优先(允许两边故意不同,如 context-mode A 关 B 开);只补缺失 key;卸载经共享安装登记 prune 传播;`model`/`effortLevel`/`hooks`/通知类等私有 key 永不同步。**user-scope MCP 别再用 `claude mcp add --scope user`**(落在账户私有 `.claude.json`,不在同步面),要么进项目 `.mcp.json` 要么走 plugin。
