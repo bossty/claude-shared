@@ -7,7 +7,9 @@ metadata:
   originSessionId: b2d68a4d-31c5-4990-b8b4-5a13e9b0ab5e
 ---
 
-# CC 官方最佳实践对齐 sprint（2026-07-03，commit `eaea72ae`，分支 fix/resize-observer-benign-monitor 未 push）
+# CC 官方最佳实践对齐 sprint（2026-07-03，`eaea72ae`+`56109d8e`，**已合 master `7702f317`**）
+
+**合 master 过程**：master 期间前进 60+ commit 且双方都动了 CLAUDE.md/plugin → 在临时 worktree（本工作树有他会话未提交改动，不碰）解 3 冲突：CLAUDE.md=瘦身版折入 master 新增的 nw-toolbox+会话命令段（成 193 行仍<200，两行文档登记转入 DOC_INDEX.md）；plugin.json=0.3.0 胜 0.2.3（java-review 两侧同内容）；claude-shared/MEMORY.md=取真相源现值。合并树 pre-push ci-local 全绿后推 master。⚠️ merge commit 在裸 worktree 需 `--no-verify`（lint-staged 找不到 eslint，无 node_modules）——质量由 pre-push ci-local 兜底。
 
 **输入**：三 agent 并行调研（blog-sweep=claude.com/blog+engineering 21 篇工程实践文精读 / docs-sweep=Claude Code 官方文档 25 页 / local-inventory=本地 8 类盘点），报告全文归档 `docs/sprint/2026-07-03-cc-best-practices-optimization/`（含差距矩阵 25 条 + 不采纳项及理由，防重复论证）。
 

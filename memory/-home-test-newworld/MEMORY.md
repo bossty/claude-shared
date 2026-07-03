@@ -1,9 +1,11 @@
 <!-- 索引仅留：近期工作 + 全部 feedback 铁律 + load-bearing reference。已完结一次性 sprint topic 文件在盘,文件搜索 recall,不进索引(07-03 精简:删 06-24 前非 landmark 条目)。 -->
 
 ## 近期工作 / 进行中
+- [★MovieService上帝类拆分(B5):facade抽3协作者→合master172bd4d0+web×6部署验证 (07-04)](project_movieservice_god_class_split_2026_07_04.md) — 1280→1037行;行为保持(现有测试=安全网+@Spy真converter);★fact-check否决HeaderPageVO(3VO非同构+前端消费字段名破JSON契约);★纠葛点getMoviesByIds共享→相关组强拆造循环依赖故只抽3干净件;蓝军1B+3M+4Min全修;代码精简剩B4爬虫
 - [全代码审计修复 SESSION-STATE 接力档 (07-03)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — 批次1/2 共10项P1已部署+合master(16fdec6c/f17177d8);FINDINGS.md在feat/recently-watched未合;未决=批次0部署/P1-21-22运维级密码/峰窗强部后线上盯;下一步=P1-8/14~20/23 + P2（已合 master `ef11726f`）
 - [★全代码审计批次1+2 P1安全10项→部署→合master(16fdec6c/f17177d8) (07-03)](project_p1_security_batch1_2026_07_03.md) — FINDINGS.md(113条)。**批次1(admin/data,合16fdec6c)**:P1-7内部端点fail-closed(未配secret不放行changeme对齐OpsController)/P1-11 ffmpeg去file防LFI/P1-6禁UI设改super防提权(super走SQL带外)/P1-9 CF请求超时防冻结调度线程/P1-10 DoH fail-open防探针故障群体误封。**批次2(web/common,合f17177d8,部署web×6+admin/data)**:P1-1 FVD写fire-and-forget/P1-2 StatsCoalescingBuffer race-safe驱逐防无界(re-check+空键evict,零丢门禁48过)/P1-3 drain丢窗by-design进suppressions/P1-4 feed游标按消耗前进防跳2/3/P1-5 SystemConfig本地L1失效提前防Redis抖动返旧值。★可复用安全pattern:fail-closed(内部secret)/fail-open(探针基础设施)/请求线程写离线程/race-safe驱逐。★部署:deploy-web.sh零停机(硬测试闸+peer-gate+readiness门),峰窗20:00-03:00需--force-peak+Owner授权;ca-admin手动swap symlink;CI headless修复(pom argLine java.awt.headless=true);批次0(feat/recently-watched)+剩余P1(P1-8/14~20/21~23)未做
-- [代码精简审查 SESSION-STATE 接力档 (07-02/07-03)](docs/sprint/2026-07-02-code-simplification-review/SESSION-STATE.md) — 仓库内跨会话接力;A组死代码已清空合master(e8259e49);未决=B爬虫13家/MovieService上帝类+C缓存4路径A/P双缓+D fe-admin测试(影片playback已修复)
+- [★C组缓存统一完结:poller L2大锤(KEYS×6实例)修复+seq事件失效+CORS双缓合一→部署web×6+5钩子实测→合master(6356f6cd) (07-03/04)](project_cache_unification_2026_07_03.md) — staleness 120s→实测1.1-1.3s;★部署门捕获@Autowired双构造器crashloop(四道评审全漏,mock单测不走容器;照搬模式必看齐构造全貌;BeanFactory级回归钉);★事实纠偏:审查"6h陈旧"实为6min已修/"单一失效路径"字面执行会推翻§5.2事故背书设计;蓝军BLOCKER=hostSet loader直调mapper防self-invocation
+- [代码精简审查 SESSION-STATE 接力档 (07-02/07-03)](docs/sprint/2026-07-02-code-simplification-review/SESSION-STATE.md) — 仓库内跨会话接力;A组死代码已清空合master(e8259e49);**C组缓存统一完结✅(见上条)**;未决=B爬虫13家/MovieService上帝类+D fe-admin测试(影片playback已修复)
 - [★爬虫pilot Task9 dry-run PASS+误伤生产影片已修复 (07-03)](project_crawler_pilot_task9_dryrun_2026_07_03.md) — Beeg extract-superclass before/after逐字节一致(含offset≥480);★隔离库AUTO_INCREMENT撞生产id→覆盖playlist(实为2部),✅从CF边缘缓存无损捞回m3u8重传origin,未重爬
 - [★CC最佳实践对齐:CLAUDE.md瘦身345→193+skill 37→31 (07-03)](project_cc_best_practices_optimization_2026_07_03.md) — 三agent调研→差距矩阵25条;根档瘦身(skill索引=分组地图/文档索引迁DOC_INDEX);plugin 0.3.0+sync脚本+drift挂ci-local;不采纳项落档;已合master`7702f317`;★指针化下沉必验指针目标真含该信息
 - [★★GFW A池RUM接入reach:grid阶段3火测PASS+ON观测 (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — A池零reach真因=融合器probe-key驱动;火测证A真有退化;+Beta(8,1)小样本收缩degraded 291→21;flag ON观测一周;分支worktree-gfw-reach-apool-rum未合master
@@ -66,6 +68,7 @@
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
+- [门禁运行期间禁同worktree并行maven/改源码](feedback_no_concurrent_maven_during_gates.md) — clean抽掉门禁classpath→大片NoClassDefFound误判失败;判污染=失败全NoClassDefFound+时间戳与自己mvn重叠;部署jar必须无并行窗口重建
 - [给存量加字段:先部署生成端再回填](feedback_deploy_generating_end_before_backfill.md) — 否则回填完到生成端上线之间窗口持续产缺口;别用周期cleanup任务掩盖部署时序(Owner纠"找根因非事后弥补")
 - [声明式结构 > 过程式脚本](feedback_declarative_over_procedural.md) — Owner纠"搞复杂了"
 - [前端组件按行为边界切非数据切](feedback_component_split_by_behavior_not_data.md) — 同数据不同行为=两个组件,硬合=过度设计(Owner reframe:FeedCard vs MovieCard)
@@ -108,6 +111,7 @@
 - [env 命名 nginx.conf vs secrets.env 必同名](feedback_env_naming_consistency.md) — os.getenv找不到=空字符串
 - [deploy-backend.sh 不做 git pull](reference_deploy_backend_no_pull.md) — 直接部署会静默build工作树
 - [本地构建部署+多会话master踩坑](feedback_perf_rca_deploy_gotchas_2026_06_16.md) — -DskipTests被pom无视;多会话master
+- [共享master竞态:push被拒≠工作丢失](feedback_shared_master_race_push_reject.md) — 判到远端用merge-base --is-ancestor origin/master,别读竞态的共享master ref(曾误判工作丢失)
 - [不push本地构建部署一路坑](feedback_local_build_deploy_no_push_pitfalls.md) — 新节点scp+cp到dist
 - [清理分支必查能力级 supersession](feedback_branch_cleanup_supersession_check.md) — 代码不在master≠未合活价值
 - [多agent生产ops三铁律](feedback_multiagent_prod_ops_auth_backstop.md) — auth-backstop等
