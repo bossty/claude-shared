@@ -31,6 +31,13 @@ metadata:
 ## 未完（Owner 节奏）
 **已合 origin/master**（`b067900c` 双账户统一+plugin 0.1.8 + `d1c98ba8` README/一致性修复 + 独立审纠正）。S7 已做(2026-06-28):settings 拉平(~/claude-shared/settings/shared.json+scripts/sync-settings.{py,sh},两账户43 union权限+DISPLAY,私有偏好保留)+PUA hook两账户自门控(A3.1.0/B3.2.2)。剩 plugin**版本**对齐(chrome-devtools1.2↔1.4)、P4三战略项、A桶降级逐条审。★crossocean 教训：RED-GREEN 没度量到它，prod 模式 sound 但非 PROVEN（我判 3 次靠独立审兜底）。
 
+## 2026-07-03 plugin 清理 + 远端 + 双账户全自动同步（推翻两项旧决策,Owner 拍板）
+- **卸 4 plugin**（两账户）:code-review/code-simplifier（被内置 /review /code-review /simplify 能力级取代）、everything-claude-code、pua（hook 自门控后壳无用）;frontend-design Owner 定保留;释放~290MB;A 按铁律没跑 CLI 纯文件改。
+- **远端**:GitHub 私有 `bossty/claude-shared`（remote=origin,**推翻 6-27"无远端"决策**）;backup cron 每日 sync+commit+push+镜像+快照,端到端已验。**claude-shared 禁进 newworld 项目仓**:分支切换会让 symlink 真相源随 checkout 时间旅行 + auto-backup 污染 master 纪律 + 部署把 memory 带上生产节点。
+- **双账户全自动同步四层**:①skills/memory=symlink 即时（原有）②**plugin/marketplace 装卸=`~/.claude/plugins` symlink→B 的 plugins**（B 物理主,A 原目录留 `.pre-symlink-20260703`,**推翻 6-27"plugin 实体不能 symlink"结论**——installPath 绝对路径经 symlink 照样解析）③MCP 全经 plugin/项目 .mcp.json（两账户零 user-scope MCP,**别用 `claude mcp add --scope user`**=落账户私有 .claude.json 同步不到）④settings 共享域=`scripts/sync-toolchain.py` 双向 harvest+apply,两账户 SessionStart hook+每日 cron 触发,下次开会话生效。
+- 同步语义:已声明值账户优先（context-mode A关B开这类故意差异保留）、只补缺失 key、卸载经共享安装登记 prune 传播（登记读不到 fail-open）、model/effortLevel/hooks/通知类私有键永不同步;幂等,变更才写盘,bak 只留3份。
+- ★坑:`settings/shared.json` 的 enabledPlugins 曾陈旧（还写着已卸插件=true）,不剔会被 sync 回灌——**动 plugin 后 shared.json 必须同步动**（现 sync-toolchain prune 自动兜）。
+
 ## 2026-07-03 第二批 13 源评估（copy-not-install 复验）
 Owner 又抛 13 个 skill/plugin/mcp 源评估。规律同前：**0 装整包**。唯一取长=**alibaba/open-code-review** 的 Java 缺陷规则(NPE/线程安全/SQL注入/XSS，阿里大规模验证、Token 1/9)→ 已抄成新 skill `newworld-java-review` checklist(缝合已有 sql-safety/mybatis-plus-camel-mapping/multiregion-crossocean-hotpath/batch-oom/auth-revocation-failopen)。可借思路(不装)：addyosmani agent-skills「每 skill 内嵌反理性化借口→反驳表」、ponytail「写码前决策阶梯」、microsoft/SkillOpt「轨迹驱动+验证门控」系统优化 skill 触发率(backlog，日常 skill-creator 够)。明确无用：karpathy-skills(全重叠 CLAUDE.md/Owner 铁律)、taste-skill/impeccable/awesome-design-md(前端美学/distinctive UI，**反发现伪装场景要平庸不显眼=反效果**)、obsidian-skills(不用 Obsidian)、playwright-agent-cli(agent-browser 已占轻量浏览器 CLI 生态位)、headroom(上次已评，proxy/wrap 基础设施侵入大，维持不装)、mattpocock/skills(/grill-me 消歧 brainstorming 已覆盖)、skill-creator(已装)。**结论落此防第三次重复评估**。
 

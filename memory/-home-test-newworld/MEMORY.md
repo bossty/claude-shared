@@ -63,7 +63,7 @@
 - [前端鲁布·戈德堡机器简化 (2026-06-06)](project_fe_simplify_2026_06_06.md) — owner心病前端太复杂(更新感知叠7层)
 - [旗舰17.rip geo-lb切流回归+region镜像 (2026-06-06)](project_geolb_stale_frontend_regression_2026_06_06.md) — 切流把17.rip切region陈旧前端
 - [留存大跌 RCA (2026-06-04)](project_retention_drop_rca_2026_06_04.md) — ★真根因domainListHolder陈旧统计口径bug非真降;前提先fact-check
-- [工具链调研+双账户统一 (2026-06-27)](project_toolchain_realignment_2026_06_27.md) — ~/claude-shared git真相源+两账户symlink同步
+- [工具链调研+双账户统一→全自动同步+GitHub远端 (2026-06-27/07-03)](project_toolchain_realignment_2026_06_27.md) — ~/claude-shared真相源+GitHub私有远端(bossty/claude-shared,cron日推);双账户四层自动同步(skills/memory+plugins symlink即时,settings经sync-toolchain.py SessionStart hook);卸4冗余plugin;禁user-scope MCP;claude-shared禁进项目仓
 
 ## reference(load-bearing,常 recall)
 - [edge nginx 如何用 reach + 覆盖率缺口](reference_edge_reach_coverage_pickp_rpc.md) — edge S入口 short_redirect.lua 5阶段:Step2调admin pick-p RPC(reach-aware)缓存30s→~91-96% reach;~4-9%因edge→admin RPC超时落非reach snapshot(aws-s HK 9.4%最重);admin ops_pick_p_total 100%success看不到(RPC没到达),必edge /__pick_stats(:81)交叉印证;要100%需GeoIP上edge(edge现无GeoIP靠admin解析)是主体工作+漂移风险,补缺口先修RPC可靠性;backlog
