@@ -1,72 +1,36 @@
-<!-- 索引仅留：近期(2026-05下旬起)工作 + 全部 feedback 铁律 + load-bearing reference。
-     历史一次性 sprint(4月~5月中)topic 文件仍在盘上,按需用文件搜索 recall,不进本索引。 -->
+<!-- 索引仅留：近期工作 + 全部 feedback 铁律 + load-bearing reference。已完结一次性 sprint topic 文件在盘,文件搜索 recall,不进索引(07-03 精简:删 06-24 前非 landmark 条目)。 -->
 
 ## 近期工作 / 进行中
-- [★CC官方最佳实践对齐:CLAUDE.md瘦身345→168+DOC_INDEX+permissions+skill漂移检查 (2026-07-03)](project_cc_best_practices_optimization_2026_07_03.md) — 三agent调研(blog21篇+文档25页+盘点)→差距矩阵25条落sprint档;根档瘦身(skill索引=分组地图/服务器表撤AWS档/文档索引迁DOC_INDEX.md/加compact保留段);NEW_SESSION_PROMPT重写删4/30陈旧段;settings加deny/ask;check-skill-plugin-drift.sh挂ci-local;不采纳项落档防重复论证;★指针化下沉必验指针目标真含该信息(蓝军M1);二期skill同主题合并37→31(新宿主deploy-pitfalls/cf-cache-ops/batch-backfill,旧9名见宿主)+sync-skills-to-plugin.sh自动同步+plugin 0.3.0;总启用51→45入官方20-50区间;commits eaea72ae+56109d8e未push
-- [★★GFW A池RUM接入reach:grid阶段3火测PASS+ON观测 (2026-07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — 融合器probe-key驱动致A池零reach数据(=A_POOL火测top_changed=0真因);fuse已支持nodeCount=0纯RUM故补A只需遍历RUM-only格(非拨测并行);方案3→1独立flag dark+demote-only(严格不比现状差)+只A category;部署ca-admin火测**1804格/183降级(reach<0.8)/reach_min=0→证A真有退化**(反转"A都可达")+SCAN未拖垮S/P;**flag ON观测一周**对消费方dark;★但抽样暴露reach=0格67.5%仅1失败beacon=噪声(根因纯RUM分支无先验)→加**Beta(8,1)小样本收缩**(空守卫保fail-open)已部署→degraded 291→21(↓93%)/reach_min 0→0.615/S/P不变;★ca-admin现已装mysql+redis-cli(纠旧memory)+翻flag要等下一整轮才见gauge+@Value单测默认0需手动inject+加先验后freshR不约分精确reach抖动改isBetween;分支worktree-gfw-reach-apool-rum(阶段3+收缩)未合master
-- [★GFW P3 N4重迁移=canary慢+470ms(丢CN2)回退edge+定架构 (2026-07-02)](project_gfw_p3_n4_remigration_2026_07_01.md) — 重做N4(S短链edge→NLB-direct);canary ks001翻NLB-direct可达全绿(pre-flip三网100%)**但阿里云拨测CN入口慢+470ms中位(+64%,移动+886ms)**——3-agent排查根因=换端点丢CN2 GIA(edge搬瓦工AS25820 CN2优质线 vs NLB AWS us-west-1 AS16509无CN2通用transit,每RTT差60-120ms×多往返)+edge本地lua 302 vs NLB后端往返(非TLS,两者TLS1.3 1-RTT);**决定3(a)=edge(CN2)主路+NLB仅failover逃生,ks001已回退edge,全量迁移暂停,NLB基建留dark作逃生储备**;★首次N4 pre-flip只测可达不测延迟→canary才抓到;flip原语=加/删显式渠道CNAME→d-xxx秒切
-- [★GFW P2 dark flag激活事实核查+A_POOL火测回滚 (2026-07-01)](project_gfw_p2_apool_reach_firetest_2026_07_01.md) — 两dark flag非对称:REACH_HINT前端消费方dead=no-op不激活/A_POOL_PENALTY真消费(migrateTo,PROMO_MIGRATE=100)但火测top_changed=0/7142零收益(A域实际流量地区都可达)→回滚保持false dark+留观测仪器(gfw_anchor_reach_*2 Counter,Counter保留_total反于gauge剥离);★激活dark前必核端到端消费方+Explore必指定origin/master;合master`6af9bc23`未push
-- [★GFW探针陈旧漂移观测P1-B (2026-07-01)](project_gfw_probe_stale_observability_p1b_2026_07_01.md) — 观测优先:ReachFusionService加4 gfw_reach_* gauge量化融合陈旧漂移(stale_uplift_cells=陈旧+probe判封+fused上漂);部署ca-admin基线0陈旧0危害/max age贴6h阈;★Micrometer剥离gauge _total后缀(curl:18080实测才逮);熔断待基线;合master`0f9f8dcd`未push
-- [★GFW探针可靠性监控P1-A (2026-07-01)](project_gfw_probe_reliability_monitor_p1a_2026_07_01.md) — GfwProbeAggregator 12 gfw_probe_* gauge(heartbeat调度停摆/per-source empty静默成功+单源死/round)+3 N9E告警id=109/110/111(STALL/SOURCE-EMPTY/ROUND-FAIL);部署ca-admin火测PASS(合成规则验telegram);★Explore读陈旧分支得代码不存在错论必对origin/master;合master`7a3f175c`
-- [★★GFW阶段4 reach:grid多源贝叶斯融合(dark) (2026-07-01)](project_gfw_reach_fusion_phase4_2026_07_01.md) — reach:grid格=Beta后验(probe先验+RUM joint证据);ReachFusionService(5min)融合写消费键;flag REACH_FUSION_ENABLED默认dark字节级net-zero;★whole-branch review逮2跨task MAJOR(RUM无界累积/_ANY_ probe-only);合master`097c9cba`
-- [★★GFW 3a pick-p reach flag 火测PASS保留ON (2026-06-30)](project_gfw_3a_flag_activated_2026_06_30.md) — 3a部署ca-admin+OPS_PICKP_REACH_ENABLED=true LIVE(pick-p用reach乘子effective=base×reach);翻flag=DB+PUBLISH sysconfig-refresh秒回滚;N9E id=108 PICKP-REACH-FAIL-RATIO;★ops_pick_p_total@:18080;ca-admin unzip解不了SpringBoot jar用python zipfile
-- [★★GFW parked阶段1/2/3a consolidate回master单基线 (2026-06-30)](project_gfw_parked_phases_consolidation_2026_06_30.md) — 阶段2`7a8eecd0`+阶段1`9aeb3158`(含apool统一reach读层ReachGridReader exact→isp:_ANY_→1.0)+3a`d0204537`;net-zero三支柱(flags默认false dark+fail-open reach=1.0+乘子base×reach不接反);含phase1/2/3a-cutover细节(topic文件在盘)
-- [★★GFW阶段4前置=修RUM地基/IP库多源isp省解析 (2026-06-30)](project_gfw_ipdb_rum_fix_2026_06_30.md) — 已合master(d3efc0b7)+部署7实例;根因=地理IP库HK→CA迁移漏带→真实用户全解析other;免key多源qqwry+ip2region+sapics geolite2;★免keyGeoIP MMDB≠MaxMind schema上线前必跑真文件验reader真读(GeoLite2Reader绕type校验/latitude必Float);owner fact-check+部署实测>纸面
-- [★统计独立IP骤降/IP-UV比例异常 RCA=外部bot灌水 (2026-06-29)](project_ipuv_anomaly_bot_rca_2026_06_29.md) — 真因organic UV被bot cookie-churn虚高(非NLB非bug;watched_uv/ip恒定铁证);同步饿死已修b6e43869;S已恢复;★多源数据>单一推断(我纯同步假象结案错,Owner坚持比例异常逼出真相);修复=admin看板抗bot口径(feat/organic-bot-report)+治本边缘bot缓解未做
-- [★★★GFW整合并入master=单基线 (2026-06-29)](project_gfw_consolidation_2026_06_29.md) — gfw→master(`5ed76306`)终结双基线+web/admin多会话footgun;探针保活/reachHint+S端点dormant/W3e探针统一active(反转TD-2,Owner-ack);web×6+admin+双前端零停机上线;gfw分支退役;后续GFW工作off master
-- [★★GFW组B S入口NLB-direct+推广链全挂事故 handoff (2026-06-28)](project_gfw_s_entry_nlb_handoff_2026_06_28.md) — N4全10 S域迁NLB-direct后,别会话从master重部署web抹掉s-redirect端点→推广链全404;已回退edge(10/10验证302);铁律=S端点进master前禁NLB-direct;待Owner拍①摘端点进master vs②S永久留edge
-- [★封面"贴脸"根治 sprint=BlurHash 占位全链路 (2026-06-29)](project_cover_blurhash_placeholder_2026_06_29.md) — 预热IO(root=scrollRoot治内层滚动/iOS新batch 43%→0%)+淡入+慢网自适应+BlurHash占位(感知100%根治);43419部回填100%;web×6零停机+前端+data已上线;在 feat/cover-preload-restore 未合master
-- [ponytail-audit 清理 sprint 全程 (2026-06-28)](project_movielistpage_consolidation_2026_06_28.md) — MovieListPage 6列表页合并+死代码清理+MovieCard抽取(2类卡片);★多会话worktree工作树陈旧地雷;★审计死代码必分生产调用方vs测试引用;均已部署
-- [admin单线程@Scheduled被GfwProbe饿死 (2026-06-27)](project_admin_scheduler_starvation_2026_06_27.md) — 修pool.size=5;✅fix已merge进gfw(1ee26253)gfw9自带
-- [L2抓tag分页DB fallback跨洋+fix/*流程首跑 (2026-06-26)](project_crossocean_tag_fallback_2026_06_26.md) — @Cacheable移readOnly→DB fallback丢replica;tcpdump+cache-bust金标
-- [读写分离框架评估定案 (2026-06-26)](project_rwsplit_framework_eval_2026_06_26.md) — MySQL ShardingSphere否决;Redis Lettuce ReadFrom PoC按住;CA读写都主是命门
-- [GFW组A暗部署完成 (2026-06-26)](project_gfw_groupA_dark_deploy_2026_06_26.md) — 真S入口LIVE(qm001→302)+探测管道硬化+A5验收+G授权;组B B1下一步
-- [EU HIKARI=健康检查跨洋ping master抽干池 (2026-06-25)](project_health_check_crossocean_pool_drain_2026_06_25.md) — /health跨洋ping master×12/s;修ping本地slave→2ms
-- [跨洋读三层防线+8泄漏修复 (2026-06-25)](project_crossocean_read_guardrail_2026_06_25.md) — 根因热路径读漏readOnly路由;三层防线+告警闭环
-- [跨洋读sprint可复用方法论 (2026-06-25)](reference_crossocean_read_methodology_2026_06_25.md) — identity检测不可误报
-- [admin写主慢查询=Gauge每10min COUNT(*)冻结大表 (2026-06-25)](project_admin_gauge_estimate_2026_06_25.md) — COUNT(*)→TABLE_ROWS估算
-- [渠道异常告警刷屏→渠道维度+去重 (2026-06-23)](project_channel_anomaly_alert_dedup_2026_06_23.md) — dedup缺渠道维度
-- [★S入口execute-api架构POC全验证 (2026-06-22)](project_gfw_s_entry_execapi_poc_2026_06_22.md) — execute-api/Lambda CN可达v4 99%;wildcard一域覆盖渠道;POC-FINDINGS.md(gfw分支)
-- [★缓存缺口+慢查询审计sprint (2026-06-21)](project_cache_gap_slowquery_audit_2026_06_21.md) — P0三连已部署;三诊断坑(TTL jitter/digest尖峰/EU跨洋Redis锁饿死warm)
-- [cdn-fail告警95%是指标假象 (2026-06-21)](project_cdn_fail_metric_artifact_2026_06_21.md) — rule42指标假象非域名被烧
-- [ca写主磁盘告警=binlog 45G/30天 (2026-06-21)](project_ca_master_binlog_disk_2026_06_21.md) — binlog保留致盘告警
-- [ca-admin 部署模型坑 (2026-06-21)](reference_ca_admin_deploy_model_2026_06_21.md) — ca-admin宿主.34无git/maven本地build+scp
-- [★管理后台几分钟掉线 RCA (2026-06-18)](project_admin_logout_redis_snapshot_2026_06_18.md) — parseToken吞isTokenBlacklisted;Redis快照spike;skill auth-revocation-failopen
-- [DoH池三层brokenness+np2全栈部署 (2026-06-18)](project_doh_3layer_brokenness_np2_2026_06_18.md) — np2-only全栈DoH复活
-- [cableav 片头广告去除+标签闭环 (2026-06-18)](project_cableav_adintro_tags_javxx_2026_06_18.md) — HLS注入式赌博广告片头去除
-- [CC 最佳实践对齐 sprint (2026-06-17)](project_cc_bestpractices_alignment.md) — 对齐claude.md/skill
-- [perf-rca 午夜慢 + 零停机峰窗实证 (2026-06-16)](project_perf_rca_zerodowntime_2026_06_16.md) — Q1双相;零停机峰窗
-- [v4 零停机部署+主机标识统一 (2026-06-16)](project_zero_downtime_hostid_2026_06_16.md) — cloudflared不停
-- [★cableav采集/上线解耦+StockPublisher (2026-06-16)](project_cableav_decouple_stockpublisher_2026_06_16.md) — status=3存量每小时上线;水印作废;@Lazy self代理
-- [★每地区每小时≥1真入库保障 (2026-06-15)](project_region_hourly_guarantee_2026_06_15.md) — probeUntilFinalized;cableav首帧兜底;cursor-runaway啃老内容
-- [★data每小时采集修复 (2026-06-15)](project_data_hourly_collection_fix_2026_06_15.md) — 根因3外部依赖留退役HK;isolated-pass≠prod-scale必观察上线
-- [★N9E迁移后监控数据全修复 (2026-06-15)](project_n9e_monitoring_repair_2026_06_15.md) — 三类病根;改promql前curl VM实测label
-- [★beacon降本#2上线+每日推广脉冲 (2026-06-15)](project_beacon_cost_reduction_2026_06_15.md) — spectrumdigest脉冲6000req/s打满CA(CPU);CA扩容才是主力解
-- [★EU Redis分离+保留策略+HK漂移清理 (2026-06-14)](project_eu_redis_separation_2026_06_14.md) — EU Dragonfly分独立.184;BSP团队;克隆告警--raw验
-- [RUM by-POP指标降基数 (2026-06-14)](project_rum_cardinality_fix_2026_06_14.md) — 高基数RUM撑爆categraf;SLO bucket+砍cfCountry
-- [反发现调研+暴露面+整改 (2026-06-14)](project_detection_recon_2026_06_14.md) — GFW=执行器非发现器;暴露面地图
-- [广告图可靠性 sprint (2026-06-14)](project_ad_image_reliability_2026_06_14.md) — snack加密图失败~4900
-- [前端错误 triage (2026-06-13)](project_fe_error_triage_2026_06_13.md) — 13样本→397族穷举→真bug全修
-- [★Phase D split-brain事故+检查点runbook+收口 (2026-06-13)](project_phase_d_incident_and_checkpointed_runbook_2026_06_13.md) — cutover成功;ss断言容忍IPv6-mapped;PONR后绝不解冻HK
-- [★Phase F admin/data迁加州根治 (2026-06-13)](project_phase_f_admin_data_california_2026_06_13.md) — admin登录超时=REDIS_HOST跨洋池耗尽;物理迁CA本地
-- [★HK+OR web层退役+fake-green根治 (2026-06-13)](project_hk_web_retirement_2026_06_13.md) — 终态web=CA×3+EU×2;真排空看用户请求+tcpdump;fake-green改/health
-- [★终态B后代码对齐sprint (2026-06-13)](project_code_topology_realignment_2026_06_13.md) — 域名onboarding走死tunnel→新A/P域502;修getDomainCnameTarget;build-host缺口
-- [admin误指.239 drop-in事故 (2026-06-12)](project_admin_239_dropin_incident_2026_06_12.md) — drop-in切退役replica→DB全断9h;改prod env后必ss看真连接
-- [★Phase C/D+OS统一 (2026-06-11)](project_phase_c_execution_2026_06_11.md) — 全aws→Ubuntu26.04+HKT;web重建必测:80/api真链路
-- [★终态架构定稿=B单加州+EU (2026-06-10)](project_terminal_arch_B_single_california_2026_06_10.md) — 加州(master+web×3)+法兰克福(web×2+replica);砍俄勒冈/HK退役;failover手工~8min
-- [加州 region 搭建 (2026-06-09)](project_california_region_build_2026_06_09.md) — master写池/slave读池解耦;@Value不支持relaxed binding坑
-- [region HA 拓扑分析 (2026-06-08)](project_region_ha_topology_2026_06_08.md) — US需双region;cf_ray=选址罗盘。skill cf-tunnel-edge-region-placement
-- [region replica I/O 饱和 (2026-06-08)](project_region_replica_io_saturation_2026_06_08.md) — ⚠️replica不在region读路径非用户故障根因
-- [第二次多region切换"出问题"RCA (2026-06-08)](project_region_cutover_false_alarm_2026_06_08.md) — 告警=已知慢性artifact;真缺陷=DB/Redis跨洋指HK(571ms)
-- [region 就绪门禁脚本 (2026-06-08)](project_region_readiness_gate_2026_06_08.md) — gate脚本G0-G7;判据看绝对数
-- [region-p1 sprint 收口 (2026-06-08)](project_region_p1_sprint_2026_06_08.md) — ★571ms=搜索4处同步跨洋写,@Async修571→12ms;BSP方法论
-- [★跨洋热路径全闭环 (2026-06-06)](project_fullcut_5xx_rca_2026_06_06.md) — 根因region upstream写死HK;请求线程跨洋残留3坑。skill multiregion-crossocean-hotpath
-- [前端鲁布·戈德堡机器简化 (2026-06-06)](project_fe_simplify_2026_06_06.md) — owner心病前端太复杂(更新感知叠7层)
-- [旗舰17.rip geo-lb切流回归+region镜像 (2026-06-06)](project_geolb_stale_frontend_regression_2026_06_06.md) — 切流把17.rip切region陈旧前端
-- [留存大跌 RCA (2026-06-04)](project_retention_drop_rca_2026_06_04.md) — ★真根因domainListHolder陈旧统计口径bug非真降;前提先fact-check
-- [工具链调研+双账户统一→全自动同步+GitHub远端 (2026-06-27/07-03)](project_toolchain_realignment_2026_06_27.md) — ~/claude-shared真相源+GitHub私有远端(bossty/claude-shared,cron日推);双账户四层自动同步(skills/memory+plugins symlink即时,settings经sync-toolchain.py SessionStart hook);卸4冗余plugin;禁user-scope MCP;claude-shared禁进项目仓
+- [★全代码审计批次1 P1安全5项→部署ca-admin→合master 16fdec6c (07-03)](project_p1_security_batch1_2026_07_03.md) — FINDINGS.md(113条)批次1:P1-7内部端点fail-closed(未配secret不放行changeme,对齐OpsController)/P1-11 ffmpeg去file防LFI/P1-6禁UI设改super防提权(super走SQL带外)/P1-9 CF请求超时防冻结调度线程/P1-10 DoH fail-open防探针故障群体误封;★5个可复用安全pattern;部署ca-admin(admin+data单实例,current.jar symlink布局)实测prod secret已配强值fail-closed不误伤;CI headless修复(pom argLine加java.awt.headless=true,DISPLAY=:99无Xvfb;skipTests=false硬编码故用maven.test.skip);批次0(feat/recently-watched最近观看async)未部署
+- [代码精简审查 SESSION-STATE 接力档 (07-02/07-03)](docs/sprint/2026-07-02-code-simplification-review/SESSION-STATE.md) — 仓库内跨会话接力;A组死代码已清空合master(e8259e49);未决=B爬虫13家/MovieService上帝类+C缓存4路径A/P双缓+D fe-admin测试(影片playback已修复)
+- [★爬虫pilot Task9 dry-run PASS+误伤生产影片已修复 (07-03)](project_crawler_pilot_task9_dryrun_2026_07_03.md) — Beeg extract-superclass before/after逐字节一致(含offset≥480);★隔离库AUTO_INCREMENT撞生产id→覆盖playlist(实为2部),✅从CF边缘缓存无损捞回m3u8重传origin,未重爬
+- [★CC最佳实践对齐:CLAUDE.md瘦身345→193+skill 37→31 (07-03)](project_cc_best_practices_optimization_2026_07_03.md) — 三agent调研→差距矩阵25条;根档瘦身(skill索引=分组地图/文档索引迁DOC_INDEX);plugin 0.3.0+sync脚本+drift挂ci-local;不采纳项落档;已合master`7702f317`;★指针化下沉必验指针目标真含该信息
+- [★★GFW A池RUM接入reach:grid阶段3火测PASS+ON观测 (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — A池零reach真因=融合器probe-key驱动;火测证A真有退化;+Beta(8,1)小样本收缩degraded 291→21;flag ON观测一周;分支worktree-gfw-reach-apool-rum未合master
+- [★GFW P3 N4重迁移=canary慢+470ms(丢CN2)回退edge (07-02)](project_gfw_p3_n4_remigration_2026_07_01.md) — NLB-direct可达全绿但CN入口+470ms(丢CN2 GIA);决定edge主路+NLB仅failover;★pre-flip必测延迟非只可达
+- [★★GFW阶段4 reach:grid多源贝叶斯融合(dark) (07-01)](project_gfw_reach_fusion_phase4_2026_07_01.md) — reach格=Beta后验(probe先验+RUM joint);ReachFusionService 5min融合;flag默认dark net-zero;★whole-branch review逮2跨task MAJOR;合master`097c9cba`;P1-A/B观测+3a live见topic
+- [★★★GFW整合并入master=单基线 (06-29)](project_gfw_consolidation_2026_06_29.md) — gfw→master(`5ed76306`)终结双基线footgun;探针保活+S端点dormant;web×6+admin零停机;后续GFW off master
+- [★★GFW组B S入口NLB-direct推广链全挂事故 handoff (06-28)](project_gfw_s_entry_nlb_handoff_2026_06_28.md) — 别会话从master重部署web抹掉s-redirect端点→推广链404;已回退edge;铁律=S端点进master前禁NLB-direct;待Owner拍摘端点vs S永久留edge
+- [★GFW阶段4前置=修RUM地基/IP库多源isp省解析 (06-30)](project_gfw_ipdb_rum_fix_2026_06_30.md) — 根因地理IP库HK→CA迁移漏带;免key多源qqwry+ip2region+sapics geolite2;★免key GeoIP MMDB≠MaxMind schema上线前必跑真文件验reader真读
+- [★统计独立IP骤降 RCA=外部bot灌水 (06-29)](project_ipuv_anomaly_bot_rca_2026_06_29.md) — 真因organic UV被bot cookie-churn虚高(watched_uv/ip恒定铁证);★多源数据>单一推断(我纯同步假象结案错,Owner逼出真相)
+- [★封面贴脸根治=BlurHash占位全链路 (06-29)](project_cover_blurhash_placeholder_2026_06_29.md) — 预热IO(root=scrollRoot治内层滚动)+BlurHash占位感知100%根治;43419部回填;web×6零停机;feat/cover-preload-restore未合master
+- [ponytail-audit清理 sprint (06-28)](project_movielistpage_consolidation_2026_06_28.md) — MovieListPage 6页合并+死代码清理+MovieCard抽取;★多会话worktree陈旧地雷;★审计死代码必分生产调用方vs测试引用
+- [L2抓tag分页DB fallback跨洋 (06-26)](project_crossocean_tag_fallback_2026_06_26.md) — @Cacheable移readOnly→DB fallback丢replica;tcpdump+cache-bust金标
+- [读写分离框架评估定案 (06-26)](project_rwsplit_framework_eval_2026_06_26.md) — MySQL ShardingSphere否决;Redis Lettuce ReadFrom PoC按住;CA读写都主是命门
+- [跨洋读三层防线+8泄漏修复 (06-25)](project_crossocean_read_guardrail_2026_06_25.md) — 根因热路径读漏readOnly路由;三层防线+告警闭环;方法论见reference
+- [★缓存缺口+慢查询审计 (06-21)](project_cache_gap_slowquery_audit_2026_06_21.md) — P0三连已部署;三诊断坑(TTL jitter/digest尖峰/EU跨洋Redis锁饿死warm)
+- [★管理后台几分钟掉线 RCA (06-18)](project_admin_logout_redis_snapshot_2026_06_18.md) — parseToken吞isTokenBlacklisted+Redis快照spike;skill auth-revocation-failopen
+- [★cableav采集/上线解耦+StockPublisher (06-16)](project_cableav_decouple_stockpublisher_2026_06_16.md) — status=3存量每小时上线;水印作废;@Lazy self代理
+- [★data每小时采集修复 (06-15)](project_data_hourly_collection_fix_2026_06_15.md) — 根因3外部依赖留退役HK;★isolated-pass≠prod-scale必观察上线
+- [★N9E迁移后监控数据全修复 (06-15)](project_n9e_monitoring_repair_2026_06_15.md) — 三类病根;★改promql前curl VM实测label
+- [★Phase D split-brain事故+检查点runbook (06-13)](project_phase_d_incident_and_checkpointed_runbook_2026_06_13.md) — cutover成功;ss断言容忍IPv6-mapped;PONR后绝不解冻HK
+- [★终态架构定稿=B单加州+EU (06-10)](project_terminal_arch_B_single_california_2026_06_10.md) — 加州(master+web×N)+法兰克福(web×2+replica);砍俄勒冈/HK;failover手工~8min
+- [region HA拓扑分析 (06-08)](project_region_ha_topology_2026_06_08.md) — US需双region;cf_ray=选址罗盘;skill cf-tunnel-edge-region-placement
+- [★跨洋热路径全闭环 (06-06)](project_fullcut_5xx_rca_2026_06_06.md) — 根因region upstream写死HK;请求线程跨洋残留3坑;skill multiregion-crossocean-hotpath
+- [留存大跌 RCA (06-04)](project_retention_drop_rca_2026_06_04.md) — ★真根因domainListHolder陈旧统计口径bug非真降;前提先fact-check
+- [工具链调研+双账户统一→全自动同步+GitHub远端 (06-27/07-03)](project_toolchain_realignment_2026_06_27.md) — ~/claude-shared真相源+GitHub私有远端(cron日推);双账户四层自动同步;禁user-scope MCP;claude-shared禁进项目仓
 
 ## reference(load-bearing,常 recall)
+- [爬虫dry-run三铁律(id撞键/mock LLM/备份漂移)](reference_crawler_dryrun_id_collision_mock_llm.md) — 隔离库AUTO_INCREMENT必设高值防R2 id键控对象(cover/playlist)撞生产;采集有强制LLM门用mock破;buyvm-db备份缺列/表
 - [edge nginx 如何用 reach + 覆盖率缺口](reference_edge_reach_coverage_pickp_rpc.md) — edge S入口 short_redirect.lua 5阶段:Step2调admin pick-p RPC(reach-aware)缓存30s→~91-96% reach;~4-9%因edge→admin RPC超时落非reach snapshot(aws-s HK 9.4%最重);admin ops_pick_p_total 100%success看不到(RPC没到达),必edge /__pick_stats(:81)交叉印证;要100%需GeoIP上edge(edge现无GeoIP靠admin解析)是主体工作+漂移风险,补缺口先修RPC可靠性;backlog
 - [前端封面占位/懒加载技术铁律](reference_frontend_image_placeholder_lessons.md) — native lazy不认内层滚动容器(需IO root=scrollRoot);测试必节流网络非只CPU;iOS无navigator.connection;淡入必@error防永久隐身;FULLTEXT表ADD COLUMN只能COPY;blurhash从JPEG档算非webp/avif裸源;BlurHash占位=贴脸感知100%根治
 - [CA读master是正确设计非缺陷](feedback_ca_reads_master_by_design.md) — CA无slave,read池指.222(master)是终态B就近读
