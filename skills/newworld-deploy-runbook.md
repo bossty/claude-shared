@@ -27,6 +27,10 @@ description: Newworld 完整部署流程 — Step1 推送 → Step2 后端按模
 git add <files> && git commit -m "xxx" && git push
 ```
 
+## Step 1.2：本地 git pre-flight 五道门（2026-07-05 起脚本自动强制，多会话防互相覆盖）
+
+`deploy-web.sh` / `deploy-frontend.sh` 开头自动跑 `scripts/lib/git-preflight.sh`：①fetch 真历史 ②构建输入路径干净（`-uno`）③HEAD 已 push ④HEAD 含最新 origin/master ⑤HEAD 含线上基线 tag（`deployed/web|frontend-web|frontend-admin`，部署全量成功自动打+push=「线上跑的 sha」登记簿）。**被拦先按提示补救**（merge master / push / commit），确认故意回滚才 `GIT_PREFLIGHT_FORCE=1`（Owner 授权）。绕过脚本手工 scp 部署=绕过五道门（禁止）。背景：06-28 S 入口被 master 重部署抹掉 + 07-05 部署竞态，纪律层已证失守，故机制强制。
+
 ## Step 1.5：服务器 git pre-flight（铁律，每次必跑）
 
 **Step 2/3 的任何 `git pull` 之前必须**先跑下面这段。dirty tracked 文件 > 0 立即 HALT，**不得**用 `git checkout HEAD -- xxx` 或 `git reset --hard` 自动修复绕过（违反 `newworld-git-preflight` skill L34 铁律 = 累积 dirty 到下次部署爆炸）。

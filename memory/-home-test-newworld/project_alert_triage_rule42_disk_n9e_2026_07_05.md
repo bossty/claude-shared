@@ -31,4 +31,17 @@ SSH "Permanently added" 每连必打噪音 = UserKnownHostsFile /dev/null 的必
 - **全项目盘点+批3-5 计划落档 `docs/sprint/2026-07-05-monitoring-unification/PLAN.md`**：批3=web RUM 告警收编（MonitorService 补 Counter，弱与门拆两条正交规则 http_response 探:7777）；批4=**data 爬虫零告警盲区**（盘点最大发现，断流无信号）；批5=replica-lag-watchdog.sh 与规则121双轨退役/WebHealthCheckTask 删除(需 Owner 推翻 06-14 保 bean 决定)/双 telegram 桥核实/C 类保留项照 CfZoneAuditService 标杆（gauge→VM 留历史）逐步镜像。BaiduTokenAlertTask 实际已停用(@Scheduled 注释)。
 - ★categraf 官方可用未用插件：http_response(ca-web 已启用)/net_response/dns_query/x509_cert(ca-monitor 已启用)/ping/procstat/systemd/exec。
 
+**批3/批4 完成（同夜，Owner"都做，按流程开工"）**：
+- 批3a web：FrontendMonitorMetrics 6个 `nw_monitor_*_5m` gauge=读 Redis 上一完整5min槽位（口径与被退役的 checkFrontendMonitor 逐字一致，6实例同值规则端 max()）。**deploy 门 RegionReadRoutingArchTest 拦下首版跨洋读**→改 @Qualifier("replicaStringRedisTemplate")。部署 web×6 sha `f51b3755`。
+- 批4 data：CrawlRunMetrics+FreshnessTrickle.run 单点包装插桩（runInner 不动，零 task 类改动避开 B4 收敛分支冲突）。**蓝军 8 条（6 MAJOR）**：★hanime1 实际传 8 个 channel slug 且 hour%5 轮转~5h/轮→预注册白名单只留 cableav/beeg/jable/javxx；★页级失败被 FreshnessTrickle 内层 catch 吞→补 nw_crawl_movies_failed_total；时区疑虑实测排除（CA/EU 三层全 Asia/Hong_Kong）。部署 ca-admin `crawlmetrics-436636c0`。
+- N9E 规则 **125 FE-JS-ERROR双门/126 FE-API-FAIL-RATE/127 FE-CDN-FAILOVER-CRITICAL/128 WEB-ORIGIN-DOWN(http_response已在6节点探:7777零配置)/129 CRAWL-RUN-STALL/130 CRAWL-RUN-ERRORS/131 CRAWL-ZERO-OUTPUT-24H(disabled, ★07-06 计数满24h后启用防短窗increase==0误报)**，promql 全 VM 实测。
+- ★**有意不建 FE-CDN-FAILOVER-HIGH**：实测夜间 cdn_failover_5m=5122 而 in-app 旧阈值>5——CN 慢性劣化投影，照搬=永久触发，与重校准规则42同象限重复（阈值平移前必先看当前真实值）。
+- 批3b：SystemMonitorTask 整类退役（规则生效后删，无告警空窗），部署 ca-admin `smtretire-38108ea0`。三分支合 master `ab28cb5f`。
+- ★误提交教训：`git add <目录>` 会吸入他人会话的未跟踪文件（application-local.yml 含敏感词，两次 amend 剔除+进 .gitignore 根治，未推送）。
+- **防忘机制（Owner 点破 CronCreate 是会话级）**：131 启用挂 **ca-monitor root crontab 一次性任务**（07-06 06:07 HKT，UPDATE+回读+Telegram 汇报+自删；脚本 /usr/local/bin/oneshot-enable-rule131.sh root-only 含烘焙凭据；通道自检 ok:true）。★Telegram 凭据真源=业务库 system_config 表（TELEGRAM_BOT_TOKEN/CHAT_ID），不在任何 environ/secrets.env。
+- **批5#1 已收**：replica-lag-watchdog.sh 实测三台候选机都没在跑=6月迁移时已静默死亡（注释含退役俄勒冈 IP），今晚**第三个**"自建监控已死无人知"；死脚本已删（`78187732`）。规则121=主从延迟第一道真监控。
+- **批5#3 已收（Owner 令）**：n9e-telegram-bridge.py=僵尸实锤（ca-monitor 无进程/文件/unit；N9E 通知真路径=**原生 telegram channel id=13 直发**，凭据在 n9e DB notify_rule.notify_configs，非 bridge 非 admin webhook）。删 bridge.py+.service+n9e_alert_rules_validate.sh+修 5 处文档（`4f096041`）；★bootstrap-monitor-vps.sh 引用必须同步修——否则重建监控机会复活僵尸桥=双发告警。admin OpsController.alertWebhook=未接线备用端点保留。
+- ★两次踩同坑：`git add -A <目录>`/`git add <目录>` 会吸别的会话的未跟踪文件（先 application-local.yml 后别人的 sprint 文档）——**多会话共享仓库提交前必 `git status --short` 核对暂存清单，或按文件名精确 add**。
+- **批5#2 已收（Owner 拍板推翻 06-14 保 bean）**：WebHealthCheckTask 删（06-14 起从未运行=零行为变化；★WEB_LAN_IPS/WEB_WAN_IPS 键保留——DomainConfigSyncHelper/CloudflareApiService/SystemConfigController 仍在用，删键会断域名配置同步；6 处文档修正；合 master `442208ef`，随下次 admin 部署自然生效不单独重启）。**监控统一批0-5 全部收口**。
+
 相关 [[project_oom_monitor_categraf_2026_07_04]] [[reference_n9e_dashboard_alert_internals]] [[feedback_verify_not_recall]]

@@ -24,3 +24,9 @@ metadata:
 7. **BlurHash 占位 = 图片"贴脸"的感知 100% 根治**(业界标准 Instagram/Medium)：占位是内联 API 的 ~28字节 hash(0 额外网络)→ decode 成"模糊版那张图"→真图淡入。物理上图下载快不了，但用户永不见空白/灰块突兀。BlurHash(io.trbl Maven Java 库)优于 ThumbHash(无 Maven Java)对 Java 后端管道。
 
 关联 [[project_cover_blurhash_placeholder_2026_06_29]]。
+
+8. **★blurhash 占位塌缩不了 LCP 指标——Chrome 低熵图排除启发式**（2026-07-05 hero 真机 trace 证伪）：放大的 blurhash 图 bits/pixel 过低，被排除出 LCP 候选（hero-blur 从未入 LCP entry）。占位的价值=感知修复（灰块→预览）；LCP 数字收益只能靠去掉带宽竞争（如 feed 首卡去 eager）让真图更早到。设计文档里"blur 有望塌缩 LCP"的论证以后直接引本条打住。
+
+9. **动图 WebP dwebp 解不了 → `webpmux -get frame 1` 抽首帧再 dwebp**：广告类图源基本 100% 是 GIF 动图（gif2webp 产物），"已知不覆盖动图"若不估占比会全军覆没（backfill 第一轮 0/27）。webpmux 与 dwebp 同属 libwebp 套件，服务器已在位。
+
+关联 [[project-firstscreen-placeholder-lcp-2026-07-05]]。

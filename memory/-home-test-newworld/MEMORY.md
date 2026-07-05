@@ -1,128 +1,141 @@
-<!-- 索引仅留：近期工作 + 全部 feedback 铁律 + load-bearing reference。已完结一次性 sprint topic 文件在盘,文件搜索 recall,不进索引(07-03 精简:删 06-24 前非 landmark 条目)。 -->
+<!-- 索引仅留：近期工作 + 全部 feedback 铁律 + load-bearing reference。已完结一次性 sprint topic 文件在盘,文件搜索 recall,不进索引。07-05 压缩:hook 一行要点,已完结旧条目仅留标题,细节看 topic 文件。 -->
 
 ## 近期工作 / 进行中
-- [★★07-05告警triage→监控统一N9E批0-2落地(规则42重校准+119-124+删SystemMonitorTask磁盘/MySQL/Redis检查,合master`037ad472`/`1a86b38f`已部署)+批3-5计划](project_alert_triage_rule42_disk_n9e_2026_07_05.md) — CDN失败率19%=慢性昼夜节律非事故(saga备注04-28已取消);★REDIS-MEM-HIGH漂移反转=yaml陈旧DB是活的;★in-app主从延迟检查上线起即死(连master查REPLICA STATUS恒空);★data爬虫零告警=最大盲区(批4);★ca-admin jar symlink真值=deploys/current.jar非上层;批3-5见docs/sprint/2026-07-05-monitoring-unification/PLAN.md
-- [★★全代码审计(~113条)完整收口 07-04/05](project_full_code_audit_closure_2026_07_04.md) — 接批次1/2:本会话批次3-14全收口。已修部署=P0/P1/P2主批/backlog12/openresty(P1-19/20+lua P2×8)/P2-41 relay证书pin;低价值6项(P2-46/54/68/20/43/33)修+测过待搭便车部署(06:00排程Owner取消);误报19条+P2-67过度工程归档suppressions(`5ab28b6e`);Kanav待自然验证。★可复用pattern:relay SHA-256指纹pin(编译常量零文件依赖,部署前s_client实测指纹==pin)/openresty lua改需restart+web guard限流5/22死admin仍活/LLM批量回显index对齐(title被改写不能校验)/条件删Lua防读删窗口/删R2图前查引用。★方法论:蓝军优先证伪逮19误报;过度工程是合法结论(全修吧下仍诚实保留);低价值≠难(P2-20被追问逼出复盘)
-- [★★OOM监控改造+心跳误报修复+CPU/内存告警口径改造 全闭环合master`1550cff3` (07-04)](project_oom_monitor_categraf_2026_07_04.md) — 三连告警RCA(S1误报=部署归零gauge已根治/S3瞬态/S2=bot+CN夜间劣化待跟);删JvmHealthMonitorTask(ssh巡检06-27盲一周)→kernel_vmstat_oom_kill全fleet+N9E 114真火测;N9E规则115-118(CPU busy口径/iowait豁免Dragonfly/内存豁免db-master/DB真压力);io_uring iowait虚高官方定性harmless无需升配;eu-redis时钟慢37s根因SG断NTP出口已修+SSH恢复;N9E targets页空=target_busi_group表0行已修;★接采集需求先查categraf已启用插件再自建;★targets页cpu_util服务端写死改不了用target.note补
-- [★Kanav健康核查+封面潜伏bug修复 (07-04)](project_kanav_health_cover_fix_2026_07_04.md) — Owner问"Kanav是否正常工作";buyvm live dry-run:视频端到端OK但封面恒NULL(取错页面:play页og:image无+MacCMS兜底404,丢弃列表页card真封面img.11yun.xyz,picId≠vodId须按条目配对);已修parseVodIdCoverPairs(commit db45133a,分支fix/kanav-cover-from-listpage未合)+dry-run验证cover/blurhash入库;★Owner域知识反诘逼出完整根因;生产0部;review-gate从未生效(status=1,需reviewStatus字段解耦);同会话删4家排除爬虫(chore/data-remove-excluded-crawlers,5c9c31d9未合)
-- [★★爬虫批量收敛(B4):9家迁基类+4家排除,dry-run逮到video_duration回归 (07-04)](project_crawler_convergence_batch_2026_07_04.md) — 收敛分支fe958322未部署;9 dev-senior并行迁移+4家诚实上报结构阻塞停工(休眠MP4哑管道×3+XHamster元数据only);基类+6钩子(defaults零回归);★dry-run逮到基类video_duration框架回归(单测漏,牵出生产Beeg潜伏bug已修);6家真逐字节0diff+3家代码级;AUTO_INC=90000000防R2撞键
-- [★MovieService上帝类拆分(B5):facade抽3协作者→合master172bd4d0+web×6部署验证 (07-04)](project_movieservice_god_class_split_2026_07_04.md) — 1280→1037行;行为保持(现有测试=安全网+@Spy真converter);★fact-check否决HeaderPageVO(3VO非同构+前端消费字段名破JSON契约);★纠葛点getMoviesByIds共享→相关组强拆造循环依赖故只抽3干净件;蓝军1B+3M+4Min全修;代码精简剩B4爬虫
-- [全代码审计修复 SESSION-STATE 接力档 (07-03)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — 批次1/2 共10项P1已部署+合master(16fdec6c/f17177d8);FINDINGS.md在feat/recently-watched未合;未决=批次0部署/P1-21-22运维级密码/峰窗强部后线上盯;下一步=P1-8/14~20/23 + P2（已合 master `ef11726f`）
-- [★全代码审计批次1+2 P1安全10项→部署→合master(16fdec6c/f17177d8) (07-03)](project_p1_security_batch1_2026_07_03.md) — FINDINGS.md(113条)。**批次1(admin/data,合16fdec6c)**:P1-7内部端点fail-closed(未配secret不放行changeme对齐OpsController)/P1-11 ffmpeg去file防LFI/P1-6禁UI设改super防提权(super走SQL带外)/P1-9 CF请求超时防冻结调度线程/P1-10 DoH fail-open防探针故障群体误封。**批次2(web/common,合f17177d8,部署web×6+admin/data)**:P1-1 FVD写fire-and-forget/P1-2 StatsCoalescingBuffer race-safe驱逐防无界(re-check+空键evict,零丢门禁48过)/P1-3 drain丢窗by-design进suppressions/P1-4 feed游标按消耗前进防跳2/3/P1-5 SystemConfig本地L1失效提前防Redis抖动返旧值。★可复用安全pattern:fail-closed(内部secret)/fail-open(探针基础设施)/请求线程写离线程/race-safe驱逐。★部署:deploy-web.sh零停机(硬测试闸+peer-gate+readiness门),峰窗20:00-03:00需--force-peak+Owner授权;ca-admin手动swap symlink;CI headless修复(pom argLine java.awt.headless=true);批次0(feat/recently-watched)+剩余P1(P1-8/14~20/21~23)未做
-- [★C组缓存统一完结:poller L2大锤(KEYS×6实例)修复+seq事件失效+CORS双缓合一→部署web×6+5钩子实测→合master(6356f6cd) (07-03/04)](project_cache_unification_2026_07_03.md) — staleness 120s→实测1.1-1.3s;★部署门捕获@Autowired双构造器crashloop(四道评审全漏,mock单测不走容器;照搬模式必看齐构造全貌;BeanFactory级回归钉);★事实纠偏:审查"6h陈旧"实为6min已修/"单一失效路径"字面执行会推翻§5.2事故背书设计;蓝军BLOCKER=hostSet loader直调mapper防self-invocation
-- [代码精简审查 SESSION-STATE 接力档 (07-02/07-03)](docs/sprint/2026-07-02-code-simplification-review/SESSION-STATE.md) — 仓库内跨会话接力;A组死代码已清空合master(e8259e49);**C组缓存统一完结✅(见上条)**;未决=B爬虫13家/MovieService上帝类+D fe-admin测试(影片playback已修复)
-- [★爬虫pilot Task9 dry-run PASS+误伤生产影片已修复 (07-03)](project_crawler_pilot_task9_dryrun_2026_07_03.md) — Beeg extract-superclass before/after逐字节一致(含offset≥480);★隔离库AUTO_INCREMENT撞生产id→覆盖playlist(实为2部),✅从CF边缘缓存无损捞回m3u8重传origin,未重爬
-- [★CC最佳实践对齐:CLAUDE.md瘦身345→193+skill 37→31 (07-03)](project_cc_best_practices_optimization_2026_07_03.md) — 三agent调研→差距矩阵25条;根档瘦身(skill索引=分组地图/文档索引迁DOC_INDEX);plugin 0.3.0+sync脚本+drift挂ci-local;不采纳项落档;已合master`7702f317`;★指针化下沉必验指针目标真含该信息
-- [★★GFW A池RUM接入reach:grid阶段3火测PASS+ON观测 (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — A池零reach真因=融合器probe-key驱动;火测证A真有退化;+Beta(8,1)小样本收缩degraded 291→21;flag ON观测一周;分支worktree-gfw-reach-apool-rum未合master
-- [★GFW P3 N4重迁移=canary慢+470ms(丢CN2)回退edge (07-02)](project_gfw_p3_n4_remigration_2026_07_01.md) — NLB-direct可达全绿但CN入口+470ms(丢CN2 GIA);决定edge主路+NLB仅failover;★pre-flip必测延迟非只可达
-- [★★GFW阶段4 reach:grid多源贝叶斯融合(dark) (07-01)](project_gfw_reach_fusion_phase4_2026_07_01.md) — reach格=Beta后验(probe先验+RUM joint);ReachFusionService 5min融合;flag默认dark net-zero;★whole-branch review逮2跨task MAJOR;合master`097c9cba`;P1-A/B观测+3a live见topic
-- [★★★GFW整合并入master=单基线 (06-29)](project_gfw_consolidation_2026_06_29.md) — gfw→master(`5ed76306`)终结双基线footgun;探针保活+S端点dormant;web×6+admin零停机;后续GFW off master
-- [★★GFW组B S入口NLB-direct推广链全挂事故 handoff (06-28)](project_gfw_s_entry_nlb_handoff_2026_06_28.md) — 别会话从master重部署web抹掉s-redirect端点→推广链404;已回退edge;铁律=S端点进master前禁NLB-direct;待Owner拍摘端点vs S永久留edge
-- [★GFW阶段4前置=修RUM地基/IP库多源isp省解析 (06-30)](project_gfw_ipdb_rum_fix_2026_06_30.md) — 根因地理IP库HK→CA迁移漏带;免key多源qqwry+ip2region+sapics geolite2;★免key GeoIP MMDB≠MaxMind schema上线前必跑真文件验reader真读
-- [★统计独立IP骤降 RCA=外部bot灌水 (06-29)](project_ipuv_anomaly_bot_rca_2026_06_29.md) — 真因organic UV被bot cookie-churn虚高(watched_uv/ip恒定铁证);★多源数据>单一推断(我纯同步假象结案错,Owner逼出真相)
-- [★封面贴脸根治=BlurHash占位全链路 (06-29)](project_cover_blurhash_placeholder_2026_06_29.md) — 预热IO(root=scrollRoot治内层滚动)+BlurHash占位感知100%根治;43419部回填;web×6零停机;feat/cover-preload-restore未合master
-- [ponytail-audit清理 sprint (06-28)](project_movielistpage_consolidation_2026_06_28.md) — MovieListPage 6页合并+死代码清理+MovieCard抽取;★多会话worktree陈旧地雷;★审计死代码必分生产调用方vs测试引用
-- [L2抓tag分页DB fallback跨洋 (06-26)](project_crossocean_tag_fallback_2026_06_26.md) — @Cacheable移readOnly→DB fallback丢replica;tcpdump+cache-bust金标
-- [读写分离框架评估定案 (06-26)](project_rwsplit_framework_eval_2026_06_26.md) — MySQL ShardingSphere否决;Redis Lettuce ReadFrom PoC按住;CA读写都主是命门
-- [跨洋读三层防线+8泄漏修复 (06-25)](project_crossocean_read_guardrail_2026_06_25.md) — 根因热路径读漏readOnly路由;三层防线+告警闭环;方法论见reference
-- [★缓存缺口+慢查询审计 (06-21)](project_cache_gap_slowquery_audit_2026_06_21.md) — P0三连已部署;三诊断坑(TTL jitter/digest尖峰/EU跨洋Redis锁饿死warm)
-- [★管理后台几分钟掉线 RCA (06-18)](project_admin_logout_redis_snapshot_2026_06_18.md) — parseToken吞isTokenBlacklisted+Redis快照spike;skill auth-revocation-failopen
-- [★cableav采集/上线解耦+StockPublisher (06-16)](project_cableav_decouple_stockpublisher_2026_06_16.md) — status=3存量每小时上线;水印作废;@Lazy self代理
-- [★data每小时采集修复 (06-15)](project_data_hourly_collection_fix_2026_06_15.md) — 根因3外部依赖留退役HK;★isolated-pass≠prod-scale必观察上线
-- [★N9E迁移后监控数据全修复 (06-15)](project_n9e_monitoring_repair_2026_06_15.md) — 三类病根;★改promql前curl VM实测label
-- [★Phase D split-brain事故+检查点runbook (06-13)](project_phase_d_incident_and_checkpointed_runbook_2026_06_13.md) — cutover成功;ss断言容忍IPv6-mapped;PONR后绝不解冻HK
-- [★终态架构定稿=B单加州+EU (06-10)](project_terminal_arch_B_single_california_2026_06_10.md) — 加州(master+web×N)+法兰克福(web×2+replica);砍俄勒冈/HK;failover手工~8min
-- [region HA拓扑分析 (06-08)](project_region_ha_topology_2026_06_08.md) — US需双region;cf_ray=选址罗盘;skill cf-tunnel-edge-region-placement
-- [★跨洋热路径全闭环 (06-06)](project_fullcut_5xx_rca_2026_06_06.md) — 根因region upstream写死HK;请求线程跨洋残留3坑;skill multiregion-crossocean-hotpath
-- [留存大跌 RCA (06-04)](project_retention_drop_rca_2026_06_04.md) — ★真根因domainListHolder陈旧统计口径bug非真降;前提先fact-check
-- [工具链调研+双账户统一→全自动同步+GitHub远端 (06-27/07-03)](project_toolchain_realignment_2026_06_27.md) — ~/claude-shared真相源+GitHub私有远端(cron日推);双账户四层自动同步;禁user-scope MCP;claude-shared禁进项目仓
+- [★★广告(Snack)审计:尺寸提示三套矛盾数→YAML单真相源+/slot-specs+上传软校验 (07-06)](project_snack_slot_size_hints_2026_07_06.md) — 已合master`f0c98761`+四线部署验证全过(07-06 02:45);待拍板B1-B5+z05/p01拆分;★双比例槽下限取两档较小值;★worktree add -A误裹镜像文件教训
+- [★★CRAWL-RUN-STALL{cableav}误报triage→真P1:P2-35 SSRF传参错致HLS全断~18h+修复已部署 (07-05)](project_crawl_stall_alert_ssrf_hls_outage_2026_07_05.md) — getRequestUri()是origin-form须getUri();已部署ca-admin(523e2c75)+规则129/131去cableav;★测方法不测调用点教训;待办=javxx断流独立查+监控DB轮询方向Owner拍板
+- [★★07-05并发部署互相覆盖事故:收敛+三防线机制化(Gate M互斥/Gate A授权/sha路径)](project_concurrent_deploy_incident_2026_07_05.md) — 终态web×6=9ba95945+deployed/web tag首次登记;B(afe2a6f9)被覆盖未上线,重部署必先merge基线(Gate 4会拦,禁FORCE绕);三防线已合master`55599422`——此后所有部署必须带OWNER_DEPLOY_APPROVED=1
+- [★★全组件参数调优审计+P1批次全落地+Tomcat饱和定案 (07-05)](project_config_tuning_audit_2026_07_05.md) — 真因=admin每30min全量SCAN 12.46M键阻塞CA web,修法SADD索引去SCAN=P1待做(分支fix/channel-saturation-no-scan);binlog压缩一周后SET PERSIST;待办P2+机制A2-A5
+- [★★渠道归因/统计审计:2 P1已修部署+5 P2待拍板 (07-05)](project_channel_attribution_audit_2026_07_05.md) — arrival断70天+质量分空桶已修(f3694a30)合master待授权;基线验证=明晨03:50日报;★agent主张必亲核
+- [★★Redis废弃键审计+清理+view-count HDEL根治+观看数秒级展示方案②全闭环 (07-05)](project_redis_stale_keys_cleanup_2026_07_05.md) — crawler-failcount-ttl合`a31f2fda`;viewcount-hdel合`1ad237f3`(HLEN 37592→246);★秒级展示合`913e4f9f`(display桶+buffer增量+单调Lua校准+max合并+模糊显示,web×6+admin+前端全部署,蓝军8条CONFIRM,e2e四象限过);★出口合并挂载点按真实UI消费面定(内层合并被外层@Cacheable短路);★24h冻结根因=06-22 H4逐片卡缓存;观看数RCA=流量降45%另开会话;worktree硬拦hook合`ae781c6b`
+- [★部署git pre-flight五道门+deployed/*基线tag合`38aef9d6` (07-05)](project_deploy_git_preflight_2026_07_05.md) — 待办=CI按diff分级+recently-watched上线待拍板
+- [★context-mode A/B证伪停用+headroom否决+nw-cap hook上线 (07-05)](project_context_mode_retire_headroom_eval_2026_07_05.md) — ★评估上下文工具必真A/B+哨兵存活测试
+- [★★前端错误TOP分析+Z13修复收口(合`27cc9a15`) (07-05)](project_frontend_error_top_analysis_z13_fix_2026_07_05.md) — ★guard.lua是PCRE非Lua pattern;治理sprint=docs/sprint/2026-07-05-frontend-error-top-cleanup/PLAN.md
+- [★★07-05首屏占位LCP优化A/B/C合master部署验证](project_firstscreen_placeholder_lcp_2026_07_05.md) — ★VO加字段×共享缓存×rolling混布=旧节点500;观察项=RUM LCP p75数天
+- [★★07-05告警triage→监控统一N9E批0-4落地(合`ab28cb5f`)+批5待办](project_alert_triage_rule42_disk_n9e_2026_07_05.md) — ★data爬虫零告警=最大盲区;批3-5见docs/sprint/2026-07-05-monitoring-unification/PLAN.md
+- [★★全代码审计(~113条)完整收口 07-04/05](project_full_code_audit_closure_2026_07_04.md) — 低价值6项修+测过待搭便车部署;误报19条归档suppressions(`5ab28b6e`)
+- [★★OOM监控改造+心跳误报+告警口径 合`1550cff3` (07-04)](project_oom_monitor_categraf_2026_07_04.md) — ★接采集需求先查categraf已启用插件
+- [★Kanav健康核查+封面bug修复 (07-04)](project_kanav_health_cover_fix_2026_07_04.md) — 已修(db45133a未合,生产0部);review-gate需reviewStatus解耦;删4家爬虫(5c9c31d9未合)
+- [★★爬虫批量收敛(B4):9家迁基类+4家排除 (07-04)](project_crawler_convergence_batch_2026_07_04.md) — 分支fe958322未部署;★dry-run逮到基类回归;AUTO_INC=90000000
+- [★MovieService上帝类拆分(B5)合`172bd4d0`+部署验证 (07-04)](project_movieservice_god_class_split_2026_07_04.md) — ★fact-check否决HeaderPageVO;只抽3干净件
+- [全代码审计修复 SESSION-STATE 接力档 (07-03)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — FINDINGS.md在feat/recently-watched未合
+- [★全代码审计批次1+2 P1安全10项部署合master (07-03)](project_p1_security_batch1_2026_07_03.md) — pattern:fail-closed/fail-open/请求线程写离线程/race-safe驱逐
+- [★C组缓存统一完结 合`6356f6cd` (07-03/04)](project_cache_unification_2026_07_03.md) — ★部署门捕获@Autowired双构造器crashloop(mock单测不走容器)
+- [代码精简审查 SESSION-STATE 接力档 (07-02/03)](docs/sprint/2026-07-02-code-simplification-review/SESSION-STATE.md) — 剩D fe-admin测试
+- [★爬虫pilot Task9 dry-run PASS (07-03)](project_crawler_pilot_task9_dryrun_2026_07_03.md) — ★隔离库AUTO_INCREMENT撞生产id;CF边缘缓存捞回
+- [★CC最佳实践对齐:CLAUDE.md瘦身+skill合并 合`7702f317` (07-03)](project_cc_best_practices_optimization_2026_07_03.md) — ★指针化下沉必验目标真含该信息
+- [★★GFW A池RUM接入reach:grid火测PASS+ON观测 (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — 分支worktree-gfw-reach-apool-rum未合master
+- [★GFW P3 N4重迁移=canary慢回退edge (07-02)](project_gfw_p3_n4_remigration_2026_07_01.md) — ★pre-flip必测延迟非只可达
+- [★★GFW阶段4 reach:grid贝叶斯融合(dark) 合`097c9cba` (07-01)](project_gfw_reach_fusion_phase4_2026_07_01.md) — flag默认dark net-zero
+- [★★★GFW整合并入master=单基线 (06-29)](project_gfw_consolidation_2026_06_29.md) — `5ed76306`终结双基线;后续GFW off master
+- [★★GFW组B S入口NLB-direct推广链全挂事故 (06-28)](project_gfw_s_entry_nlb_handoff_2026_06_28.md) — 铁律=S端点进master前禁NLB-direct
+- [★GFW阶段4前置=修RUM地基/IP库多源 (06-30)](project_gfw_ipdb_rum_fix_2026_06_30.md) — ★免key GeoIP MMDB上线前跑真文件验reader
+- [★统计独立IP骤降 RCA=bot灌水 (06-29)](project_ipuv_anomaly_bot_rca_2026_06_29.md) — ★多源数据>单一推断
+- [★封面贴脸根治=BlurHash占位全链路 (06-29)](project_cover_blurhash_placeholder_2026_06_29.md) — feat/cover-preload-restore未合master
+- [ponytail-audit清理 sprint (06-28)](project_movielistpage_consolidation_2026_06_28.md)
+- [L2抓tag分页DB fallback跨洋 (06-26)](project_crossocean_tag_fallback_2026_06_26.md)
+- [读写分离框架评估定案 (06-26)](project_rwsplit_framework_eval_2026_06_26.md) — ShardingSphere否决;CA读写都主是命门
+- [跨洋读三层防线+8泄漏修复 (06-25)](project_crossocean_read_guardrail_2026_06_25.md)
+- [★缓存缺口+慢查询审计 (06-21)](project_cache_gap_slowquery_audit_2026_06_21.md)
+- [★管理后台掉线 RCA (06-18)](project_admin_logout_redis_snapshot_2026_06_18.md) — skill auth-revocation-failopen
+- [★cableav采集/上线解耦+StockPublisher (06-16)](project_cableav_decouple_stockpublisher_2026_06_16.md)
+- [★data每小时采集修复 (06-15)](project_data_hourly_collection_fix_2026_06_15.md) — ★isolated-pass≠prod-scale
+- [★N9E迁移后监控数据全修复 (06-15)](project_n9e_monitoring_repair_2026_06_15.md) — ★改promql前curl VM实测label
+- [★Phase D split-brain事故+检查点runbook (06-13)](project_phase_d_incident_and_checkpointed_runbook_2026_06_13.md) — PONR后绝不解冻HK
+- [★终态架构定稿=B单加州+EU (06-10)](project_terminal_arch_B_single_california_2026_06_10.md) — failover手工~8min
+- [region HA拓扑分析 (06-08)](project_region_ha_topology_2026_06_08.md) — skill cf-tunnel-edge-region-placement
+- [★跨洋热路径全闭环 (06-06)](project_fullcut_5xx_rca_2026_06_06.md) — skill multiregion-crossocean-hotpath
+- [留存大跌 RCA (06-04)](project_retention_drop_rca_2026_06_04.md) — 前提先fact-check
+- [工具链调研+双账户统一自动同步+GitHub远端 (06-27/07-03)](project_toolchain_realignment_2026_06_27.md) — ~/claude-shared真相源;禁user-scope MCP;claude-shared禁进项目仓
 
 ## reference(load-bearing,常 recall)
-- [爬虫dry-run三铁律(id撞键/mock LLM/备份漂移)](reference_crawler_dryrun_id_collision_mock_llm.md) — 隔离库AUTO_INCREMENT必设高值防R2 id键控对象(cover/playlist)撞生产;采集有强制LLM门用mock破;buyvm-db备份缺列/表
-- [edge nginx 如何用 reach + 覆盖率缺口](reference_edge_reach_coverage_pickp_rpc.md) — edge S入口 short_redirect.lua 5阶段:Step2调admin pick-p RPC(reach-aware)缓存30s→~91-96% reach;~4-9%因edge→admin RPC超时落非reach snapshot(aws-s HK 9.4%最重);admin ops_pick_p_total 100%success看不到(RPC没到达),必edge /__pick_stats(:81)交叉印证;要100%需GeoIP上edge(edge现无GeoIP靠admin解析)是主体工作+漂移风险,补缺口先修RPC可靠性;backlog
-- [前端封面占位/懒加载技术铁律](reference_frontend_image_placeholder_lessons.md) — native lazy不认内层滚动容器(需IO root=scrollRoot);测试必节流网络非只CPU;iOS无navigator.connection;淡入必@error防永久隐身;FULLTEXT表ADD COLUMN只能COPY;blurhash从JPEG档算非webp/avif裸源;BlurHash占位=贴脸感知100%根治
-- [CA读master是正确设计非缺陷](feedback_ca_reads_master_by_design.md) — CA无slave,read池指.222(master)是终态B就近读
-- [Redis超时真根因+shareNativeConnection反模式](reference_redis_sharenativeconn_antipattern.md) — 真因IP库34MB LRANGE双侧HOL分批读;shareNativeConn=false反模式勿试
-- [parked jitter优化(未上线)](reference_parked_jitter_settings_read_cache.md) — patch在memory目录,复活开feature分支单cherry
-- [ca-admin查Redis坑](reference_redis_cli_caadmin_proc_password.md) — 没装redis-cli+密码在/proc非secrets.env
-- [actuator健康端口在:18080](reference_actuator_port_18080.md) — 真健康信号:18080,主端口对未映射假200+body404
-- [Dragonfly高iowait是cosmetic](reference_dragonfly_iowait_cosmetic.md) — io_uring虚高;判真I/O用write_bytes+iostat%util非iowait/PSI
-- [N9E搬ca-monitor+AWS走nw-dev](reference_n9e_ca_monitor_aws_access.md) — N9E在ca-monitor;web节点AWS_PROFILE=nw-dev
-- [N9E dashboard/alert改法+input.exec逃生口](reference_n9e_dashboard_alert_internals.md) — 真值在DB;datasource_queries非NULL;categraf缺插件用input.exec
-- [CF tunnel/LB 全量拓扑](reference_cf_tunnel_lb_topology.md) — account A全tunnel↔LB(tcos-canary geo);guard origin host≤10字符
+- [爬虫dry-run三铁律(id撞键/mock LLM/备份漂移)](reference_crawler_dryrun_id_collision_mock_llm.md) — 隔离库AUTO_INCREMENT必设高值;LLM门用mock破
+- [edge nginx 如何用 reach + 覆盖率缺口](reference_edge_reach_coverage_pickp_rpc.md) — 验证必edge /__pick_stats(:81)交叉;补缺口先修RPC可靠性;backlog
+- [前端封面占位/懒加载技术铁律](reference_frontend_image_placeholder_lessons.md) — IO root=scrollRoot;淡入必@error;blurhash从JPEG算
+- [CA读master是正确设计非缺陷](feedback_ca_reads_master_by_design.md) — read池指.222是终态B就近读
+- [Redis超时真根因+shareNativeConnection反模式](reference_redis_sharenativeconn_antipattern.md) — shareNativeConn=false勿试
+- [parked jitter优化(未上线)](reference_parked_jitter_settings_read_cache.md) — patch在memory目录
+- [ca-admin查Redis坑](reference_redis_cli_caadmin_proc_password.md) — 密码在/proc非secrets.env
+- [actuator健康端口在:18080](reference_actuator_port_18080.md) — 主端口假200+body404
+- [Dragonfly高iowait是cosmetic](reference_dragonfly_iowait_cosmetic.md) — 判真I/O用write_bytes+iostat%util
+- [N9E搬ca-monitor+AWS走nw-dev](reference_n9e_ca_monitor_aws_access.md) — web节点AWS_PROFILE=nw-dev
+- [N9E dashboard/alert改法+input.exec逃生口](reference_n9e_dashboard_alert_internals.md) — 真值在DB
+- [CF tunnel/LB 全量拓扑](reference_cf_tunnel_lb_topology.md) — guard origin host≤10字符
 - [终态CA 网络/EIP/N9E 实证](reference_terminal_ca_infra_eip_nat_n9e.md) — VPC无NAT→public IP是出站
-- [克隆CA web节点SOP](reference_clone_ca_web_node_sop.md) — cloudflared token型CF零改动;categraf ident/EIP配额/clone卫生三坑
-- [CloakBrowser评估=暂不上留后备](reference_cloakbrowser_cf_bypass.md) — 仅Python/JS无Java;FlareSolverr顶不住再上
+- [克隆CA web节点SOP](reference_clone_ca_web_node_sop.md) — categraf ident/EIP配额/clone卫生三坑
+- [CloakBrowser评估=暂不上留后备](reference_cloakbrowser_cf_bypass.md) — FlareSolverr顶不住再上
 - [DoH/B域 apex CNAME→r2.dev=hstspreload(禁删)](reference_doh_domain_apex_cname_hstspreload.md) — load-bearing禁删
-- [DoH池TXT超CF上限→np1多记录](reference_doh_txt_overlength_np1.md) — 154A域pool超CF单条上限
+- [DoH池TXT超CF上限→np1多记录](reference_doh_txt_overlength_np1.md)
 - [运行时构造资源错误live-debug法](reference_frontend_runtime_resource_error_livedebug.md) — 源码grep=0但prod在产=运行时构造
 - [广告位图片渲染统一](reference_snack_adslot_render_unify.md) — image_url=裸hash经cdn
-- [死代码审计 SOP](reference_deadcode_audit_sop.md) — prod零调用≠可删(grep必含scripts/docs/lua全引用面)
+- [死代码审计 SOP](reference_deadcode_audit_sop.md) — grep必含scripts/docs/lua全引用面
 - [零停机峰窗三源金标验证法](reference_zerodowntime_peak_validation_3source.md) — 三源缺一不可
-- [前端部署checkout先npm ci](reference_frontend_deploy_checkout_npm_ci.md) — maven-only部署checkout缺node_modules→deploy-frontend build必失败(但不碰生产,死在build前);tee掩盖脚本真退出码
-- [安全清理分支/worktree 协议](reference_safe_branch_worktree_cleanup_protocol.md) — 删ref/worktree需merged+pushed验
-- [CF immutable+id复用=边缘stale陷阱](reference_cf_immutable_stale_id_reuse.md) — 封面对不上实为CF stale
+- [前端部署checkout先npm ci](reference_frontend_deploy_checkout_npm_ci.md) — tee掩盖真退出码
+- [安全清理分支/worktree 协议](reference_safe_branch_worktree_cleanup_protocol.md) — 删ref需merged+pushed验
+- [CF immutable+id复用=边缘stale陷阱](reference_cf_immutable_stale_id_reuse.md)
 - [CF WAF referer 白名单 skip 多规则](reference_cf_waf_referer_skiplist.md) — 超4096字符=N skip规则
 - [N9E v8 dashboard 真 schema](reference_n9e_v8_dashboard_schema.md) — 唯一权威board_payload非docs
-- [LSP 工具链](reference_lsp_toolchain.md) — 4 LSP在~/.local(jdtls+Lombok/ts/lua/pyright)
-- [域名池 TARGET vs N_xxx](reference_domain_pool_target.md) — TARGET=补购阈值;N_xxx=下发列表需手动sync
-- [分类页路由 /subjects](reference_categories_route.md) — 教育伪装subjects/topics/instructors/lessons
-- [Apple Bot 流量识别](reference_apple_bot_traffic.md) — 17.0.0.0/8=AS714 Apple
-- [Claude Code 配置目录在 ~/.claude-work/](reference_claude_config_dir.md) — claude-work alias
+- [LSP 工具链](reference_lsp_toolchain.md) — 4 LSP在~/.local
+- [域名池 TARGET vs N_xxx](reference_domain_pool_target.md) — N_xxx下发列表需手动sync
+- [分类页路由 /subjects](reference_categories_route.md) — 教育伪装
+- [Apple Bot 流量识别](reference_apple_bot_traffic.md) — 17.0.0.0/8=AS714
+- [Claude Code 配置目录在 ~/.claude-work/](reference_claude_config_dir.md)
 - [skill 验证方法规格 v3](reference_skill_verification_redgreen_v3.md) — RED-GREEN+held-out门控
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
-- [门禁运行期间禁同worktree并行maven/改源码](feedback_no_concurrent_maven_during_gates.md) — clean抽掉门禁classpath→大片NoClassDefFound误判失败;判污染=失败全NoClassDefFound+时间戳与自己mvn重叠;部署jar必须无并行窗口重建
-- [给存量加字段:先部署生成端再回填](feedback_deploy_generating_end_before_backfill.md) — 否则回填完到生成端上线之间窗口持续产缺口;别用周期cleanup任务掩盖部署时序(Owner纠"找根因非事后弥补")
-- [声明式结构 > 过程式脚本](feedback_declarative_over_procedural.md) — Owner纠"搞复杂了"
-- [前端组件按行为边界切非数据切](feedback_component_split_by_behavior_not_data.md) — 同数据不同行为=两个组件,硬合=过度设计(Owner reframe:FeedCard vs MovieCard)
+- [任何时间部署都要Owner拍板,不分峰谷](feedback_owner_approval_all_deploys.md) — 机制层=git-preflight Gate A(OWNER_DEPLOY_APPROVED=1才放行);提前授权也须Owner明说范围
+- [门禁运行期间禁同worktree并行maven/改源码](feedback_no_concurrent_maven_during_gates.md) — 部署jar必须无并行窗口重建
+- [给存量加字段:先部署生成端再回填](feedback_deploy_generating_end_before_backfill.md) — 别用周期cleanup掩盖部署时序
+- [声明式结构 > 过程式脚本](feedback_declarative_over_procedural.md)
+- [前端组件按行为边界切非数据切](feedback_component_split_by_behavior_not_data.md) — FeedCard vs MovieCard
 - [所有新功能走feature分支开发-测试-才合master](feedback_feature_branch_deploy_test_then_merge.md) — master永远可部署基线
-- [web 模块永远第一优先](feedback_web_module_top_priority.md) — web用户前台优先
+- [web 模块永远第一优先](feedback_web_module_top_priority.md)
 - [沟通用词:不用简称能中文就中文](feedback_communication_style.md) — 用户铁律
-- [禁手写工具返回的数字](feedback_no_handwritten_numbers_from_tools.md) — 逐字复制脚本原始输出
-- [引用易变事实回原文核不凭记忆](feedback_verify_not_recall.md) — 设计锚现象不锚机制
-- [指标解读前先验证数据源](feedback_verify_metric_source.md) — 下结论前grep追写入方
-- [实验结论必落档防重复论证](feedback_experiment_conclusions_to_doc.md) — 含被推翻的;sprint落POC-FINDINGS.md
-- [实时性≠准确性](feedback_realtime_vs_accuracy.md) — "不要求实时"≠"不要求准确",禁有损采样
-- [E2E 必须真实浏览器](feedback_e2e_real_browser.md) — 禁curl塞cookie绕前端
-- [CN拨测必用aliyun真浏览器](feedback_cn_probe_aliyun_realbrowser.md) — boce server-side垃圾(3%假vs aliyun99%真)
+- [禁手写工具返回的数字](feedback_no_handwritten_numbers_from_tools.md) — 逐字复制原始输出
+- [引用易变事实回原文核不凭记忆](feedback_verify_not_recall.md)
+- [指标解读前先验证数据源](feedback_verify_metric_source.md) — grep追写入方
+- [实验结论必落档防重复论证](feedback_experiment_conclusions_to_doc.md) — 含被推翻的
+- [实时性≠准确性](feedback_realtime_vs_accuracy.md) — 禁有损采样
+- [E2E 必须真实浏览器](feedback_e2e_real_browser.md) — 禁curl塞cookie
+- [CN拨测必用aliyun真浏览器](feedback_cn_probe_aliyun_realbrowser.md) — boce垃圾
 - [前端验证必须 Safari + Chrome 双引擎](feedback_qa_safari_chrome_dual_engine.md) — Owner铁律
-- [前端 dev server 不可靠](feedback_frontend_deploy_devserver.md) — 前端问题必部署线上验证
+- [前端 dev server 不可靠](feedback_frontend_deploy_devserver.md) — 必部署线上验证
 - [前端部署必走 deploy-frontend.sh](feedback_frontend_deploy_standard_script.md) — 禁手跑npx vite build
-- [Vue scoped CSS 不覆盖 global 同名类](feedback_vue_scoped_vs_global_css.md) — 全局类需:deep或:global
+- [Vue scoped CSS 不覆盖 global 同名类](feedback_vue_scoped_vs_global_css.md) — 需:deep或:global
 - [部署谨慎原则](feedback_deploy_caution.md) — 前端必本地验证后再部署
 - [部署前充分验证](feedback_deploy_caution_v2.md) — 不反复部署试错
-- [部署前必查三项](feedback_deploy_preflight.md) — SQL migration/PageHelper LIMIT/新函数启动链路真调用
+- [部署前必查三项](feedback_deploy_preflight.md) — SQL migration/PageHelper LIMIT/启动链路真调用
 - [部署 SSH 不混 & 和 &&](feedback_deploy_no_concurrent_chain.md) — 纯顺序部署
-- [master cutover事故教训](feedback_master_cutover_incident.md) — 502/503先查DB外(SG/network);回滚必undo fence
-- [ss断言IPv6-mapped坑](feedback_ss_ipv6_mapped_assertion.md) — ss grep漏[::ffff:IP];权威源master侧processlist
-- [迁移必审外部依赖三件套](feedback_migration_external_dependency_audit.md) — ①本体②可达性③IP白名单两层;grep抓plausible-wrong默认值
-- [隔离worktree多agent跨件key格式必漂](feedback_cross_component_key_format_align.md) — canonical单函数两侧+真存储端到端验
-- [worktree Bash cwd 重置](feedback_agent_bash_cwd_reset_worktree.md) — agent Bash cwd每次重置,worktree任务每条cd或绝对路径
-- [服务OOM-kill先dmesg实证根因](feedback_cgroup_oom_diagnosis.md) — 真因常MEMCG cgroup欠配;memory.peak即时验
-- [web高负载判CPU vs IO](feedback_web_load_io_vs_cpu_diagnosis.md) — iowait≤1.3%非IO瓶颈;扩盘救不了CPU
-- [categraf读配置目录所有文件禁留备份](feedback_categraf_config_dir_globs_all.md) — 备份必放目录外;判停采看时间戳前进
-- [长任务防停滞SOP](feedback_long_task_no_stall_sop.md) — until-watcher+CronCreate周期骨干
-- [secrets.env 改动必跟备份 diff 对账](feedback_secrets_env_diff_baseline.md) — cutover RESET致cron停采事故
-- [repo nginx.conf是node-managed存死upstream](feedback_repo_nginx_conf_stale_upstream.md) — 只patch行禁整份覆盖;Gate6 curl:80/api
-- [本地 admin 禁用定时任务](feedback_local_admin.md) — 连生产会误触健康检查告警
+- [master cutover事故教训](feedback_master_cutover_incident.md) — 502/503先查DB外;回滚必undo fence
+- [ss断言IPv6-mapped坑](feedback_ss_ipv6_mapped_assertion.md) — ss grep漏[::ffff:IP]
+- [迁移必审外部依赖三件套](feedback_migration_external_dependency_audit.md) — 本体/可达性/IP白名单
+- [隔离worktree多agent跨件key格式必漂](feedback_cross_component_key_format_align.md) — canonical单函数两侧
+- [worktree Bash cwd 重置](feedback_agent_bash_cwd_reset_worktree.md) — 每条cd或绝对路径
+- [服务OOM-kill先dmesg实证根因](feedback_cgroup_oom_diagnosis.md) — 常MEMCG cgroup欠配
+- [web高负载判CPU vs IO](feedback_web_load_io_vs_cpu_diagnosis.md) — 扩盘救不了CPU
+- [categraf读配置目录所有文件禁留备份](feedback_categraf_config_dir_globs_all.md) — 备份放目录外
+- [长任务防停滞SOP](feedback_long_task_no_stall_sop.md) — until-watcher+CronCreate骨干
+- [secrets.env 改动必跟备份 diff 对账](feedback_secrets_env_diff_baseline.md)
+- [repo nginx.conf是node-managed存死upstream](feedback_repo_nginx_conf_stale_upstream.md) — 只patch行禁整份覆盖
+- [本地 admin 禁用定时任务](feedback_local_admin.md) — 连生产误触告警
 - [百美金级月成本不作决策约束](feedback_cost_threshold.md) — 反脆弱优先
-- [HE 同族多 IP 不 race](feedback_he_same_family_no_race.md) — 多源冗余必跨族
-- [所有CF DNS记录TTL一律Auto](feedback_cf_dns_ttl_auto.md) — ttl:1不写死
-- [CF API 必先查文档](feedback_cf_api_docs.md) — 调用前必查官方文档
+- [HE 同族多 IP 不 race](feedback_he_same_family_no_race.md) — 冗余必跨族
+- [所有CF DNS记录TTL一律Auto](feedback_cf_dns_ttl_auto.md)
+- [CF API 必先查文档](feedback_cf_api_docs.md)
 - [guard.lua 白名单维护](feedback_guard_whitelist.md) — 改API路径必同步白名单
-- [Lua require 链失败=进程级 500 雪崩](feedback_lua_require_chain.md) — lua模块缺文件被缓存
-- [env 命名 nginx.conf vs secrets.env 必同名](feedback_env_naming_consistency.md) — os.getenv找不到=空字符串
-- [deploy-backend.sh 不做 git pull](reference_deploy_backend_no_pull.md) — 直接部署会静默build工作树
-- [本地构建部署+多会话master踩坑](feedback_perf_rca_deploy_gotchas_2026_06_16.md) — -DskipTests被pom无视;多会话master
-- [共享master竞态:push被拒≠工作丢失](feedback_shared_master_race_push_reject.md) — 判到远端用merge-base --is-ancestor origin/master,别读竞态的共享master ref(曾误判工作丢失)
-- [不push本地构建部署一路坑](feedback_local_build_deploy_no_push_pitfalls.md) — 新节点scp+cp到dist
+- [Lua require 链失败=进程级 500 雪崩](feedback_lua_require_chain.md) — 缺文件被缓存
+- [env 命名 nginx.conf vs secrets.env 必同名](feedback_env_naming_consistency.md) — 找不到=空字符串
+- [deploy-backend.sh 不做 git pull](reference_deploy_backend_no_pull.md) — 会静默build工作树
+- [本地构建部署+多会话master踩坑](feedback_perf_rca_deploy_gotchas_2026_06_16.md) — -DskipTests被pom无视
+- [共享master竞态:push被拒≠工作丢失](feedback_shared_master_race_push_reject.md) — 用merge-base --is-ancestor判
+- [不push本地构建部署一路坑](feedback_local_build_deploy_no_push_pitfalls.md)
 - [清理分支必查能力级 supersession](feedback_branch_cleanup_supersession_check.md) — 代码不在master≠未合活价值
-- [多agent生产ops三铁律](feedback_multiagent_prod_ops_auth_backstop.md) — auth-backstop等
+- [多agent生产ops三铁律](feedback_multiagent_prod_ops_auth_backstop.md)
 - [多agent团队必须互相沟通质疑](feedback_agent_team_crossfire.md) — Owner铁律
-- [蓝军/审计 agent 方法论](feedback_audit_methodology.md) — 派审计/蓝军必守10条
-- [清登记≠清实体 + 关团队SOP](feedback_registry_vs_entity_cleanup.md) — 必验实体非裸信登记
-- [admin axios 响应 unwrap 双兜底](feedback_admin_axios_response_unwrap.md) — ResponseEntity<DTO> latent bug
-- [如何获得 P9 级表现](feedback_p9_prompting_style.md) — 开场6项模板+P9触发条件
-- [禁 headless 对别账户跑 claude CLI](feedback_no_headless_claude_cli_other_account.md) — CLAUDE_CONFIG_DIR别账户会回写凭证清空=登出
+- [蓝军/审计 agent 方法论](feedback_audit_methodology.md) — 必守10条
+- [清登记≠清实体 + 关团队SOP](feedback_registry_vs_entity_cleanup.md)
+- [admin axios 响应 unwrap 双兜底](feedback_admin_axios_response_unwrap.md)
+- [如何获得 P9 级表现](feedback_p9_prompting_style.md)
+- [禁 headless 对别账户跑 claude CLI](feedback_no_headless_claude_cli_other_account.md) — 回写凭证=登出
+- [gh CLI 未安装+本项目不走 PR 流程](feedback_no_gh_cli_no_pr_workflow.md) — 别装gh别建PR
+- [共享checkout写操作前必认HEAD属主](feedback_shared_checkout_write_ops_owner_check.md) — master更新永远--ff-only

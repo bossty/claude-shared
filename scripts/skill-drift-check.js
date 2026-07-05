@@ -5,7 +5,10 @@
  * 替代 CLAUDE.md 人肉约定「home 改必须同步 plugin」。 */
 const fs = require('fs'), path = require('path');
 const SRC = path.join(__dirname, '..', 'skills');                 // 真相源 (flat .md)
-const PLUGIN = '/home/test/newworld/claude-plugin/newworld/skills'; // 分发副本 (dir/SKILL.md)
+// 分发副本 (dir/SKILL.md)：优先当前仓库(precommit 从 repo/worktree 根调用,写死主 checkout 会对
+// worktree 提交产生假阳性——worktree 副本已同步但主 checkout 还是旧的,2026-07-05 实踩);兜底主 checkout。
+const cwdPlugin = path.join(process.cwd(), 'claude-plugin', 'newworld', 'skills');
+const PLUGIN = fs.existsSync(cwdPlugin) ? cwdPlugin : '/home/test/newworld/claude-plugin/newworld/skills';
 const norm = s => s.replace(/\r\n/g, '\n').replace(/\s+$/g, '');   // 容忍行尾差异
 let drift = [];
 const srcSkills = fs.readdirSync(SRC).filter(f => f.endsWith('.md'));

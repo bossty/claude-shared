@@ -23,6 +23,7 @@ description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界
 - **撞版本号/同名文件 = reconcile 不硬 rebase**:派生件(plugin/分发副本)从 truth source 在**新 master 上重新派生**(确定性、零冲突),别在版本号/同名 skill 上手解 merge 冲突。
 - **别碰别会话的未提交 WIP**(`M`/`??` 但不是你改的):不 commit、不 revert、不"顺手清理"(承 CLAUDE.md「不碰你没创建的」);要提醒它就留独立 untracked note 文件。
 - **引用代码做结论前确认它在 master 不是 WIP**:`git ls-files <path>` / `git show origin/master:<path>` 核它真已提交,**别把别会话未提交的树内改动当 production 引用**(实测踩过:把未提交的 `recentRywExecutor` 当 prod 写进结论,被独立审揪出事实错)。
+- **共享 checkout 上任何写操作(含 `git checkout -- <file>` "清残留"/`rm` untracked/merge)前必 `git symbolic-ref HEAD` 认属主**——别会话可能已切走分支(07-05 实踩:以为在 master 清残留,实际在别会话活跃分支动手,且抹掉的"残留"是功能性覆盖层 settings.json 致 hook 失效)。未提交 M 文件先验内容归属(与哪个分支 byte 级一致)再动;共享 checkout 上更新 master 永远 `--ff-only` 不用裸 merge(这次靠它免于在别人分支造合并提交)。
 
 ## 2 — 分支策略
 - feature/* 新功能、fix/* 修复,**从 `origin/master` 开**(先 `git fetch`)。
@@ -38,9 +39,11 @@ description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界
 - **master 串行合并 + 合前重基重测(人肉 merge queue)**:一次只落一个;每分支合入前必并最新 master 在合并态重测;前一个合入后,后续未合分支必须重新并新 master 重测(禁用旧测结果合)。防 semantic conflict(A 测 main、B 测 main,合后 main+A+B 谁都没测→炸)。
 - 中期可引入 merge queue/CI gate(前置=先有 CI 可跑的绿判据);现状人工+Owner+蓝军=人肉 CI gate。
 - commit 粒度:单 commit=最小可独立 revert 单元(不破 build);message 精确量化(承 newworld-commit-message-precision)。
+- **合并后收尾清单(2026-07-05 Owner 定"合并即清理")**:①删远端分支 `git push origin --delete <br>` ②删本地 `git branch -d`(拒绝时用能力级校验 `git merge-base --is-ancestor <br> origin/master` 通过才 `-D`) ③删 worktree+`git worktree prune`。历史查询走 `git log --merges/--first-parent`(--no-ff merge commit 永久保留分支名+全部提交),死分支 ref 只会让别会话误判 supersession。未合活分支(等授权窗口/长命 track)保留。
 
 ## 5 — keep-main-green
 - master 可部署性靠**自动化测试门**;人工/Owner 授权只决定"发不发"不替代"代码对不对"。
+- **pre-push 本地 CI 按 diff 路径分级(2026-07-05)**:docs/*.md/claude-*/sql→秒过;frontend-*→只对应 vitest;后端叶子模块→`mvn -pl <集合> -am test`;common/根 pom/未知路径→**fail-closed 全量**。判据只看 diff 内容不看分支名;`GATE_DECIDE_ONLY=1` 预演决策;`SKIP_CI_LOCAL=1` 应急全跳(需 Owner);push 命令给足 timeout(全量约 7 分钟)或 run_in_background。
 - master 坏了**立即 revert 回最后绿态**(非现场修),fixing the build 最高优先级。
 - 评审/授权必须快路径(慢评审逼出大批量合并=DORA 点名头号障碍);Owner offline 期分支保活+每日 sync master,上线批量授权前各分支重并 master 重测。
 
