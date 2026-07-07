@@ -23,10 +23,11 @@ YAML 按前台 CSS 亲核值重写（2 倍图）+ 新增 hint 字段；`GET /api
 ## 部署铁律（PLAN.md §部署注意）
 **必须先铺 /etc/newworld/snack-slot-spec.yml 再（或同时）部署 admin jar**（蓝军#2：顺序反会新端点下发旧值）；旧 jar 读新 yml 安全（未知 hint 键被忽略）。前端走 deploy-frontend.sh。
 
-## 07-06 追加（Owner 两指令 + 新发现）
-- **命名以 mobile 为准 + 单图共用单一建议尺寸**：分支 `fix/snack-slot-mobile-naming`（`289552b5`，测试全绿已 push，待授权合并）——v44 SQL 改 19 槽 name（仅电脑端的 5 槽显式标注）+ yaml rec_w/rec_h + 提示改「建议上传:w×h(手机/电脑共用一张图)」。部署序：v44 SQL→yml→admin jar→fe-admin。
-- **★p01/z05 全部 8 条广告 encrypted_image_url=NULL → 线上一直显示「更多精彩内容›」兜底卡非真实素材**（SnackFallbackCard 文案；生产 DB 实查）。修复=跑 `POST /api/v1/upload/ad-reencrypt-all` 回填，待 Owner 令。
-- **Owner 改版方向**：p01/z05 品牌卡后续改「电影卡样式(图+下方文字)或纯图」——落地时 yaml 改 640×360+hint 一行事，顺带根治蓝军 MAJOR#1。
+## 07-06 第二批（命名+单尺寸+电影卡改版）已合 master `98d05b1e` 并部署验证完成（03:39-03:42 HKT）
+- v44 SQL（19 槽 name 移动端视角，5 槽标'仅电脑端显示'）已跑生产 DB 并断言验证；yml（rec_w/rec_h 单一建议尺寸+影片卡 hint）已铺；admin jar `20260706-034016-98d05b1e`（recW 真身核过）；fe-web×6 + fe-admin 已上，deployed/frontend-web+frontend-admin tag=`98d05b1e`。
+- **p01/z05 电影卡样式（Owner 拍板）**：Snack08 187→36 行，委托 Snack04 网格（16:9 图+下方标题）；合并撞 F11 安全批（同文件冲突），安全属性经 Snack04 safeClickUrl 委托继承已亲核。双引擎四象限线上实拍验证（chromium/webkit × PC/mobile：PC 4 列/移动 2 列/z05 移动 0 渲染 ✓，截图 scratchpad/shots/）。
+- **★真相修正：p01/z05 等 21 条广告 image_url 是空串/NULL——从来没上传过素材**（此前误判'旧图没跑加密迁移'：`IS NOT NULL` 把空串当有图，教训=判有图必须同时排除空串）。reencrypt-all 回填 total=0 无从回填；**待办=运营在管理后台补传 640×360 素材**（提示已准确）。z02 的 24 条有图正常。
+- 蓝军 MAJOR#1（z05/p01 估算值）随 16:9 硬约束根治。
 
 ## 待 Owner 拍板（FINDINGS §三.B）
 B1 上传管道按规格 downscale（省带宽，动生产管道独立 sprint）；B2 前台广告图假 lazy（mount 即全量解密，z02 首屏 24 张并发）；B3 Snack02/05 解密前 CLS；B4 Snack07 窄屏溢出裁切；B5 clean-env 种子缺 component_code；z05/p01 共用估算值是否拆分（蓝军 MAJOR#1）。
