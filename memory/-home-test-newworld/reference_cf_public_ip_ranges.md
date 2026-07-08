@@ -36,3 +36,6 @@ metadata:
 - 不要硬编码 IP 段到代码（CF 偶尔更新），用 cron + 拉 cloudflare.com/ips-v6/v4 → 写 shared_dict / nginx geo file
 - newworld guard.lua 增量：top of file 加 IP-in-CIDR check helper，对每请求 `if ip in CF_RANGES then return end`
 - 验证：CF 自己探测的请求绕过 rate-limit；真用户 IP（中国移动 240e: / 中国电信 223.x 等）仍走 rate-limit
+
+---
+**并入（原 reference_cf_ipv6.md，2026-07-07）**：CF 回源可走 IPv6；原档所涉 UFW web-01/02 主机已退役，通用事实=放行 CF 段须含 IPv6 段。

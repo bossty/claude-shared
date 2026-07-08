@@ -4,6 +4,8 @@ description: S 域名 DNS round-robin 某节点 100% 500 时，CF API 删该 IP 
 type: reference
 originSessionId: fe398321-ee74-4942-9f53-cfbb4ac5e1d8
 ---
+
+> **⚠️ 2026-07-07 状态标注**：token 查询主机 172.31.27.200 已死，token 现经 nw-toolbox/nw-cf 获取；摘除/回填法本身仍有效。
 S 域名（4 个：swiftgroup26.cc / mintlab26.cc / peak-rank.cc / boldpoint395.com）在 CF 灰云 DNS-only 多 IP 轮询：3 IP 池 = 67.230.161.24 (usca-1) / 67.230.182.105 (usca-2) / 95.40.168.207 (aws-s)。某节点出问题用户体感 ~33% 概率 500。
 
 **止血**：CF API 从 4 个 zone 各删该 IP 的 A 记录 → 流量只走剩余 2 IP → 公网 500 立即归零

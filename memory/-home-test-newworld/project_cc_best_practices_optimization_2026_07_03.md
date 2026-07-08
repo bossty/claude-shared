@@ -28,3 +28,19 @@ metadata:
 **方法论**：蓝军对瘦身做"丢失面审计"（每条被删事实必须在承载文档 grep 实证存在）抓出 1 MAJOR——CLAUDE.md 指针指向的 AWS_HK_DEPLOYMENT.md 实际不含 BuyVM relay 机制/S-entry 主机（细节只在未索引 memory 里）→ 回填后指针才名副其实。**教训：指针化下沉时必验"指针目标真含该信息"，不能只验目标文件存在。**
 
 相关：[[doc-governance]] [[skill-verification-redgreen-v3]]
+
+
+---
+**并入摘要（原 project_cc_bestpractices_alignment.md，2026-07-07 memory 整理；全文在 git 历史 claude-shared）**
+---
+name: project_cc_bestpractices_alignment
+description: 2026-06-17 按 claude.com《large codebases best practices》对齐项目;6 commits 落地子目录 CLAUDE.md 分层+.lsp.json+claude-plugin 入仓;附 multi-agent 协作教训
+metadata: 
+  node_type: memory
+  type: project
+  originSessionId: 809750ae-eb58-4a24-b9ed-42e9ab00244c
+---
+
+2026-06-17 sprint：把项目对齐 https://claude.com/blog/how-claude-code-works-in-large-codebases。owner 反复强调"不停滞/任何增删改不排斥/团队完成后 lead 别停滞"。
+
+**6 commits（master）**：`890894b6` 6 模块子目录 CLAUDE.md 分层(common/web/admin/data+frontend-web/admin,lean 18-24行,根档加指针) → `033245d3` `.lsp.json`+Java25 LSP 金标 → `cc95e8e7`/`6

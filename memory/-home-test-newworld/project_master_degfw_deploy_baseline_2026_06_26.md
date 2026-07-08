@@ -7,6 +7,8 @@ metadata:
   originSessionId: 6eecae1c-95e0-4231-a84e-4ccc79979b6c
 ---
 
+> **⚠️ 2026-07-07 状态标注**：gfw/master 双 track 机制已随 06-29 GFW 并 master 退役；保留 gauge landmine 教训。
+
 > ★★ 已被取代（2026-06-29）：master 已重新整合 GFW（`--no-ff` merge `5ed76306` + 零停机部署），**不再 GFW-free**；`gfw-breakthrough-arch` 已退役。本档"master=GFW-free / gfw=track 双线分叉"模型**作废**。现状见 [[project_gfw_consolidation_2026_06_29]]。（下文保留作历史。）
 
 **2026-06-26 结构手术：GFW W3 从 master 撤出，master 回归 GFW-free 可直接部署。**

@@ -7,6 +7,8 @@ metadata:
   originSessionId: bad9e248-e91e-4f20-b940-5c3872e06b28
 ---
 
+> **⚠️ 2026-07-07 状态标注**：批1三分支已合 master e78214ea 并全部署验证，「待授权勿部署」段作废。
+
 > ✅ **已闭环（07-06）**：三上帝类拆分分支全合 master `e78214ea`（detached --no-ff）+ 全部署验证（web×6 deployed/web=e78214ea / ca-admin 手动 swap 基线 20260706-085346-e78214ea / fe-web×6 deployed/frontend-web=e78214ea，swiper12 生产双引擎四象限 hero 渲染 0 错）。以下为拆分实施记录。
 
 全项目审计 deferred 上帝类拆分第三件 **B9 OpsController**（1318 行）第一批完成实现+验证，**未合 master、未部署**（Owner 明示等指令）。
@@ -28,3 +30,20 @@ metadata:
 **本会话累计 3 个上帝类拆分分支待 Owner 授权合 master**：[[project_b7_configcontroller_split_2026_07_06]](web) + [[project_b5_cf_http_client_split_2026_07_06]](admin CfHttpClient) + 本 B9(admin PPoolService)。
 
 **剩余 deferred**：B9 的 Z13PenaltyService+完整 PickPService(需先前者)；B5 的 7 资源域拆分；B6 DomainLifecycleService 2259(★B14 测试级联雷)；B8 爬虫 2088。DESIGN 全文 `docs/sprint/2026-07-06-b9-pickp-service/DESIGN.md`。
+
+
+---
+**并入摘要（原 project_b5_cf_http_client_split_2026_07_06.md，2026-07-07 memory 整理；全文在 git 历史 claude-shared）**
+**★踩坑教训**：
+- **抽出的 public service 方法触发 arch/依赖分析**：telegramAlertService 起初误判为传输层独占删掉→编译报 8 处 resource 方法 cannot find symbol，实为资源域告警也用→必须保留（grep 用点先于删字段）。stringRedisTemplate 才是传输独占(0 resource 用)可删。
+- **@InjectMocks + 两个同类型 mock 会注反**（B7 同款）：CfHttpClient 内部无此问题(构造器只 cfApiMetrics)，但测试注入 mock httpClient 到传输层——两个测试文件（CloudflareApiServiceTest + CloudflareApiServiceBranchCoverageTest）的 setUp 都要改：构造真实 CfHttpClient→注入 mock httpClient/retrySleeper 到它→setField 到 cfService.cfHttpClient（@Spy 范式，端到端测试经真实传输层跑）。**漏改第二个测试文件→25 errors**（一个 god class 常有多个测试文件，全 grep）。
+- **传输测试符号迁移**：test 引用 `CloudflareApiService.CfTransientException/CF_REQUEST_TIMEOUT/classifyOp/CURRENT_CF_ACCOUNT` + 反射 private handleCfResponse/retrySleeper/computeBackoff → 全部改指 CfHttpClient；handleResponse 转 public 后反射可简化直调。sed/perl 批量改 + 分类 invoke 目标(cfService vs cfHttpClient)。
+**剩余 deferred**（下批候选）：B5 的 7 资源域 service 拆分(WAF/DoH/DNS/Zone/Worker/R2/Tunnel，各自 DESIGN)；B6 DomainLifecycleService 2259 行(★注意 B14 测试级联雷)；B8 爬虫 2088；B9 OpsController。DESIGN 全文 `docs/sprint/2026-07-06-b5-cf-http-client/DESIGN.md`。
+
+---
+**并入摘要（原 project_b7_configcontroller_split_2026_07_06.md，2026-07-07 memory 整理；全文在 git 历史 claude-shared）**
+**★踩坑教训**：
+- **抽出的 public service 方法会触发 arch 护栏**（原 package-private 逃过）：ConfigController.resolveFirstVisitDate 原 package-private 不触 MasterWriteRoutingArchTest（targets public）；抽为 service public API 后被抓。修法=标 `@MasterWriteAllowed(理由)`（master 写全在 statsAsyncExecutor.execute 异步内，名副其实）。连带更新 RegionReadRoutingArchTest 的 ALLOWLIST（假阳：master 字段访问是写、读走 replica）+ exemptionAnnotations_snapshot 快照 的 FQN（旧 controller→新 service）。
+- **@InjectMocks + 两个同类型 mock（master+replica StringRedisTemplate）会注反**：构造器注入按类型匹配，Mockito 无法可靠按名匹配 → FVD 测试 4 个 Redis 用例假失败（result null）。修法=setUp 手动 `new FvdFirstVisitService(...)` 显式按参数位置传。
+- **端点级集成测试保活**：ConfigControllerTest 端点测试（migrate/anchor/N_PP 走 mockMvc）用 ReflectionTestUtils 注入**真实** service 实例（复用同批 mock，@Spy 范式）→ 现有 stub 全部继续有效，集成覆盖不丢。
+**★独立审计线索（未处理）**：发现两套发散 `fvd:` 前缀实现——本 Z16 迁移门（SHA256(salt|ip|ua|vid)）vs 既存 `FvdRedisFallbackService`（Wave Stats V7 C-5，sha256(ip|ua)），平行冗余，本批不合并只记录。

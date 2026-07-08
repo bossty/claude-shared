@@ -7,6 +7,8 @@ metadata:
   originSessionId: 3e6b0318-9157-4777-b86a-35bd2c0bb0d5
 ---
 
+> **⚠️ 2026-07-07 状态标注**：deploy-backend.sh 已不存在（现 deploy-web.sh，本地 build 模型）；仍有效的通则=验 jar sha 非只信部署脚本输出。
+
 `scripts/deploy-backend.sh <module>` 的步骤是 `[0/8]` SQL 校验 → `[1/8]` mvn package → … → `[7/8]` restart → `[8/8]` 验证。**没有 git pull 步**——它 build 的是目标服务器工作树**当前状态**的代码。
 
 若服务器落后 origin（很常见，aws-data 经常落后几个 commit），直接跑 deploy-backend.sh 会**静默 build 旧代码**：部署"成功"、`[8/8] OK`、服务 active，但跑的是旧逻辑。

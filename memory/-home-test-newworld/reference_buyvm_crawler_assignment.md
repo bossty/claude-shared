@@ -4,6 +4,8 @@ description: 哪台 BuyVM 跑哪个源，systemd drop-in 配置位置
 type: reference
 originSessionId: f4505e91-c990-4d2b-9f8a-0e74e2ca4ce8
 ---
+
+> **⚠️ 2026-07-07 状态标注**：buyvm-web-01 已退役、backfill 转 web-02（见 terminal 档），分工表按此校正。
 ## 分工
 
 | 服务器 | profile | 资源 | 负责源 |

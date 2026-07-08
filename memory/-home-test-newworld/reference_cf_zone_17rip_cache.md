@@ -7,6 +7,8 @@ metadata:
   originSessionId: d1ce72a8-731d-43b9-a768-2729ffc096b7
 ---
 
+> **⚠️ 2026-07-07 状态标注**：文中示例 DB 主机 172.31.27.200 已退役；账号模型/Browser TTL 结论仍有效。
+
 **CF 分组:5 个逻辑组、只有 4 个 CF 账号**。逻辑组 A/B/C/P/S 配置在 `system_config`(`CF_API_TOKEN_{A,B,C,P}` + `CF_TOKEN_S`〔注意 S 是 `CF_TOKEN_S`、不是 `CF_API_TOKEN_S` —— 命名不一致〕/ `CF_ACCOUNT_ID_*` / `CF_TUNNEL_ID_*`;`CF_TOKEN_S` 另存 secrets.env)。**关键:P 和 S 共用同一个 CF 账号 `9a1d66324e3d3375e6288f949e49190b`**;A/B/C 各自独立账号。因此 P-scoped token (`CF_API_TOKEN_P`) 能枚举到该账号全部 31 个 zone(= 20 个 P 域 + 11 个 S 域)。`CloudflareApiService.getTokenByAccount` 印证:account `S` 用 `CF_TOKEN_S`、缺失则 fallback 到 `CF_API_TOKEN_P`(只因同账号才成立)。`domain` 表 `category`/`cf_account` 严格区分(A70 / B18 / C4 / P20 / S11)—— **P 与 S 是独立业务组**(S = wildcard 短链渠道入口域、grey-cloud;P = P 域池),CF 账号层共址不代表业务上是一个组。
 
 主站 `17.rip` = group A(zone `c160c3791b0eacc1db7f3690b286aa8c`)。DB 查询 `mysql -h172.31.27.200 -unewworld`(密码 secrets.env `DB_PASSWORD`);CF API 全程在 aws-data 服务器侧跑、token 不落地。

@@ -7,6 +7,8 @@ metadata:
   originSessionId: b2187ab6-4c03-4c80-b561-f114570e7bc2
 ---
 
+> **⚠️ 2026-07-07 状态标注**：宿主 aws-monitor(16.163.94.193) 已退役，N9E 现在 ca-monitor；链路机制仍可用。
+
 # N9E 告警链路（5/12 用户视角探活补完）
 
 ## 链路图

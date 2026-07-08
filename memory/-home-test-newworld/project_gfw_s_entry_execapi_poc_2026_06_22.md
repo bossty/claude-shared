@@ -7,6 +7,8 @@ metadata:
   originSessionId: 019a2513-f7cc-4759-ad55-7522771891e2
 ---
 
+> **⚠️ 2026-07-07 状态标注**：「禁合master(master须GFW-free)」已废止：GFW 2026-06-29 已并 master 单基线(5ed76306)。
+
 2026-06-22 GFW突破架构「S入口=execute-api/Lambda(非CF AWS IP)」活体POC全验证通过。实证全文 `docs/sprint/2026-06-21-reachhint-tri-probe/POC-FINDINGS.md`(分支 `gfw-breakthrough-arch`,未合master)。
 
 **核心实证结论(已落档,直接采信勿重证)**:

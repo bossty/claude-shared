@@ -7,6 +7,8 @@ metadata:
   originSessionId: db5768b1-6308-46eb-845a-adea5ee5851e
 ---
 
+> **⚠️ 2026-07-07 状态标注**：两批已全部署(f0c98761/98d05b1e)，「待授权」段作废。
+
 # 广告系统全链路审计 + 尺寸提示单真相源化（2026-07-06）
 
 **已合 master `f0c98761` 并四线部署完成（07-06 02:32-02:45 HKT，Owner 授权 force-peak）**：线0 yml铺ca-admin(md5核对+.bak-pre-f0c98761备份)→线1 web×6→线2 fe-web×6→线3 admin jar `20260706-024449-f0c98761`→线4 fe-admin。验证：admin 启动0 ERROR+SnackSlotSpecService 17槽加载OK；jar真身含slot-specs路由+hint字段(python zipfile)；/slot-specs super-JWT探针返{"encrypted":true}=路由真mapped；fe-admin dist含"建议尺寸：PC"新串；deployed/web+frontend-web+frontend-admin 三tag=f0c98761；eu-web-01 236条ERROR=02:38:54重启秒已知Lettuce drain模式,5min后0条。部署日志 scratchpad/deploy-all-f0c98761.log。上一会话03:00定时部署已按Owner令取消(脚本改名.CANCELLED,进程已死)。

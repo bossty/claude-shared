@@ -191,3 +191,11 @@ owner 反复反诘 "域名数量爆炸式增长 + 用户均衡 + Argo 全开/部
 ## 详细 sprint report
 
 `/home/test/newworld/docs/sprint/2026-05-29-peak-perf-debate/sprint-report.md` + `/phase4-n9e-trace-evidence.md`
+
+
+---
+**并入摘要（原 fe_perf_phase1_2026_05_29.md，2026-07-07 memory 整理；全文在 git 历史 claude-shared）**
+- **PRIORITY 1**: Edge-perf investigates why CN traffic 0% to HKG. May need:
+- **PRIORITY 2**: R2 cdn-failover weight by user's likely cfPop, not just HRW
+- **PRIORITY 3**: SW precache top 5 JS chunks (main entry + Home + Player + Vue+Vendor)
+- **PRIORITY 4**: Cache Reserve for /assets/*.js on main zone

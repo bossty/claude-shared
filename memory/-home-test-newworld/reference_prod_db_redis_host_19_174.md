@@ -7,6 +7,8 @@ metadata:
   originSessionId: d040d32b-2e98-4c95-acc0-220cd4d6d6b9
 ---
 
+> **⚠️ 2026-07-07 状态标注**：三个 HK IP(.19.174/.16.161/.27.200) 终态架构 B 后全死；终态 DB=172.34.1.222/Redis=172.34.1.128。保留价值=查 /proc/environ 铁律 + 硬编码 IP latent bug（仓库 ~10 脚本仍中招）。
+
 # prod DB/Redis 真值 = 172.31.19.174（aws-db-poc 重建后）
 
 **真值（2026-05-31 实测）**：prod MySQL + Dragonfly 同机在 **`172.31.19.174`**（aws-db-poc，PTR `ip-172-31-19-174.ap-east-1.compute.internal`）。admin 进程 `DB_HOST=REDIS_HOST=172.31.19.174`；`.16.161:3306` 已死（closed）、`.19.174:3306` OPEN。

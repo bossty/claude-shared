@@ -7,6 +7,8 @@ metadata:
   originSessionId: 64b5f5d1-9590-4971-9f5b-8d2e351a83eb
 ---
 
+> **⚠️ 2026-07-07 状态标注**：「US 需俄勒冈+加州双 region」结论已被终态架构 B(06-10 单加州+EU)取代，OR 已退役。
+
 # region HA 拓扑分析（2026-06-08，fullcut-5xx 后续）
 
 **起因**：region 当前各单节点单 AZ（US us-west-2a / EU eu-central-1a，均 m5.xlarge）。要补 ×2 HA，分析同 AZ vs 跨 AZ + LZ/WZ。

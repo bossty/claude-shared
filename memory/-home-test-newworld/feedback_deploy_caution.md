@@ -13,3 +13,5 @@ type: feedback
 - 一次部署解决问题，避免反复部署
 - CF Purge Everything 极其谨慎，优先用精确 URL purge
 - 部署后如有问题，优先回滚而不是继续修改
+
+**另一案例（原 feedback_deploy_caution_v2 合并入，2026-07-07）：** Playwright 并发与 HLS 403 问题上多次「改→部署→失败→再改」循环令 Owner 非常不满——修 bug 先用日志/本地调试/真实浏览器彻底定位根因，确认方案可行后一次性修复部署。

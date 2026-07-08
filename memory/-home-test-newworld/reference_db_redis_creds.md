@@ -4,6 +4,8 @@ description: aws-data:/etc/newworld/secrets.env 存所有生产凭证（需 sudo
 type: reference
 originSessionId: a1281538-3ef1-45f9-abfb-2b6348aec877
 ---
+
+> **⚠️ 2026-07-07 状态标注**：凭证入口 aws-data/172.31.27.200 已退役，现用 ca 节点 /proc/environ（见 reference_redis_cli_caadmin_proc_password）。
 凭证位置：`ssh aws-data 'sudo cat /etc/newworld/secrets.env'`
 
 主要键：

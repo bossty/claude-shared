@@ -7,6 +7,8 @@ metadata:
   originSessionId: 64b5f5d1-9590-4971-9f5b-8d2e351a83eb
 ---
 
+> **⚠️ 2026-07-07 状态标注**：A-HK-tunnel「主站 origin」角色已随终态架构 B 退役；dnsv106 canary 部分仍有效。
+
 2026-06-10 CF API 实证测绘（account A=50cbd453…149cc0113d7c62b91b6b3d2a，Cnbestmovie）。
 
 ## Tunnel（account A，名↔ID↔connector）

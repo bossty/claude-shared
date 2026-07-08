@@ -7,6 +7,8 @@ metadata:
   originSessionId: 73e919fd-8c72-4aa2-8753-31dde1bdee8e
 ---
 
+> **⚠️ 2026-07-07 状态标注**：主机 aws-db-poc(.19.174) 已退役；DATETIME/TIMESTAMP 与混合 TZ 存量数据教训持久有效。
+
 2026-05-29 owner 拍板「所有 OS / 库 / 项目统一香港时区」。根因：三层里只有 **MySQL 服务器（aws-db-poc, 172.31.19.174）OS=UTC 掉队**，导致 DB 默认 `created_at`(UTC) vs 应用 `LocalDateTime.now()`(HK) 差 8h（由 domain.purchased_at 上线暴露）。aws-data/web-01/web-02 OS+JVM 早已 HK；JDBC url 已 `serverTimezone=Asia/Hong_Kong`。
 
 **已做（aws-db-poc，全程不重启、可回滚）**：
