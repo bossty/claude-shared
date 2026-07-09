@@ -1,8 +1,4 @@
 {
-  "env": {
-    "DISPLAY": ":99",
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
   "permissions": {
     "allow": [
       "Bash(*)",
@@ -48,22 +44,9 @@
       "PushNotification(*)",
       "NotebookEdit(*)",
       "ShareOnboardingGuide(*)"
-    ]
-  },
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true,
-    "chrome-devtools-mcp@claude-plugins-official": true,
-    "context-mode@context-mode": true,
-    "superpowers@claude-plugins-official": true,
-    "context7@claude-plugins-official": true,
-    "jdtls-lsp@claude-plugins-official": false,
-    "pyright-lsp@claude-plugins-official": false,
-    "typescript-lsp@claude-plugins-official": false,
-    "lua-lsp@claude-plugins-official": false,
-    "playwright@claude-plugins-official": true,
-    "skill-creator@claude-plugins-official": true,
-    "claude-api@anthropic-agent-skills": true,
-    "newworld@newworld-marketplace": false
+    ],
+    "deny": [],
+    "ask": []
   },
   "extraKnownMarketplaces": {
     "pua-skills": {
@@ -79,12 +62,6 @@
         "url": "https://github.com/affaan-m/everything-claude-code.git"
       },
       "autoUpdate": false
-    },
-    "context-mode": {
-      "source": {
-        "source": "github",
-        "repo": "mksglu/context-mode"
-      }
     },
     "anthropic-agent-skills": {
       "source": {
@@ -284,5 +261,25 @@
     "everything-claude-code__playwright",
     "everything-claude-code__github",
     "everything-claude-code__memory"
-  ]
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "sh /home/test/.claude/statusline-command.sh"
+  },
+  "tui": "default",
+  "skipWorkflowUsageWarning": true,
+  "theme": "light",
+  "preferredNotifChannel": "terminal_bell",
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "voiceEnabled": true,
+  "model": "claude-fable-5[1m]",
+  "worktree": {
+    "baseRef": "fresh"
+  },
+  "effortLevel": "low",
+  "skipDangerousModePermissionPrompt": true,
+  "editorMode": "normal",
+  "switchModelsOnFlag": false,
+  "teammateMode": "in-process"
 }

@@ -1,34 +1,39 @@
 <!-- 索引仅留：近期工作 + 全部 feedback 铁律 + load-bearing reference。已完结一次性 sprint topic 文件在盘,文件搜索 recall,不进索引。07-05 压缩:hook 一行要点,已完结旧条目仅留标题,细节看 topic 文件。 -->
 
 ## 近期工作 / 进行中
-- [★全量文档整理 合master`f3cb6042` (07-07)](project_docs_consolidation_2026_07_07.md) — docs 58M/1648md→17M/1179md;★教训=文档整理只要碰到任
-- [★★统一域名失败转移 P0 SW-primary逃生 已上线+验证(合`cf56c01b`,线上基线`fd80377e`) (07-06/07)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — ✅**P0已部署生产(07-07 deploy-frontend.sh web×
-- [★nw-cap hook排查定案+三类deny硬拦+日志 合`f0a01c43` (07-07)](project_nwcap_hook_deny_upgrade_2026_07_07.md) — subagent里hook本就生效(现场实验实证),06-19后转录不记hook执行是假象
-- [★★domain-health去SCAN(桶化索引集替代12.45M键全库SCAN,生产849/hr根治)+flag灰度 实现+审查完成待错峰部署 (07-06)](project_z13_domain_health_no_scan_2026_07_06.md) — ⚠️未合master未部署(Owner定实现现做部署等错峰);分支fix/z13-domain-health-no-scan@97ba91b0;写端web DomainErrorController追加coalescingBuffer.addMember索引+读端admin domainHealth flag(OPS_Z13_INDEX_ENABLED默认false→SCAN逐字节,true→SMEMBERS cur∪cur-1);★config-tuning 11078abc只治ChannelSaturationTask未覆盖此端点(独立)
-- [★★审计deferred三上帝类拆分批2(B6 SDomainProvisioning/B9 Z13Penalty/B9完整PickPService)+swiper... subagent-driven 全合master`afc7710a`+ca-admin部署验证 (07-06晚)](project_b9_pickp_full_split_2026_07_06.md) — ✅三分支合master`afc7710a`(B6独立+PickPService-
-- [★★前端可维护性审计:23Task覆盖治理+收敛 合master`5e28106c`+四象限部署验证 文档`3745344c` (07-06)](project_frontend_maintainability_audit_2026_07_06.md) — CSS/JS互相覆盖担忧→结论有序分层非面条(真实冲突仅3CSS+1JS)
-- [★广告上传报错Data is not in GIF format根治+编辑下拉隐藏退役槽+l03横幅收敛+11槽尺寸复核 合`39f551fc`全部署 (07-06)](project_snack_gif_upload_and_slot_fixes_2026_07_06.md) — ①根因=上传路径盲信文件名/content-type的ext送gif2webp,
-- [★★审计deferred三上帝类拆分(B7 ConfigController/B5 CfHttpClient/B9 PPoolService)+swiper12 全合master`e78214ea`+全部署验证 (07-06)](project_b9_ppool_service_split_2026_07_06.md) — ✅三分支合master`e78214ea`(detached --no-ff,M
-- [★★审计deferred批1:B1 domain_health_log外科定案(z7=权威,生产实证ewma空表+agent休眠)合`b7a8c244`+swiper 11→12.2.0清critical CVE合`a1e7f464` (07-06)](project_audit_deferred_batch1_swiper12_2026_07_06.md) — ⚠️fe-web部署待搭车(线上仍v11构建,下次前端部署带上+线上四象限补验)
-- [★★广告位收敛19→13(PC/mobile共用一套以mobile为主)+yml单尺寸rec+纯图卡+命名v45 (07-06)](project_snack_slot_consolidation_2026_07_06.md) — 终态master`3467e0c5`全部署(收敛+单尺寸+纯图卡+命名v45+4
-- [★★广告(Snack)审计:尺寸提示三套矛盾数→YAML单真相源+/slot-specs+上传软校验 (07-06)](project_snack_slot_size_hints_2026_07_06.md) — 两批全部署:f0c98761四线(02:45)+98d05b1e五步(03:42
-- [★★CRAWL-RUN-STALL{cableav}误报triage→真P1:P2-35 SSRF传参错致HLS全断~18h+修复已部署 (07-05)](project_crawl_stall_alert_ssrf_hls_outage_2026_07_05.md) — getRequestUri()是origin-form须getUri();已部署
-- [★★07-05并发部署互相覆盖事故:收敛+三防线机制化(Gate M互斥/Gate A授权/sha路径)](project_concurrent_deploy_incident_2026_07_05.md) — 终态web×6=9ba95945+deployed/web tag首次登记
-- [★★全组件参数调优审计+P1全落地+快照尖峰四次修正后根治(df_snapshot_format=false,6s→0.13s) (07-05/06)](project_config_tuning_audit_2026_07_05.md) — 去SCAN已合master`11078abc`但非尖峰真因;★教训=RCA逐层现
-- [★★渠道归因/统计审计全闭环:2P1+8P2+留存A修复上线+次晨业务证据全过 (07-05/06)](project_channel_attribution_audit_2026_07_05.md) — arrivals断70天回归(07-05日报10渠道618)+基线生效(watchMid=4非默认);★待拍板=基线换源
-- [★★Redis废弃键审计+清理+view-count HDEL根治+观看数秒级展示方案②全闭环 (07-05)](project_redis_stale_keys_cleanup_2026_07_05.md) — crawler-failcount-ttl合`a31f2fda`;★秒级展示合`
-- [★部署git pre-flight五道门+deployed/*基线tag合`38aef9d6` (07-05)](project_deploy_git_preflight_2026_07_05.md) — 待办=CI按diff分级+recently-watched上线待拍板
+- [★UDF B4 blockType gauge(CF整封告警)开发完成待Owner门 (07-08)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — worktree `/home/test/worktree-udf-b4` 分支feature/udf-b4-reach-blocktype-gauge@49f165c8;gauge+单测`c7ace4cf`+告警SQL/runbook`d51f2a10`+merge master后admin 2187测试全绿;待Owner=部署ca-admin→建规则disabled=1→观测24h定阈启用→--no-ff合master;核心实证=CF整封表现为tcp_reset非ip_block
+- [★★会话token成本审计:真成本cache_read~70%(旧减噪瞄错tool_result 10%靶)→修nw-token-report+复活28skill自动触发+委派skill/大Read hook 合`3882495c`/`787b52f1` (07-08)](project_token_cost_audit_2026_07_08.md) — 机制vs纪律地图,真吊纪律只剩/clear分段;skill真相源=平铺claude-shared/skills非plugin;>5min空窗缓存重建;方法论[[feedback_measure_real_cost_before_optimizing]]
+- [★统一域名失败转移 P0逃生复核缺陷修复 已上线(合`df6c8fa5`,fe-web`3dfea327`,web×6) (07-08)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — 四路复核后修M1(探即跳候选构造)/ccTLD护栏/kill-switch/clobber竞态;E2E PASS+部署后四象限4/4;backlog=iOS真机门/ccTLD后端断言;版本核验坑见[[reference_postdeploy_version_verify_cf_swr_stale]]
+- [★统一域名失败转移 escapeRoots前端消费+三flag已激活 (07-08)](project_udf_backend_half_2026_07_08.md) — SW逃生用escapeRoots.roots有序取代池原序;ESCAPE_ROOTS/A_POOL_SOFT_SORT已翻true,软排序reach有序live(top_changed 9→629,四象限8/8);融合早已live非dark;follow-up=ConfigController:210-211 anchor/migrateTo未归一rootHost(不活跃)/ca-web-04 journald 0B
+- [★★统一域名失败转移 后端半5Task 已上线波1(web×6+admin,合`3a632119`) (07-08)](project_udf_backend_half_2026_07_08.md) — ReachFusion保真+rum_n+A软排序两阶段+pick-p迁web+P→P渠道池+escapeRoots契约;波2待ops CF hostname;follow-up=A侧rootHost未归一
+- [★全量文档整理 合`f3cb6042` (07-07)](project_docs_consolidation_2026_07_07.md) — docs 58M→17M
+- [★★统一域名失败转移 P0 SW-primary逃生 已上线(合`cf56c01b`,基线`fd80377e`) (07-06/07)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — P0已部署生产
+- [★nw-cap hook排查+三类deny硬拦+日志 合`f0a01c43` (07-07)](project_nwcap_hook_deny_upgrade_2026_07_07.md) — subagent里hook本就生效(实证)
+- [★★domain-health去SCAN(桶化索引替代12.45M键全库SCAN)+flag灰度 待错峰部署 (07-06)](project_z13_domain_health_no_scan_2026_07_06.md) — ⚠️未合master未部署;分支fix/z13-domain-health-no-scan@97ba91b0;flag OPS_Z13_INDEX_ENABLED默认false
+- [★★审计deferred拆分批2(B6/B9 Z13Penalty/PickPService)+swiper 合`afc7710a`+部署验证 (07-06)](project_b9_pickp_full_split_2026_07_06.md) — 已上线
+- [★★前端可维护性审计:23Task 合`5e28106c`+四象限验证 (07-06)](project_frontend_maintainability_audit_2026_07_06.md) — 结论有序分层非面条
+- [★广告上传GIF格式报错根治+退役槽隐藏+11槽复核 合`39f551fc` (07-06)](project_snack_gif_upload_and_slot_fixes_2026_07_06.md) — 根因=盲信文件名ext送gif2webp
+- [★★审计deferred拆分(B7 ConfigController/B5 CfHttpClient/B9 PPoolService)+swiper12 合`e78214ea` (07-06)](project_b9_ppool_service_split_2026_07_06.md) — 已上线
+- [★★审计deferred批1:B1 domain_health_log(z7权威)合`b7a8c244`+swiper11→12.2.0清CVE合`a1e7f464` (07-06)](project_audit_deferred_batch1_swiper12_2026_07_06.md) — ⚠️fe-web部署待搭车
+- [★★广告位收敛19→13+单尺寸+纯图卡+命名v45 合`3467e0c5` (07-06)](project_snack_slot_consolidation_2026_07_06.md) — 全部署
+- [★★广告尺寸提示三套矛盾→YAML单真相源+/slot-specs+软校验 (07-06)](project_snack_slot_size_hints_2026_07_06.md) — 两批全部署
+- [★★CRAWL-STALL误报→真P1:P2-35 SSRF传参错致HLS全断18h 已修 (07-05)](project_crawl_stall_alert_ssrf_hls_outage_2026_07_05.md) — getRequestUri须getUri
+- [★★07-05并发部署互相覆盖事故:三防线机制化(Gate M/Gate A/sha) (07-05)](project_concurrent_deploy_incident_2026_07_05.md) — web×6=9ba95945+deployed/web tag
+- [★★全组件参数调优审计+P1落地+快照尖峰根治(df_snapshot_format=false,6s→0.13s) (07-05)](project_config_tuning_audit_2026_07_05.md) — ★RCA逐层现;去SCAN`11078abc`非尖峰真因
+- [★★渠道归因/统计审计闭环:2P1+8P2+留存A修复 (07-05)](project_channel_attribution_audit_2026_07_05.md) — ★待拍板=基线换源
+- [★★Redis废弃键清理+view-count HDEL+观看数秒级展示 合`a31f2fda` (07-05)](project_redis_stale_keys_cleanup_2026_07_05.md)
+- [★部署git pre-flight五道门+deployed/*基线tag 合`38aef9d6` (07-05)](project_deploy_git_preflight_2026_07_05.md) — 待办=CI按diff分级
 - [★context-mode A/B证伪停用+headroom否决+nw-cap hook上线 (07-05)](project_context_mode_retire_headroom_eval_2026_07_05.md) — ★评估上下文工具必真A/B+哨兵存活测试
-- [★★前端错误TOP分析+Z13修复收口(合`27cc9a15`) (07-05)](project_frontend_error_top_analysis_z13_fix_2026_07_05.md) — ★guard.lua是PCRE非Lua pattern
-- [★★07-05首屏占位LCP优化A/B/C合master部署验证](project_firstscreen_placeholder_lcp_2026_07_05.md) — ★VO加字段×共享缓存×rolling混布=旧节点500
-- [★★07-05告警triage→监控统一N9E批0-4落地(合`ab28cb5f`)+批5待办](project_alert_triage_rule42_disk_n9e_2026_07_05.md) — ★data爬虫零告警=最大盲区
-- [★★全代码审计(~113条)完整收口 07-04/05](project_full_code_audit_closure_2026_07_04.md) — 低价值6项修+测过待搭便车部署;误报19条归档suppressions(`5ab28b6e`)
-- [★★OOM监控改造+心跳误报+告警口径 合`1550cff3` (07-04)](project_oom_monitor_categraf_2026_07_04.md) — ★接采集需求先查categraf已启用插件
-- [★Kanav健康核查+封面bug修复 (07-04)](project_kanav_health_cover_fix_2026_07_04.md) — 已修(db45133a未合,生产0部);review-gate需reviewStatus解耦;删4家爬虫(5c9c31d9未合)
-- [★★爬虫批量收敛(B4):9家迁基类+4家排除 (07-04)](project_crawler_convergence_batch_2026_07_04.md) — 分支fe958322未部署;★dry-run逮到基类回归;AUTO_INC=90000000
-- [★MovieService上帝类拆分(B5)合`172bd4d0`+部署验证 (07-04)](project_movieservice_god_class_split_2026_07_04.md) — ★fact-check否决HeaderPageVO
-- [全代码审计修复 SESSION-STATE 接力档 (07-03)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — FINDINGS.md在feat/recently-watched未合
-- [★★GFW A池RUM接入reach:grid火测PASS+ON观测 (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — 分支worktree-gfw-reach-apool-rum未合master
+- [★★前端错误TOP分析+Z13修复(合`27cc9a15`) (07-05)](project_frontend_error_top_analysis_z13_fix_2026_07_05.md) — ★guard.lua是PCRE非Lua pattern
+- [★★07-05首屏占位LCP优化A/B/C 部署验证](project_firstscreen_placeholder_lcp_2026_07_05.md) — ★VO加字段×共享缓存×rolling=旧节点500
+- [★★07-05告警triage→监控统一N9E批0-4(合`ab28cb5f`)+批5待办](project_alert_triage_rule42_disk_n9e_2026_07_05.md) — ★data爬虫零告警=最大盲区
+- [★★全代码审计(~113条)收口 07-04/05](project_full_code_audit_closure_2026_07_04.md) — 误报19条归档suppressions(`5ab28b6e`)
+- [★★OOM监控改造+心跳误报+告警口径 合`1550cff3` (07-04)](project_oom_monitor_categraf_2026_07_04.md) — ★接采集先查categraf已启用插件
+- [★Kanav健康核查+封面bug修复 (07-04)](project_kanav_health_cover_fix_2026_07_04.md) — db45133a未合生产0部;删4家爬虫5c9c31d9未合
+- [★★爬虫批量收敛(B4):9家迁基类+4家排除 (07-04)](project_crawler_convergence_batch_2026_07_04.md) — 分支fe958322未部署;AUTO_INC=90000000
+- [★MovieService上帝类拆分(B5)合`172bd4d0` (07-04)](project_movieservice_god_class_split_2026_07_04.md) — ★fact-check否决HeaderPageVO
+- [全代码审计修复 SESSION-STATE (07-03)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — FINDINGS.md在feat/recently-watched未合
+- [★★GFW A池RUM接入reach:grid火测PASS (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — 分支worktree-gfw-reach-apool-rum未合master
 - [★封面贴脸根治=BlurHash占位全链路 (06-29)](project_cover_blurhash_placeholder_2026_06_29.md) — feat/cover-preload-restore未合master
 
 ## reference(load-bearing,常 recall)
@@ -55,6 +60,7 @@
 - [死代码审计 SOP](reference_deadcode_audit_sop.md) — grep必含scripts/docs/lua全引用面
 - [零停机峰窗三源金标验证法](reference_zerodowntime_peak_validation_3source.md) — 三源缺一不可
 - [前端部署checkout先npm ci](reference_frontend_deploy_checkout_npm_ci.md) — tee掩盖真退出码
+- [部署后版本核验:CF边缘SWR裸curl读旧版假阴](reference_postdeploy_version_verify_cf_swr_stale.md) — 版本核验用浏览器no-store/直读节点文件,别裸curl
 - [安全清理分支/worktree 协议](reference_safe_branch_worktree_cleanup_protocol.md) — 删ref需merged+pushed验
 - [CF immutable+id复用=边缘stale陷阱](reference_cf_immutable_stale_id_reuse.md)
 - [CF WAF referer 白名单 skip 多规则](reference_cf_waf_referer_skiplist.md) — 超4096字符=N skip规则
@@ -63,11 +69,13 @@
 - [域名池 TARGET vs N_xxx](reference_domain_pool_target.md) — N_xxx下发列表需手动sync
 - [分类页路由 /subjects](reference_categories_route.md) — 教育伪装
 - [Apple Bot 流量识别](reference_apple_bot_traffic.md) — 17.0.0.0/8=AS714
+- [CN三网国际出口路由分化:电信→EU/移动联通→CA](reference_cn_isp_international_routing_split.md) — per-node telecom=0(CA)/unicom=0(EU)是真实路由非bug
 - [Claude Code 配置目录在 ~/.claude-work/](reference_claude_config_dir.md)
 - [skill 验证方法规格 v3](reference_skill_verification_redgreen_v3.md) — RED-GREEN+held-out门控
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
+- [优化成本前先测真实成本结构+机制兜底判断](feedback_measure_real_cost_before_optimizing.md) — 按message.id去重看cache_read累计,别被观测工具瞄错靶;列在清单的skill≠自动触发
 - [domain-health是12.45M键SCAN慢端点smoke禁连发](feedback_domain_health_scan_hammering.md) — 连发耗尽Lettuce连接池致pick-p饥饿+线程满告警
 - [任何时间部署都要Owner拍板,不分峰谷](feedback_owner_approval_all_deploys.md) — 机制层=git-preflight Gate A(OWNER_DEPLOY_APPROVED=1才放行)
 - [门禁运行期间禁同worktree并行maven/改源码](feedback_no_concurrent_maven_during_gates.md) — 部署jar必须无并行窗口重建
@@ -79,6 +87,7 @@
 - [沟通用词:不用简称能中文就中文](feedback_communication_style.md) — 用户铁律
 - [禁手写工具返回的数字](feedback_no_handwritten_numbers_from_tools.md) — 逐字复制原始输出
 - [引用易变事实回原文核不凭记忆](feedback_verify_not_recall.md)
+- [声明部署行为中性/flag off前必查生产DB真值](feedback_verify_live_flag_value_not_code_default.md) — 代码默认≠生产真值,灰度门常被运维翻开;ops查DB才逮住批A"中性"是错的
 - [指标解读前先验证数据源](feedback_verify_metric_source.md) — grep追写入方
 - [实验结论必落档防重复论证](feedback_experiment_conclusions_to_doc.md) — 含被推翻的
 - [实时性≠准确性](feedback_realtime_vs_accuracy.md) — 禁有损采样

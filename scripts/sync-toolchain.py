@@ -6,9 +6,11 @@
      (只加缺失 key,绝不改已有值 —— 账户已声明的值永远优先,与 sync-settings 语义一致)
   2. apply : 把 shared.json 灌回两账户(同样 setdefault 语义,私有 key 不动)
 
-共享域(harvest+apply): enabledPlugins / permissions.allow / extraKnownMarketplaces /
-                        skillOverrides / disabledMcpjsonServers
-只 apply 不 harvest: env(shared.json 里人工 curated,防账户私有 env 互串)
+共享域(harvest+apply): settings.json 全部顶层键(2026-07-08 Owner 定"除账户ID全共享";
+                        账户身份在 .credentials.json/.claude.json,不在 settings,红线不碰)
+2026-07-08 起 enabledPlugins / env 移交 /etc/claude-code/managed-settings.json 托管
+(对所有账户强制生效、优先级最高),本脚本不再同步这两键。改 plugin 启停/共享 env
+一律 sudo 改 managed-settings.json。
 
 私有 key 永不碰: model / effortLevel / hooks / theme / tui / statusLine / notif 类 /
                 skipDangerousModePermissionPrompt 等一切不在共享域列表里的顶层 key。
@@ -31,7 +33,7 @@ def log(*a):
 def load(p): return json.load(open(p))
 
 def save_if_changed(path, new, old_raw):
-    new_raw = json.dumps(new, ensure_ascii=False, indent=2)
+    new_raw = json.dumps(new, ensure_ascii=False, indent=2, sort_keys=True)
     if new_raw == old_raw:
         return False
     if DRY:
@@ -54,54 +56,58 @@ def list_union(dst, src):
     for x in (src or []):
         if x not in dst: dst.append(x)
 
-REGISTRY = '/home/test/.claude-work/plugins/installed_plugins.json'  # 两账户共享(A 的 plugins 目录 symlink 到 B)
-
-def installed_set():
-    """已安装 plugin 集合;登记文件读不到/为空时返回 None(此时跳过修剪,fail-open)。"""
-    try:
-        keys = set(load(REGISTRY).get('plugins', {}).keys())
-        return keys or None
-    except Exception:
-        return None
-
 def main():
-    shared_raw = json.dumps(load(SHARED), ensure_ascii=False, indent=2)
+    shared_raw = json.dumps(load(SHARED), ensure_ascii=False, indent=2, sort_keys=True)
     shared = json.loads(shared_raw)
     accts = {}
     for p in ACCOUNTS:
-        raw = json.dumps(load(p), ensure_ascii=False, indent=2)
+        raw = json.dumps(load(p), ensure_ascii=False, indent=2, sort_keys=True)
         accts[p] = (json.loads(raw), raw)
 
-    # ---- 0. prune: 以共享安装登记为准,清掉"已卸载但残留"的 enabledPlugins key ----
-    #        (让卸载也能双向传播;登记读不到时 fail-open 不修剪)
-    inst = installed_set()
-    if inst:
-        for s in [shared] + [s for s, _ in accts.values()]:
-            ep = s.get('enabledPlugins') or {}
-            for k in [k for k in ep if k not in inst]:
-                del ep[k]
+    # ---- 0. 清理: enabledPlugins/env 已移交 managed-settings 托管,擦掉残留防混淆 ----
+    for s in [shared] + [s for s, _ in accts.values()]:
+        s.pop('enabledPlugins', None)
+        s.pop('env', None)
 
-    # ---- 1. harvest: 账户 → shared(只加缺失) ----
+    # ---- 1. harvest: 账户 → shared(只加缺失;2026-07-08 起全键同步,Owner 定"除账户ID全共享") ----
+    #      账户身份不在 settings.json(在 .credentials.json/.claude.json,红线不碰),故可全键。
+    #      语义不变:标量 setdefault、dict 补缺失 key、list 并集;已声明的值永远优先,不覆盖。
+    def merge_into(dst, src):
+        for k, v in (src or {}).items():
+            if k in ('enabledPlugins', 'env'):
+                continue  # managed-settings 托管
+            if isinstance(v, dict):
+                dict_add_missing(dst.setdefault(k, {}), v)
+            elif isinstance(v, list):
+                list_union(dst.setdefault(k, []), v)
+            elif v is not None:
+                dst.setdefault(k, v)
+
     for p, (s, _) in accts.items():
-        dict_add_missing(shared.setdefault('enabledPlugins', {}), s.get('enabledPlugins'))
-        list_union(shared.setdefault('permissions', {}).setdefault('allow', []),
-                   (s.get('permissions') or {}).get('allow'))
-        dict_add_missing(shared.setdefault('extraKnownMarketplaces', {}), s.get('extraKnownMarketplaces'))
-        dict_add_missing(shared.setdefault('skillOverrides', {}), s.get('skillOverrides'))
-        list_union(shared.setdefault('disabledMcpjsonServers', []), s.get('disabledMcpjsonServers'))
+        merge_into(shared, s)
+        # permissions 二层特判:allow/deny 列表并集(merge_into 一层 dict 补缺失不够)
+        for lk in ('allow', 'deny', 'ask'):
+            list_union(shared.setdefault('permissions', {}).setdefault(lk, []),
+                       (s.get('permissions') or {}).get(lk))
 
     changed = save_if_changed(SHARED, shared, shared_raw)
     if changed: log(f'✓ harvest → {SHARED}')
 
-    # ---- 2. apply: shared → 各账户(setdefault,私有值不动) ----
+    # ---- 2. apply: shared → 各账户(已声明标量不动;list/嵌套 list 直接采用 shared 规范序,
+    #      保证两账户字节级一致——harvest 已并集,赋值无损) ----
+    def apply_canonical(dst, src):
+        for k, v in (src or {}).items():
+            if k in ('enabledPlugins', 'env'):
+                continue
+            if isinstance(v, dict):
+                apply_canonical(dst.setdefault(k, {}), v)
+            elif isinstance(v, list):
+                dst[k] = list(v)
+            elif v is not None:
+                dst.setdefault(k, v)
+
     for p, (s, raw) in accts.items():
-        s.setdefault('env', {}).update(shared.get('env', {}))
-        dict_add_missing(s.setdefault('enabledPlugins', {}), shared.get('enabledPlugins'))
-        list_union(s.setdefault('permissions', {}).setdefault('allow', []),
-                   shared.get('permissions', {}).get('allow'))
-        dict_add_missing(s.setdefault('extraKnownMarketplaces', {}), shared.get('extraKnownMarketplaces'))
-        dict_add_missing(s.setdefault('skillOverrides', {}), shared.get('skillOverrides'))
-        list_union(s.setdefault('disabledMcpjsonServers', []), shared.get('disabledMcpjsonServers'))
+        apply_canonical(s, shared)
         if save_if_changed(p, s, raw):
             log(f'✓ apply → {p}')
 

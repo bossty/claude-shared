@@ -56,6 +56,16 @@ repo 根：`/home/test/newworld/.luarc.json`（已 commit 在 master，commit `0
 
 这是工作量更大的 API 迁移，单开 sprint 处理。
 
+## ⚠️ jdtls "init timeout / Connection closed" 真根因 = workspace 快照损坏（2026-07-08 实证）
+
+现象：Java LSP 首次调用 `timed out after 120000ms during initialization`，之后全 `Connection is closed`；TS LSP 同时正常。**不是慢启动、不是没装、不是"待重开"**——干净 workspace 冷启动实测仅 **62s**（Maven import ~10s 到 ServiceReady + 首查触发全量索引 ~51s；`.m2` 已 warm 无下载），本可命中 harness 的 120s 上限。
+
+- **-data workspace 位置**：`~/.cache/jdtls/jdtls-<sha1(basename(cwd))>`。cwd=`/home/test/newworld` → basename=`newworld` → **`jdtls-b12d9c7d622fbf7c4d1ed40a3b13ada1ab342c5a`**（只取目录名 hash，不是全路径；各子模块另有各自 hash，互不复用）。harness 调 LSP 时 cwd=项目根、无 `-data` 参数，jdtls.py 自动算同一 hash 目录 → 复用。
+- **损坏根因**：上次 jdtls 被非正常终止（SIGKILL），`.metadata` 残留未保存 `.snap` 快照 → 下次开 OSGi `core.resources` bundle 激活失败（日志 `ObjectNotFoundException: Tree element ... not found` → `Application error`）→ 进程连 `initialize` 都不回 → harness 120s 超时。
+- **修复（无需改任何 config）**：`rm -rf ~/.cache/jdtls/jdtls-b12d9c7d...` 删掉损坏 workspace，下次 LSP 调用会 fresh 重建 ~62s。想零等待就先预热：cwd=项目根跑一次 jdtls 驱动到 ServiceReady 再走 LSP `shutdown`/`exit` **优雅退出**（切忌 SIGKILL，否则又留损坏快照）。预热脚本可发 initialize+initialized+workspace/symbol 三帧。
+- **poisoned session 坑**：一旦某会话首次调用吃了那次 120s shutdown 超时，harness 的 jdtls LSP 客户端会进 start→shutdown 重启循环、耗尽 `.lsp.json` 的 `maxRestarts:3` → 本会话后续全 `Internal error`/`connection disposed`，**即使底层 workspace 已修好也要重开会话**才能重置客户端。所以修完 workspace 后需新会话验证。
+- `.lsp.json` 的 `startupTimeout:600000` **无效**——harness 有独立 120s init 硬上限，不读这个字段。
+
 ## 快速验证 LSP 是否还在工作
 
 ```
