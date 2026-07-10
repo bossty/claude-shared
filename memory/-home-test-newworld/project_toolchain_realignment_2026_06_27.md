@@ -33,7 +33,8 @@ metadata:
 
 ## 2026-07-03 plugin 清理 + 远端 + 双账户全自动同步（推翻两项旧决策,Owner 拍板）
 - **卸 4 plugin**（两账户）:code-review/code-simplifier（被内置 /review /code-review /simplify 能力级取代）、everything-claude-code、pua（hook 自门控后壳无用）;frontend-design Owner 定保留;释放~290MB;A 按铁律没跑 CLI 纯文件改。
-- **远端**:GitHub 私有 `bossty/claude-shared`（remote=origin,**推翻 6-27"无远端"决策**）;backup cron 每日 sync+commit+push+镜像+快照,端到端已验。**claude-shared 禁进 newworld 项目仓**:分支切换会让 symlink 真相源随 checkout 时间旅行 + auto-backup 污染 master 纪律 + 部署把 memory 带上生产节点。
+- **远端**:GitHub 私有 `bossty/claude-shared`（remote=origin,**推翻 6-27"无远端"决策**）;backup cron 每日 sync+commit+push+镜像+快照,端到端已验。
+- **★2026-07-09 Owner 订正:claude-shared 入 newworld 项目仓 = 有意设计（非技术债）**——诉求=换环境直接 `clone` 主 repo 即带全套 skill+memory,无需另建仓/额外基建;由 pre-commit 闸门0（`sync-claude-shared.sh`+`git add -A claude-shared`）自动镜像入库。原"禁进项目仓"三条理由重估:①分支切换真相源时间旅行——真相源物理在 home `~/claude-shared`（symlink 目标）、drift-check 读 home，repo 内仅镜像副本,切分支不动真相源,实际影响≈0;②auto-backup 污染 master commit diff——真实但轻微（仅 memory/skill 真更新时）,Owner 接受为备份代价;③**部署把 memory 带上生产节点——实测不成立**：deploy-web.sh 只 scp 单 jar、deploy-frontend.sh 只 tar dist.new,build-artifact-only 从不整 repo checkout 到生产，memory 到不了生产机（⚠️仅当将来改成整 repo 部署时此风险复活,届时需重评）。故入仓代价≈commit 噪声,换来跨环境导入便利,Owner 拍板成立。
 - **双账户全自动同步四层**:①skills/memory=symlink 即时（原有）②**plugin/marketplace 装卸=`~/.claude/plugins` symlink→B 的 plugins**（B 物理主,A 原目录留 `.pre-symlink-20260703`,**推翻 6-27"plugin 实体不能 symlink"结论**——installPath 绝对路径经 symlink 照样解析）③MCP 全经 plugin/项目 .mcp.json（两账户零 user-scope MCP,**别用 `claude mcp add --scope user`**=落账户私有 .claude.json 同步不到）④settings 共享域=`scripts/sync-toolchain.py` 双向 harvest+apply,两账户 SessionStart hook+每日 cron 触发,下次开会话生效。
 - 同步语义:已声明值账户优先（context-mode A关B开这类故意差异保留）、只补缺失 key、卸载经共享安装登记 prune 传播（登记读不到 fail-open）、model/effortLevel/hooks/通知类私有键永不同步;幂等,变更才写盘,bak 只留3份。
 - ★坑:`settings/shared.json` 的 enabledPlugins 曾陈旧（还写着已卸插件=true）,不剔会被 sync 回灌——**动 plugin 后 shared.json 必须同步动**（现 sync-toolchain prune 自动兜）。

@@ -46,6 +46,22 @@ description: 主线程 token 成本纪律——何时把活派给 subagent、主
 - **subagent 返回给编排者、不是给 Owner**：要**致密、电报式、只给结论+证据路径/数字**，别写给 Owner 看的详述散文——省回主线程的 token（少喂 cache_read）。
 - Owner-facing 的主线程汇报仍守 `newworld-communication-style`（详细中文、证据齐），**不压缩**。
 
+## fan-out 前缀缓存：**别**先单发暖缓存（2026-07-09 A/B 对照实验证伪该做法）
+
+> 「fan-out 前先单发一个先锋 agent 暖缓存」**是错的，别做**。冷启动探针对照（两组间隔 >5min 使前缀 TTL 过期）：
+>
+> | 组 | 协议 | 首个 agent | 其余 agent |
+> |---|---|---|---|
+> | A | 一条消息**齐发** 3 个 | create 38,306 / read **0** | ×2：create 21,350 / read **16,956** |
+> | B | 先锋**等返回**，再齐发 3 个 | create 38,305 / read **0** | ×3：create 21,350 / read **16,956** |
+>
+> 两组结构完全相同：**harness 派发 subagent 有天然串行间隔（实测相差 1 秒即够建好缓存），齐发的后来者自动命中前缀**。"齐发导致大家一起 miss"不成立。专为暖缓存多开一个不干活的先锋，反而白付一次 ~38K 冷启动。
+
+- 真实机制（无需任何协议，自动发生）：subagent 启动前缀（CLAUDE.md+MEMORY.md+skill 清单）各 agent 相同 → 一批 fan-out 中**第一个** miss 并建缓存（~38K create），**其余全部命中**（read ~17K，自建部分降到 ~21K）。
+- **唯一可控杠杆 = 别让 subagent 前缀断档超 5 分钟**：prompt cache 默认 5min TTL，窗口内命中免费滚动续期（官方 `ttl:"1h"` 需 API 层设置，Claude Code harness 不暴露该开关）。断档后下一个 agent 全价重建 ~38K。故同一批 fan-out **尽量连续发完**，别在 agent 之间插入长时间主线程工作。
+- 推论：省前缀成本的真办法是**少开不必要的 agent**（见上节「何时别派」），不是调度技巧。
+- 方法论教训：`cache_read=0` 的观察有多种成因（TTL 过期、前缀变更、批次首个），**只凭观察分布就写铁律会写反**——必须做 A/B 对照。
+
 ## 模型经济
 
 - 6 个 SDLC agent 已 `model: sonnet`。**通用 Explore/general-purpose 默认继承主模型（贵档）**——机械执行类委派**显式传 `model: sonnet`**（读/搜/跑测试几乎无质量损失）；蓝军 reviewer / 架构决策 / 难实现才用 opus/更高。

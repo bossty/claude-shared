@@ -3,7 +3,8 @@
 > 建立：2026-06-27 toolchain-realignment sprint（`~/newworld/docs/sprint/2026-06-27-toolchain-realignment/`）。
 > 解决：`~/.claude`（账户 A）与 `~/.claude-work`（账户 B）的 skills/memory/规范漂移（A 34 skill/91 memory，B 0 skill/143 memory，重叠 <1%）。
 > 机制：本 git repo 为唯一真相源，两账户 symlink 引入 → 改一处两账户同步 → git 记录每次演进。
-> 远端：**GitHub 私有仓库 `bossty/claude-shared`（2026-07-03 Owner 定,推翻此前"无远端"）**,由 backup cron 每日推送;主项目 repo 不承载本仓（多会话分支切换会让真相源随分支漂移 + 部署到生产节点扩大暴露面）。
+> 远端：**GitHub 私有仓库 `bossty/claude-shared`（2026-07-03 Owner 定,推翻此前"无远端"）**,由 backup cron 每日推送（此为异地备份主渠道）。
+> **主项目 repo（newworld）亦承载本仓一份镜像副本（2026-07-09 Owner 订正,推翻此前"不承载"）**：诉求=换环境直接 `clone` 主 repo 即带全套 skill+memory,无需另建仓;由 newworld pre-commit 闸门0 自动 `sync-claude-shared.sh`+`git add`。原"不承载"顾虑重估——真相源物理在 home `~/claude-shared`（repo 内仅镜像、drift-check 读 home,切分支不动真相源）;部署 build-artifact-only（只传 jar/dist,不整 repo checkout）故 memory 到不了生产节点。代价仅 memory 更新时的 commit diff 噪声,已接受。
 
 ## 结构
 ```
