@@ -1,27 +1,35 @@
 <!-- 索引仅留：近期工作 + 全部 feedback 铁律 + load-bearing reference。已完结一次性 sprint topic 文件在盘,文件搜索 recall,不进索引。07-05 压缩:hook 一行要点,已完结旧条目仅留标题,细节看 topic 文件。07-09 瘦身:已收口旧条目移 MEMORY-archive.md(同目录,不进每会话 context),收口即归档为常态。 -->
 
+> **backlog 单一真相源 = 仓库 `docs/BACKLOG.md`（BL-1~27，建于 2026-07-10 `b452e7d0`）**。memory 只记教训与已完成事实，**不记待办状态**（待办写进 BACKLOG.md）；下方条目里的 backlog 引用一律指向 BL-x 编号。
+
 ## 近期工作 / 进行中
+- [★★单人实践backlog BL-31~36全收口：Actions云门红绿双验+金丝雀SOP+错误上报治理+Flyway否决(ledger闸门替代)+集成环境 **两次合master`0d6cabb6`/`f2c43885`,云门均绿,零部署,分支已清** (07-10)](project_solo_practices_closeout_2026_07_10.md) — 评审逮3真bug(rename逃逸/base-ref fail-open/--rest基线tag说谎);新增BL-40=web本地dev被L0塌缩误判拒启动(次日已修合`459f6319`);GitHub PAT在buyvm-data可查Actions;剩ops项=首跑金丝雀前核实ca-web-04在CF LB pool
+- [★★BL-30 生产备份修复+DR演练收口：核心档体系建成红绿双验+5轮RTO演练收4真坑 **已合master`ed48119f`,分支已清** (07-10)](project_bl30_backup_dr_2026_07_10.md) — 99天无备份P0闭环;fact-check推翻2表名推断(vid_alias_log/visitor_fingerprint必备份);RTO保守2h/采样验证206s;坑=GTID残留/还原默认参数13倍慢/binlog爆盘/ugrep截长行
+- [★★UDF审计Batch3=M3 pick-p迁web后监控失明 **已修+红绿双验+合master`a6cf8028`** (07-10)](project_udf_m3_monitoring_2026_07_10.md) — 规则108盯已死指标`ops_pick_p_total{admin}`(VM零series)+分母clamp_min致恒0永不触发;edge`nw_s_*`从未采集;修=108改盯web非2xx+新增4规则(含2条fail-safe静默检测)+edge×3增采`:81/__pick_stats`;红验401注入→事件6551+TG3508,绿验自动恢复;**新发现aws-s跨洋RPC常态失败2.92%(snapshot兜底掩盖,reach-aware已降级)**;backlog=aws-s跨洋治理/error比率告警待1周基线/B4告警(134)DB里disabled=1与memory声明不符;判据泛化见[[reference_n9e_dashboard_alert_internals]]
+- [★★UDF审计Batch2=M1 SW逃生final-host二次排除 **已修+真Chromium红绿双证(沙箱+buyvm)+部署6节点live+合master`7cf09882`(存证`a8a82d86`)** (07-10)](project_udf_m1_batch2_final_host_2026_07_10.md) — 裸apex被channel前缀重构回当前死host无二次排除→偷探测预算;修法applied===currentHostname二次排除两处同步;e2e复用m1-probe-target-e2e.mjs加currentTraceHits===0断言+SW_PATH红绿;WebKit ENV-LIMITED靠parity+iOS灰度;**合master时pre-push全量门跨run漂移无关Java假红(多会话并行maven撞车),SKIP_CI_LOCAL推+存证**;订正07-10:M3已由Batch3合`a6cf8028`收口
 - [★闸门审计:修backend-pl空转(叶子后端push曾零测试)+合master慢门+分支生命周期SOP **已合master`8ba9731b`**;续:memory悬空根治(nw-memory-commit+软守卫)**已合master`d928f098`** (07-09)](project_branch_lifecycle_gates_2026_07_09.md) — pre-commit/pre-push无真重复;全量7min<10min口径不上细粒度选测;SOP全文docs/BRANCH_LIFECYCLE.md;memory纪律见[[feedback_memory_commit_discipline]]
-- [★★UDF全系统对抗式审计(8维fable+high subagent)+Batch1后端修复 **Batch1已部署+合master`2dd9e726`(merge`870a0eb5`,deployed/web=f481f6fd);worktree/分支已清** (07-09)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE-audit-batch1.md) — 台账`AUDIT-2026-07-10.md`14条finding无一证伪;真缺陷=M2 deadRoots无min-n门(已修已部署,ReachHintService MIN_SAMPLES在产)/M3 pick-p迁web后告警失明(N9E 108盯死admin路径,ops**未做,backlog**)/M1 SW逃生channel后置注入击穿current-host排除(escapeRoots ON已挡,kill-switch回滚广域复活,**需4象限e2e独立会话,backlog**);Batch1三面部署(web×6+admin+edge×3)验证全绿:reach:grid wildcard_ok在产/pick-p RPC error=0/ReachFusionServiceTest26-26;**合master夹带别会话memory教训见[[feedback_git_commit_pathspec_shared_checkout]]**;剩C-2 ccTLD护栏/G-2 staggeredRace降量backlog
+- [★★UDF全系统对抗式审计(8维fable+high subagent)+Batch1后端修复 **Batch1已部署+合master`2dd9e726`(merge`870a0eb5`,deployed/web=f481f6fd);worktree/分支已清** (07-09)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE-audit-batch1.md) — 台账`AUDIT-2026-07-10.md`14条finding无一证伪;真缺陷=M2 deadRoots无min-n门(已修已部署,ReachHintService MIN_SAMPLES在产)/M3 pick-p迁web后告警失明(N9E 108盯死admin路径,**订正07-10:已由Batch3合`a6cf8028`收口**)/M1 SW逃生channel后置注入击穿current-host排除(escapeRoots ON已挡,kill-switch回滚广域复活,**订正07-10:已由Batch2合`7cf09882`收口**);Batch1三面部署(web×6+admin+edge×3)验证全绿:reach:grid wildcard_ok在产/pick-p RPC error=0/ReachFusionServiceTest26-26;**合master夹带别会话memory教训见[[feedback_git_commit_pathspec_shared_checkout]]**;剩C-2 ccTLD护栏/G-2 staggeredRace降量=BL-8/BL-9(项目级backlog真相源已建docs/BACKLOG.md `b452e7d0`)
 - [★★广告图500KB cap根治=甜点位+Snack01浅色主题cover事故修复 **已合master`714e2f55`全收口** (07-09)](project_snack_sweetspot_transcode_2026_07_09.md) — 教训=target/被jdtls污染致ci-local假红,见`Unresolved compilation problem`先clean
 - [★★H3逃生腿验证sprint三Part全实测完成 **已合master`0cc709cf`全收口,CN ECS已销毁,无遗留待办** (07-09)](../../../../newworld/docs/sprint/gfw-h3-escape-validation/SESSION-STATE.md) — 结论:本次未坐实真实TCP死QUIC活→不常态化QUIC源;ECH不押注;注入器方法论(本机sudo+nft+静态h3curl模拟传输层封锁)与场景A/B/C全绿细节见SESSION-STATE;backlog另立项=真机iOS SW逃生/跨域escapeRoots消费/UDF后端reach回归
-- [★UDF B4 blockType gauge 已部署+告警启用+**已合master`c30719b8`收口** (07-09)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — 核心实证=CF整封表现为tcp_reset非ip_block;UDF全线代码基线与在产一致,剩=灰度观测+3类未决待Owner+ConfigController latent follow-up
+- [★UDF B4 blockType gauge 已部署+告警规则建但**未启用**(id=134 disabled=1)+**已合master`c30719b8`收口** (07-09,订正07-10)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — 核心实证=CF整封表现为tcp_reset非ip_block;UDF全线代码基线与在产一致。**订正07-10**:旧写"告警启用"过期,生产DB实查 rule 134 `disabled=1`(设计内先建后启,阈值0.5占位),该订正memory非DB=BL-16;ConfigController latent rootHost follow-up 经fa6891f1核实已消除(normalizeExcludeRoot两路共用归一)
 - [★★会话token成本审计:真成本cache_read~70%(旧减噪瞄错tool_result 10%靶)→修nw-token-report+复活28skill自动触发+委派skill/大Read hook 合`3882495c`/`787b52f1` (07-08)](project_token_cost_audit_2026_07_08.md) — 机制vs纪律地图,真吊纪律只剩/clear分段;skill真相源=平铺claude-shared/skills非plugin;>5min空窗缓存重建;方法论[[feedback_measure_real_cost_before_optimizing]]
 - [★统一域名失败转移 P0逃生复核缺陷修复 已上线(合`df6c8fa5`,fe-web`3dfea327`,web×6) (07-08)](../../../../newworld/docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md) — 四路复核后修M1(探即跳候选构造)/ccTLD护栏/kill-switch/clobber竞态;E2E PASS+部署后四象限4/4;backlog=iOS真机门/ccTLD后端断言;版本核验坑见[[reference_postdeploy_version_verify_cf_swr_stale]]
 - [★统一域名失败转移 escapeRoots前端消费+三flag已激活 (07-08)](project_udf_backend_half_2026_07_08.md) — SW逃生用escapeRoots.roots有序取代池原序;ESCAPE_ROOTS/A_POOL_SOFT_SORT已翻true,软排序reach有序live(top_changed 9→629,四象限8/8);融合早已live非dark;follow-up=ConfigController:210-211 anchor/migrateTo未归一rootHost(不活跃)/ca-web-04 journald 0B
 - [★★统一域名失败转移 后端半5Task 已上线波1(web×6+admin,合`3a632119`) (07-08)](project_udf_backend_half_2026_07_08.md) — ReachFusion保真+rum_n+A软排序两阶段+pick-p迁web+P→P渠道池+escapeRoots契约;波2待ops CF hostname;follow-up=A侧rootHost未归一
-- [★★domain-health去SCAN(桶化索引替代12.45M键全库SCAN)+flag灰度 待错峰部署 (07-06)](project_z13_domain_health_no_scan_2026_07_06.md) — ⚠️未合master未部署;分支fix/z13-domain-health-no-scan@97ba91b0;flag OPS_Z13_INDEX_ENABLED默认false
-- [★★审计deferred批1:B1 domain_health_log(z7权威)合`b7a8c244`+swiper11→12.2.0清CVE合`a1e7f464` (07-06)](project_audit_deferred_batch1_swiper12_2026_07_06.md) — ⚠️fe-web部署待搭车
-- [★★渠道归因/统计审计闭环:2P1+8P2+留存A修复 (07-05)](project_channel_attribution_audit_2026_07_05.md) — ★待拍板=基线换源
-- [★部署git pre-flight五道门+deployed/*基线tag 合`38aef9d6` (07-05)](project_deploy_git_preflight_2026_07_05.md) — 待办=CI按diff分级
+- [★★domain-health去SCAN(桶化索引替代12.45M键全库SCAN) **已合master并部署,flag已开** (07-06,订正07-10)](project_z13_domain_health_no_scan_2026_07_06.md) — 订正:97ba91b0已在deployed/web血缘(merge-base实测),分支已删;OPS_Z13_INDEX_ENABLED生产DB=true(update_time 2026-07-07 01:35:21,nw-mysql实查)
+- [★★审计deferred批1:B1 domain_health_log(z7权威)合`b7a8c244`+swiper11→12.2.0清CVE合`a1e7f464` (07-06,订正07-10)](project_audit_deferred_batch1_swiper12_2026_07_06.md) — 订正:a1e7f464已在deployed/frontend-web血缘,仅剩线上四象限视觉补验=BL-19(docs/BACKLOG.md)
+- [★★渠道归因/统计审计闭环:2P1+8P2+留存A修复 (07-05)](project_channel_attribution_audit_2026_07_05.md) — ★待拍板=基线换源=BL-10(docs/BACKLOG.md)
+- [★部署git pre-flight五道门+deployed/*基线tag 合`38aef9d6` (07-05)](project_deploy_git_preflight_2026_07_05.md) — 订正07-10:CI按diff分级已完成(`a7b5ce7d`已合master,血缘实测),无遗留
 - [★★07-05告警triage→监控统一N9E批0-4(合`ab28cb5f`)+批5待办](project_alert_triage_rule42_disk_n9e_2026_07_05.md) — ★data爬虫零告警=最大盲区
-- [★Kanav健康核查+封面bug修复 (07-04)](project_kanav_health_cover_fix_2026_07_04.md) — db45133a未合生产0部;删4家爬虫5c9c31d9未合
-- [★★爬虫批量收敛(B4):9家迁基类+4家排除 (07-04)](project_crawler_convergence_batch_2026_07_04.md) — 分支fe958322未部署;AUTO_INC=90000000
-- [全代码审计修复 SESSION-STATE (07-03)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — FINDINGS.md在feat/recently-watched未合
-- [★★GFW A池RUM接入reach:grid火测PASS (07-02)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — 分支worktree-gfw-reach-apool-rum未合master
-- [★封面贴脸根治=BlurHash占位全链路 (06-29)](project_cover_blurhash_placeholder_2026_06_29.md) — feat/cover-preload-restore未合master
+- [★Kanav健康核查+封面bug修复 (07-04,订正07-10)](project_kanav_health_cover_fix_2026_07_04.md) — 订正:db45133a与5c9c31d9均已合master(血缘实测);Kanav生产仍0部(无cron只手动端点),待自然验证=BL-18
+- [★★爬虫批量收敛(B4):9家迁基类+4家排除 (07-04,订正07-10)](project_crawler_convergence_batch_2026_07_04.md) — 订正:fe958322已合master(B4本体`3152a5fa`,血缘实测);遗留两点surface=BL-13;AUTO_INC=90000000
+- [全代码审计修复 SESSION-STATE (07-03,订正07-10)](docs/sprint/2026-07-02-full-code-audit/SESSION-STATE.md) — 订正:FINDINGS.md已在master(git ls-tree实测);feat/recently-watched功能已否决删除,分支已清;剩openresty P1-19/20 defer=BL-26
+- [★★GFW A池RUM接入reach:grid火测PASS (07-02,订正07-10)](project_gfw_apool_rum_phase3_firetest_2026_07_02.md) — 订正:已合master(`19bcc7f4`,血缘实测);07-09已决策不翻A_POOL_PENALTY_ENABLED;触发式再评估/07-23到期YAGNI结案=BL-17
+- [★封面贴脸根治=BlurHash占位全链路 (06-29,订正07-10)](project_cover_blurhash_placeholder_2026_06_29.md) — 订正:已合master(首屏占位LCP合并`10260a0e`,blurhash-decode.js在master树,实测);分支已清
 
 ## reference(load-bearing,常 recall)
+- [env 键归属判定 + systemd EnvironmentFile 累加语义](reference_env_key_ownership_and_systemd_envfile.md) — 判模块是否读某键必追 @Value 所在模块(禁凭类名/yml占位符);drop-in 覆盖 EnvironmentFile 须先空赋值重置
+- [Spring 实例化≠代码引用:给 common 类去 @Value 默认值前必查下游 ComponentScan](reference_spring_bean_instantiation_vs_import.md) — 唯一 import 方是 admin,但 web/data 也扫 common→朴素去默认值炸 6 台 web;修法 @ConditionalOnProperty;验证用 --debug condition report 非 ApplicationContextRunner
 - [部署 jar 必 symlink 切换不覆盖实文件(inode 实证)+迁移 harness 三坑](reference_jar_symlink_vs_inplace_overwrite.md) — install/cp -f 原地覆盖同 inode 与运行中 JVM mmap 竞争;EU 重启数百条 Redis Connection closed 是跨洋在途 stats-async 被切,低峰 0 是时段运气非流程更优
 - [UDF deadRoots 判死无样本门,隐式依赖 REACH_FUSION_ENABLED 贝叶斯先验](reference_deadroots_sample_gate_implicit_contract.md) — 关融合=deadRoots 立失小样本保护;软沉底不删+trace 终裁故非 BLOCKER;REACH_HINT_ENABLED 07-10 已 live
 - [SW生命周期+前端逃生测试铁律](reference_sw_lifecycle_escape_testing.md) — SW改动必真浏览器e2e/内存态不跨重启须IDB恢复/缺失导出只warning/harness自己会骗人/老headless SW终止脆弱用xvfb
@@ -63,7 +71,7 @@
 
 ## feedback(铁律,长期适用)
 - [闸门/守卫/告警必造反例红绿双验+未知输入须fail-safe](feedback_gate_redgreen_and_failsafe_direction.md) — 守卫失效是静默的;4实例(backend-pl空转/bash -n漏无后缀/软守卫恒真/N9E datasource_queries NULL)纯读代码全看不出
-- [memory写完立刻nw-memory-commit单独提交,别留悬空被别会话夹带](feedback_memory_commit_discipline.md) — 实测3a4b2187夹带他人memory;守卫比目录必rsync -rlcni(-c比checksum非mtime/-l防symlink致恒真)
+- [memory提交用nw-memory-commit;**带尾巴必须--only划范围**(07-10根因订正)](feedback_memory_commit_discipline.md) — ★"写完立刻提交"已被证伪:真相源是symlink到~/claude-shared的全会话共享目录,数分钟编辑窗口内他会话commit照样夹带(实测6d16d068扫走9条订正);转向"不阻止sweep只禁commit说谎",BL-28修于`8d730250`;守卫与sync两侧都必rsync -c(只修守卫侧=没修)
 - [认领backlog/开分支前扫worktree+分支防多会话并行撞车](feedback_check_parallel_worktrees_before_backlog.md) — handleApiRequest空池修复合master后才发现另会话逐字重复;开工前30秒git worktree list即可避免;清理别人worktree前先备份其独立产物
 - [hook=特权基础设施:禁触碰主通道(改写/deny/污染stdout)+实现对齐声明契约 (07-09事故)](feedback_hooks_privileged_infra_invariants.md) — 改hook须隔离行为测试;输出异常先判通道不可信做对照实验
 - [优化成本前先测真实成本结构+机制兜底判断](feedback_measure_real_cost_before_optimizing.md) — 按message.id去重看cache_read累计,别被观测工具瞄错靶;列在清单的skill≠自动触发

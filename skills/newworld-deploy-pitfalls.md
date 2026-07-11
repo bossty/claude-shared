@@ -117,10 +117,10 @@ git stash push -u -m "pre-deploy-<TS>"
 
 # 部署铁律
 
-生产 admin/data/web JAR 路径**不是** `newworld-admin/target/newworld-admin-*.jar`，而是 `/newworld/<module>/deploys/current.jar` **软链**：
+生产 admin/data/web JAR 路径**不是** `newworld-admin/target/newworld-admin-*.jar`，而是 `/opt/newworld/newworld-<module>/deploys/current.jar` **软链**（2026-07-10 三模块统一前缀）：
 
 ```
-/newworld/newworld-admin/deploys/
+/opt/newworld/newworld-admin/deploys/
   20260428-231343.jar  ← 真 JAR
   20260427-203020.jar  ← 上一版
   current.jar -> 20260428-231343.jar  ← 软链 systemd 启动用
@@ -130,9 +130,9 @@ git stash push -u -m "pre-deploy-<TS>"
 
 ```bash
 TS=$(date +%Y%m%d-%H%M%S)
-scp target/newworld-admin-*.jar aws-data:/newworld/newworld-admin/deploys/$TS.jar
+scp target/newworld-admin-*.jar aws-data:/opt/newworld/newworld-admin/deploys/$TS.jar
 ssh aws-data "
-  cd /newworld/newworld-admin/deploys
+  cd /opt/newworld/newworld-admin/deploys
   ln -sfn $TS.jar current.jar
   sudo systemctl restart newworld-admin
 "
@@ -141,7 +141,7 @@ ssh aws-data "
 ## 回滚
 
 ```bash
-ssh aws-data 'cd /newworld/newworld-admin/deploys && ln -sfn 20260427-203020.jar current.jar && sudo systemctl restart newworld-admin'
+ssh aws-data 'cd /opt/newworld/newworld-admin/deploys && ln -sfn 20260427-203020.jar current.jar && sudo systemctl restart newworld-admin'
 ```
 
 ## 5 版保留铁律

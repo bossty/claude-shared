@@ -9,7 +9,13 @@ metadata:
 
 **`install` 与 `cp -f` 都是原地覆盖同一 inode**（`O_TRUNC` 写入，2026-07-10 实测 inode 不变），不是新建+rename。覆盖运行中的 jar 到 `systemctl restart` 生效之间，老 JVM 若触发尚未加载的类，会从内容已被改写的 inode 读 → `ClassFormatError`/`NoClassDefFoundError`。**部署 jar 一律 `install` 到新文件名 + `ln -sfn current.jar` 原子切换**（老 jar inode 完好，无竞争窗口），回滚也是切 symlink。
 
-2026-07-10 web 6 节点已从实文件模型迁到 `/opt/newworld/newworld-web/deploys/current.jar`；admin/data 在 `/newworld/newworld-<mod>/deploys/`（阶段 2 待归一到 `/opt`）。见 `docs/sprint/2026-07-10-jar-layout-unification/`。
+2026-07-10 三模块已统一：`/opt/newworld/newworld-{web,admin,data}/deploys/current.jar`，保留 5 版，老路径已清理。见 `docs/sprint/2026-07-10-jar-layout-unification/`。
+
+**回滚脚本装在 `/opt/newworld/bin/rollback-backend.sh`（8 实例），不是仓库里的 `/newworld/scripts/`** —— 后者在生产从不存在（web 节点无 checkout，ca-admin 的 `/newworld` 非 git 仓库），CLAUDE.md 写了几个月的"秒级回滚"曾是纸面能力。**仓库里有脚本 ≠ 生产跑得了，宣告某个运维能力前先 ssh 确认它在节点上存在。**
+
+`secrets.env` 路径按 region 分裂（真实差异非 drift）：CA web = `/opt/newworld/secrets.env`；EU web + admin/data = `/etc/newworld/secrets.env`。**别拿单节点实测外推全集群**（我据 ca-web-01 写死过一次注释，EU 恰好相反）。
+
+`.bak-*` 备份命名历史上有多种格式（`.bak-pre-<sha>` / `.bak-pre712bc10e` 无连字符 / `.bak-<label>` / `.pre-<sha>`），按 glob 清理必然漏；清理前先 `ls` 看全量再定模式。
 
 **验证 harness 三坑**（都会伪装成"迁移失败"）：
 1. `for` 循环里跑 `ssh host 'bash -s' <<HEREDOC`：ssh 吃掉循环 stdin，第二次迭代起远端收到空脚本、输出丢失、退出码乱。→ 脚本落文件，`ssh host 'sudo bash -s' < file` 逐台调用。

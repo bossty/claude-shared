@@ -20,3 +20,5 @@ metadata:
 6. **gawk 解析大 gz 逐分钟**：`match($0,/\/2026:00:([0-9][0-9]):/,m)` 取分钟 + `match($0,/urt="([0-9.]+)"/,u)` 取 urt，只输出 per-minute 汇总（小输出）。
 
 关联 [[project_perf_rca_zerodowntime_2026_06_16]] [[feedback_local_build_deploy_no_push_pitfalls]]。
+
+> ⚠️ 2026-07-10 布局统一后路径已变：三模块统一 `/opt/newworld/newworld-<mod>/deploys/current.jar`，回滚脚本在 `/opt/newworld/bin/rollback-backend.sh`。本档正文里的老路径按当时事实保留。见 [[reference_jar_symlink_vs_inplace_overwrite]]。

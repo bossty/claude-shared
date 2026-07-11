@@ -26,3 +26,5 @@ metadata:
 **⑧ 隐藏源站单节点 canary 浏览器 smoke = SSH 本地转发**：源站 :80/:443 对外关闭(回源走 CF Tunnel)、公网 IP 打不通，单节点没外部直达路径。用 `ssh -N -L 18080:127.0.0.1:80 <canary>`(run_in_background 稳住，别 `ssh -f` 会被 harness 信号杀)→ chrome-devtools 打 localhost:18080(canary OpenResty catch-all 服全栈：新前端 dist + /api 代理到新后端密文)→ 真浏览器验加密 config 解密不白屏。失败资源全是外部 R2/CDN 域(隧道打不到=artifact 非缺陷)，看 API 成功+菜单渲染+控制台零错误。
 
 **⑨ 单节点 canary 前端走标准脚本**：临时改 worktree `deploy-frontend.sh` `WEB_HOSTS=(<canary>)` 跑一次(sync-seeds 仍硬编码 usw1-web-new-01)，fleet 时恢复全 5 台再跑一次(让 5 台 version.js 一致)。
+
+> ⚠️ 2026-07-10 布局统一后路径已变：三模块统一 `/opt/newworld/newworld-<mod>/deploys/current.jar`，回滚脚本在 `/opt/newworld/bin/rollback-backend.sh`。本档正文里的老路径按当时事实保留。见 [[reference_jar_symlink_vs_inplace_overwrite]]。

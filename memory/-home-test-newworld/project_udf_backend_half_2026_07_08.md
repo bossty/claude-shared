@@ -37,7 +37,7 @@ metadata:
 
 **enable-time 前置（后续灰度，均需另次授权）**：翻 `A_POOL_SOFT_SORT_ENABLED` **须先开融合写 rum_n**(否则 dark→rum_n 缺→no-op「验空操作」)+四象限回归(喂 LIVE migrateTo)；`ESCAPE_ROOTS_ENABLED` 待前端消费轮。
 
-**follow-up(独立 task)**：A 侧 anchorCandidates `ConfigController.java:~210` `Set.of(normalizedHost)` 未归一 rootHost(latent 低发生率:wildcard-A 直接访问时 migrateTo 不排除当前死根)；修需归一+四象限回归(改 migrate.js 生产路径)。
+**follow-up(独立 task)**：~~A 侧 anchorCandidates `ConfigController.java:~210` `Set.of(normalizedHost)` 未归一 rootHost(latent 低发生率:wildcard-A 直接访问时 migrateTo 不排除当前死根)~~ **已结案(2026-07-10 master fa6891f1 核实消除)**：现由 `normalizeExcludeRoot`(ConfigController:571 抽公用,复用 HostChannelParser.rootHost)归一 excludeHosts，escapeRoots(:775) 与 anchorCandidates(:213) 两路共用，migrateTo 取归一后 candidates[0]，第三次漂移已堵。
 
 设计档 `CONSENSUS.md §6b`(Owner 决策已锁)；计划 `docs/superpowers/plans/2026-07-07-udf-backend-half.md`；报告 `docs/superpowers/reports/task-{1..5}-report.md`+`task-3-edge-tunnel-infra.md`；审查 `agents/reviewer-backend-{task1..5,final}.md`。交接 SESSION-STATE `docs/sprint/2026-07-06-unified-domain-failover/SESSION-STATE.md`。
 

@@ -56,8 +56,8 @@ done
 > 下面 `$REPO` = 本地 checkout 根（如 `/home/test/newworld`）。
 
 **JAR 路径 / 保留机制（两种，按模块）**：
-- **web**：systemd ExecStart 直指 `/opt/newworld/newworld-web.jar`（实体文件 `ubuntu:ubuntu`）；切换前备份 `*.bak-pre-<sha>`。
-- **admin/data**：`/newworld/newworld-<m>/deploys/<TS>-<sha>.jar` + `current.jar` symlink 原子切换，保留最近 5 版。
+- **三模块统一 symlink 模型**（2026-07-10 布局统一）：`/opt/newworld/newworld-<m>/deploys/<TS>-<sha>.jar` + `current.jar` symlink 原子切换，保留最近 5 版。
+- 切换是 `ln -sfn`，**不覆盖运行中的 jar**（`install`/`cp -f` 原地覆盖同一 inode，会与老 JVM 的 mmap 懒加载竞争）。
 
 ```bash
 export PATH=/opt/apache-maven-3.9.9/bin:$PATH
@@ -70,17 +70,19 @@ bash "$REPO"/scripts/deploy-web.sh
 # 手动等价（单台示例；必须逐台，CA 先 3-of-4 保活再 EU，每台 restart 后等就绪再下一台）：
 mvn -f "$REPO"/pom.xml clean package -pl newworld-common,newworld-web -am -q -Dmaven.test.skip=true
 scp "$REPO"/newworld-web/target/newworld-web-0.0.1-SNAPSHOT.jar ca-web-01:/tmp/nw-web.jar
-ssh ca-web-01 "sudo cp /opt/newworld/newworld-web.jar /opt/newworld/newworld-web.jar.bak-pre-${SHA} && \
-  sudo mv /tmp/nw-web.jar /opt/newworld/newworld-web.jar && sudo systemctl restart newworld-web"
+ssh ca-web-01 "sudo install -o ubuntu -g ubuntu -m 664 /tmp/nw-web.jar /opt/newworld/newworld-web/deploys/${TS}-${SHA}.jar && \
+  sudo ln -sfn /opt/newworld/newworld-web/deploys/${TS}-${SHA}.jar /opt/newworld/newworld-web/deploys/current.jar && \
+  sudo systemctl restart newworld-web"
+# 正常走 scripts/deploy-web.sh（零停机滚动 + readiness 门 + 保留 5 版修剪），上面是手工兜底
 # 其余 ca-web-02/03/04 + eu-web-01/02 同样逐台。
 
 # === admin 模块（ca-admin 单实例）===
 mvn -f "$REPO"/pom.xml clean package -pl newworld-common,newworld-admin -am -q -Dmaven.test.skip=true
 TS=$(date +%Y%m%d-%H%M%S)
 scp "$REPO"/newworld-admin/target/newworld-admin-0.0.1-SNAPSHOT.jar ca-admin:/tmp/${TS}-${SHA}.jar
-ssh ca-admin "sudo cp /tmp/${TS}-${SHA}.jar /newworld/newworld-admin/deploys/${TS}-${SHA}.jar && rm -f /tmp/${TS}-${SHA}.jar && \
-  sudo ln -sfn /newworld/newworld-admin/deploys/${TS}-${SHA}.jar /newworld/newworld-admin/deploys/current.jar && \
-  ls -t /newworld/newworld-admin/deploys/*.jar 2>/dev/null | grep -v current.jar | tail -n +6 | xargs -r sudo rm -f && \
+ssh ca-admin "sudo cp /tmp/${TS}-${SHA}.jar /opt/newworld/newworld-admin/deploys/${TS}-${SHA}.jar && rm -f /tmp/${TS}-${SHA}.jar && \
+  sudo ln -sfn /opt/newworld/newworld-admin/deploys/${TS}-${SHA}.jar /opt/newworld/newworld-admin/deploys/current.jar && \
+  ls -t /opt/newworld/newworld-admin/deploys/*.jar 2>/dev/null | grep -v current.jar | tail -n +6 | xargs -r sudo rm -f && \
   sudo systemctl restart newworld-admin"
 
 # === data 模块（ca-admin 单实例，按需）===
@@ -90,9 +92,9 @@ ssh ca-admin "sudo cp /tmp/${TS}-${SHA}.jar /newworld/newworld-admin/deploys/${T
 ### 后端回滚（秒级；节点无 /newworld/scripts，手动切回）
 ```bash
 # web：切回备份 jar（用部署时记下的 <sha>）
-ssh ca-web-01 'sudo mv /opt/newworld/newworld-web.jar.bak-pre-<sha> /opt/newworld/newworld-web.jar && sudo systemctl restart newworld-web'
+ssh ca-web-01 '/opt/newworld/bin/rollback-backend.sh web'   # symlink 切回上一版 + 健康轮询
 # admin/data：symlink 指回上一版 deploys jar（先 ls -t deploys/*.jar 看上一版文件名）
-ssh ca-admin 'sudo ln -sfn /newworld/newworld-admin/deploys/<上一版>.jar /newworld/newworld-admin/deploys/current.jar && sudo systemctl restart newworld-admin'
+ssh ca-admin 'sudo ln -sfn /opt/newworld/newworld-admin/deploys/<上一版>.jar /opt/newworld/newworld-admin/deploys/current.jar && sudo systemctl restart newworld-admin'
 ```
 
 ## Step 2.5：后端部署后必须验证
@@ -100,11 +102,11 @@ ssh ca-admin 'sudo ln -sfn /newworld/newworld-admin/deploys/<上一版>.jar /new
 > **警告**：不能只 curl 端点看 HTTP 状态码。admin 的 Spring Security 对所有不存在路径也返回 401，可能误判路由存在，导致新代码实际未生效却以为成功。
 
 ```bash
-# JAR 路径：web=/opt/newworld/newworld-web.jar；admin/data=/newworld/newworld-<m>/deploys/current.jar
+# JAR 路径（三模块统一）：/opt/newworld/newworld-<m>/deploys/current.jar
 # 1. JAR 内类验证（确认新 class 已打入运行 jar）
-ssh ca-admin 'unzip -l /newworld/newworld-admin/deploys/current.jar | grep <NewClass>.class'
+ssh ca-admin 'unzip -l /opt/newworld/newworld-admin/deploys/current.jar | grep <NewClass>.class'
 # common 里的新类（DTO/entity）在嵌套 jar，顶层 unzip 看不到 → 抽嵌套 common jar 再查：
-ssh ca-admin 'unzip -p /newworld/newworld-admin/deploys/current.jar BOOT-INF/lib/newworld-common-0.0.1-SNAPSHOT.jar > /tmp/c.jar && unzip -l /tmp/c.jar | grep <NewClass>.class; rm -f /tmp/c.jar'
+ssh ca-admin 'unzip -p /opt/newworld/newworld-admin/deploys/current.jar BOOT-INF/lib/newworld-common-0.0.1-SNAPSHOT.jar > /tmp/c.jar && unzip -l /tmp/c.jar | grep <NewClass>.class; rm -f /tmp/c.jar'
 # 必须有命中，0 条 = 新代码未打入 jar / symlink 未更新
 
 # 2. journalctl 启动无 ERROR（重启后等 ~12s 再查）
@@ -120,7 +122,7 @@ ssh ca-admin 'sudo journalctl -u newworld-admin --since "2 min ago" -q | grep -c
 # 5. 【多会话铁律】收口前必验现网 jar "真身"含本次修复——别只看 md5==自己部署的那版
 #    多会话共享仓库：你部署后，别会话可能 build off master 重新部署 web/admin，现网 jar md5 会变（≠你的）。
 #    只要它 build off 已含本次修复的 master，就仍带你的修复；但禁假设——解 jar 实测本次新增类/方法在不在：
-ssh eu-web-01 'python3 -c "import zipfile,re; d=zipfile.ZipFile(\"/opt/newworld/newworld-web.jar\").read(\"BOOT-INF/classes/<pkg>/<NewClass>.class\"); print(any(b\"<newMethod>\" in x for x in re.findall(rb\"[ -~]{6,}\",d)))"'
+ssh eu-web-01 'python3 -c "import zipfile,re; d=zipfile.ZipFile(\"/opt/newworld/newworld-web/deploys/current.jar\").read(\"BOOT-INF/classes/<pkg>/<NewClass>.class\"); print(any(b\"<newMethod>\" in x for x in re.findall(rb\"[ -~]{6,}\",d)))"'
 #    True=现网真跑着含本次修复的 jar（即便 md5 被别会话换过）；False=你的修复被别会话用旧 baseline 覆盖了→重新 off master 部署
 ```
 
@@ -128,7 +130,7 @@ ssh eu-web-01 'python3 -c "import zipfile,re; d=zipfile.ZipFile(\"/opt/newworld/
 
 ```bash
 # step 1：class 必须在 jar 里
-ssh ca-admin 'unzip -l /newworld/newworld-admin/deploys/current.jar | grep SwVersionController.class'
+ssh ca-admin 'unzip -l /opt/newworld/newworld-admin/deploys/current.jar | grep SwVersionController.class'
 # step 2：启动无错
 ssh ca-admin 'sudo journalctl -u newworld-admin --since "3 min ago" | grep -E "ERROR|Exception" | head -5'
 # step 3：接口真实可用（admin 需要 JWT，别用 curl 状态码误判）
