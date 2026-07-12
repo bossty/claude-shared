@@ -5,3 +5,4 @@ skills/agent-browser
 skills/find-skills
 skills/learned/
 *.bak-*
+memory/*/staging/
