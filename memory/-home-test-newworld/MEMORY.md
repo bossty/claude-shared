@@ -3,6 +3,7 @@
 > **backlog 单一真相源 = 仓库 `docs/BACKLOG.md`（BL-1~27，建于 2026-07-10 `b452e7d0`）**。memory 只记教训与已完成事实，**不记待办状态**（待办写进 BACKLOG.md）；下方条目里的 backlog 引用一律指向 BL-x 编号。
 
 ## 近期工作 / 进行中
+- [★★supjav 正式生产启用全线上线 **已合master`10839b4cf`**(永久边车/opt/supjav-fetcher+ca-admin autossh隧道+data.env flag+段限流按源分档+每小时定时) 生产金标PASS真出片118238 16/16封面 (07-12)](project_supjav_prod_enable_2026_07_12.md) — 段限流按段host分档(supjav段=Google Drive`googleusercontent`,4并发+300ms只收紧它不误伤其他源);scrapling不拉playwright/patchright驱动须全量pin;R2孤儿转BL-54;BL-52/53(vcsi/定时配置驱动化)立项
 - [★memory暂存机制+BL-46/47+纯docs免重测 全部实施合master`db13a673`/`4367b353`,分支已清 (07-11)](project_memory_staging_and_relax_2026_07_11.md) — staging对sweep三处排除变异双验;ci-local自检NW_GATE_CALLER是防炸慢门关键;镜像/真相源.gitignore必须两侧同改(当天咬人)
 - [★★多会话并行工作流加固五条全落地 **已合master`171b27c9`(push落点`b4487724`),分支/worktree已清** (07-11)](project_parallel_workflow_hardening_2026_07_11.md) — 共享checkout只读化hook+master单点化(SKIP_CI_LOCAL不可绕)+backlog占坑+分支push编译轻门14.7s(vs全量7min)+memory暂存设计待评审;评审逮8真缺陷(判据=逃生口叠加必推演既有逃生口是否旁路新卡口);待拍板=条2实施/BL-46/BL-47
 - [★★BL-44 javxx 重诊断:真出片阻塞=stream API 直连403(非交接档"封面编码")+三修复验真出片(id=118090)+barePath伪装MP4后台坏图修+**Owner决策弃用123av转supjav** (07-12)](project_javxx_rediagnosis_pivot_supjav_2026_07_12.md) — 交接档详细诊断在因果层错(uploadCover finalize门只查barePath,mozjpeg-c null不回滚);真阻塞=fetchM3u8FromSurrit裸直连403产线trace坐实;修①proxy②③封面-frames:v1(AVIF185s→2s)+barePath抽帧;红绿+895绿;后台坏图=cover_image存伪装MP4前端用变体故只后台坏
@@ -14,6 +15,8 @@
 - [★★javxx/123av 断流三层根因:IP封禁×2已修合master`0cb8d594`+源站改版待做BL-44 (07-11)](project_javxx_ipban_revamp_2026_07_11.md) — 部署验证逐层揭盖:列表页IP封禁→修proxy后暴露资产CDN icdn.123av.me同封→修后暴露源站改版(poster参数移除/embed域surrit→javplayer/metadata块#video-details→dl.watch__info无冒号);推翻backlog"BuyVM出口07-08已否决"旧记载(直连403/proxy200);stale-target假红判据=clean重编能复现才真红
 
 ## reference(load-bearing,常 recall)
+- [跨机房永久边车连通=autossh systemd隧道(受限key permitopen)+pkill -f自匹配杀自己远端shell坑](reference_autossh_sidecar_tunnel_pkill_gotcha.md) — 切换边车用显式PID或pkill -x禁pkill -f含命令行字符串;autossh -M0+ServerAlive断线15s重连;systemd切换顺序避端口/display冲突
+- [长视频抽等距帧必先remux成MP4再keyframe seek](reference_thumbnail_grid_seek_remux_mp4.md) — 对concat/裸TS做-ss是顺序解码慢死长片;缩略图网格/预览montage同款;时长必ffprobe真产物别信EXTINF/部分fixture外推
 - [源站按机房IP封→FlareSolverr双白名单必成对](reference_source_ip_ban_dual_whitelist_flaresolverr.md) — bypass-hosts(走FlareSolverr)与proxy-hosts(走BuyVM干净出口IP)口径不同;漏配proxy=该源断供+熔断静默;症状=某region突然零产出+FlareSolverr 500/63s;第三次同源复发(javxx/123av BL-44→hanime1 BL-50 anime/3d);新增CF保护源必成对评估
 - [告警规则加 label 正则前必验 series 真实存在](reference_alert_rule_series_existence_check.md) — counter series 常动态创建(if count>0 才注册),而"零产出"恰是要监控的故障态本身→规则永不触发;VM 实查 count by(label) + offset 1h 排重启假象;反方向预注册前先问"零值是否正常态"(否则从失明变误报)
 - [env 键归属判定 + systemd EnvironmentFile 累加语义](reference_env_key_ownership_and_systemd_envfile.md) — 判模块是否读某键必追 @Value 所在模块(禁凭类名/yml占位符);drop-in 覆盖 EnvironmentFile 须先空赋值重置
