@@ -3,6 +3,10 @@
 > **backlog 单一真相源 = 仓库 `docs/BACKLOG.md`（BL-1~27，建于 2026-07-10 `b452e7d0`）**。memory 只记教训与已完成事实，**不记待办状态**（待办写进 BACKLOG.md）；下方条目里的 backlog 引用一律指向 BL-x 编号。
 
 ## 近期工作 / 进行中
+- [★BL-59 madou.club 采集接入 开发+测试完成**未合master**(分支feat/madou-crawler,9commits) 31厂牌囤后放+多机厂牌分片+content_number跨源基础;金标B类真出片烟测PASS(1280x720解密) (07-13)](project_madou_crawler_2026_07_13.md) — 蓝军4MAJOR全修;F1初版基类null→SKIPPED守卫有跨爬虫副作用(削弱supjav熔断)→revert改madou本地根治;F4(ii)「3/8下线」生产证伪(movie_category无enabled列)
+- [★★xvideos金标复核+region规则改造+入库端接入 **未合master**(分支fix/goldset-blockers,10commits) 准确率93.0%→**97.0%**(held-out 97.0%/未见uploader 97.6%/CJK基线41.7%) (07-13)](docs/sprint/2026-07-12-xvideos-goldset/SESSION-STATE.md) — 撤回上会话「自评」签字(同模型给自己标注打分,三名盲评员逮出它漏掉的25个slug分类冲突+`-3d`信号证伪);**核心教训=源站tag本身脏**(`-3d`家族连2D/3D都分不清、`hentai`是泛化词打真人片、`young-man`是单uploader模板指纹、`yuri`/`" ai "`是人名)→任何「见tagX即判Y」必先量化该tag精确率;**新增可监控指标=规则支持度审计**(cn-tags命中73但60%来自Cherrycat31一人→uploader多样性下降=该规则将崩的早期信号);default兜底桶150条三人盲标150/150全western(原最大盲区消除);Owner四拍板(cn=华语内容/演员非产地、AMWF按女优算、目标改判「零系统性误判+残余可解释」禁硬编码刷100%、实现入库端);**待拍板**=CAS分流(AI片分类仍被打「3D动画」,与07-13决策相悖)+duration过滤同族bug
+
+- [★supjav 断流修复(referer 429):代码完成+部署ca-admin已live核实,待18:00真出片验证+合master **未合** (07-13)](docs/sprint/2026-07-13-supjav-referer-fix/SESSION-STATE.md) — 根因=effectiveReferer把turbovidhls盗链referer套到Google Drive段(googleusercontent)致429(受控实验:turbovidhls12/12 429 vs mmsi01.com12/12 200,换IP/UA无效);修=hls.referer-agnostic-hosts豁免走pickReferer默认,分层自动(m3u8保referer仅段豁免);蓝军窄化默认值删tiktokcdn;fMP4/key路径已知缺口supjav不触发→BL-56;同型第5次[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
 - [★★supjav 正式生产启用全线上线 **已合master`10839b4cf`**(永久边车/opt/supjav-fetcher+ca-admin autossh隧道+data.env flag+段限流按源分档+每小时定时) 生产金标PASS真出片118238 16/16封面 (07-12)](project_supjav_prod_enable_2026_07_12.md) — 段限流按段host分档(supjav段=Google Drive`googleusercontent`,4并发+300ms只收紧它不误伤其他源);scrapling不拉playwright/patchright驱动须全量pin;R2孤儿转BL-54;BL-52/53(vcsi/定时配置驱动化)立项
 - [★memory暂存机制+BL-46/47+纯docs免重测 全部实施合master`db13a673`/`4367b353`,分支已清 (07-11)](project_memory_staging_and_relax_2026_07_11.md) — staging对sweep三处排除变异双验;ci-local自检NW_GATE_CALLER是防炸慢门关键;镜像/真相源.gitignore必须两侧同改(当天咬人)
 - [★★多会话并行工作流加固五条全落地 **已合master`171b27c9`(push落点`b4487724`),分支/worktree已清** (07-11)](project_parallel_workflow_hardening_2026_07_11.md) — 共享checkout只读化hook+master单点化(SKIP_CI_LOCAL不可绕)+backlog占坑+分支push编译轻门14.7s(vs全量7min)+memory暂存设计待评审;评审逮8真缺陷(判据=逃生口叠加必推演既有逃生口是否旁路新卡口);待拍板=条2实施/BL-46/BL-47
@@ -15,6 +19,10 @@
 - [★★javxx/123av 断流三层根因:IP封禁×2已修合master`0cb8d594`+源站改版待做BL-44 (07-11)](project_javxx_ipban_revamp_2026_07_11.md) — 部署验证逐层揭盖:列表页IP封禁→修proxy后暴露资产CDN icdn.123av.me同封→修后暴露源站改版(poster参数移除/embed域surrit→javplayer/metadata块#video-details→dl.watch__info无冒号);推翻backlog"BuyVM出口07-08已否决"旧记载(直连403/proxy200);stale-target假红判据=clean重编能复现才真红
 
 ## reference(load-bearing,常 recall)
+- [BuyVM 多机分片爬虫走 HTTP 触发非 @Scheduled（scheduling gate 关整个 @EnableScheduling）](reference_buyvm_worker_scheduling_gate_sharding.md) — worker 必关 scheduling 防 12 个无 flag 定时任务 N 重跑；主+管理端口都要错开；CAS 闸门+brands fail-safe；BuyVM 连 CA 走 EIP
+- [A族爬虫 parseDetail 返回null的语义陷阱+别用基类null→SKIPPED守卫修(削弱全爬虫熔断)](reference_crawler_parsedetail_null_contract.md) — 基类crawlOneItem对null draft计FAILED非SKIPPED;改共享基类前枚举全下游隐式依赖跑全量测试
+- [HLS 段 PNG 伪装前缀剥除:定位走 PNG chunk 到 IEND 后再扫 TS 周期(纯周期扫被同相位诱饵误命中)](reference_hls_segment_png_disguise_strip.md) — supjav 段=PNG+填充+真TS,我方未剥致大前缀(500×500 941B)零帧;offset-0纯周期扫会被「真起点−188」同相位0x47误命中少剥188B(1/256/段近千段必中,加大探针无效),必按PNG chunk结构锚IEND;存量R2原地解密-剥-重加密换新段名(绕CF stale)重写m3u8,不删旧段幂等;单测确证端到端待部署[[feedback_goldset_must_play_real_video]]
+- [段被套盗链referer致签名CDN(Google Drive)大面积429断流→referer-agnostic host段豁免](reference_source_referer_ban_agnostic_host_exempt.md) — 换IP/UA无效、唯一判别量是referer(区别IP封的403/challenge);段限流治标referer治本;fMP4/AES key路径会绕过豁免(supjav不触发);同型第5次;姊妹坑[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
 - [跨机房永久边车连通=autossh systemd隧道(受限key permitopen)+pkill -f自匹配杀自己远端shell坑](reference_autossh_sidecar_tunnel_pkill_gotcha.md) — 切换边车用显式PID或pkill -x禁pkill -f含命令行字符串;autossh -M0+ServerAlive断线15s重连;systemd切换顺序避端口/display冲突
 - [长视频抽等距帧必先remux成MP4再keyframe seek](reference_thumbnail_grid_seek_remux_mp4.md) — 对concat/裸TS做-ss是顺序解码慢死长片;缩略图网格/预览montage同款;时长必ffprobe真产物别信EXTINF/部分fixture外推
 - [源站按机房IP封→FlareSolverr双白名单必成对](reference_source_ip_ban_dual_whitelist_flaresolverr.md) — bypass-hosts(走FlareSolverr)与proxy-hosts(走BuyVM干净出口IP)口径不同;漏配proxy=该源断供+熔断静默;症状=某region突然零产出+FlareSolverr 500/63s;第三次同源复发(javxx/123av BL-44→hanime1 BL-50 anime/3d);新增CF保护源必成对评估
@@ -62,6 +70,7 @@
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
+- [视频源金标验证必须真点正片播放](feedback_goldset_must_play_real_video.md) — 只验封面+preview 会漏正片不可播(supjav BL-58 潜伏教训);判据用站点真实播放器videoWidth>0非自建Hls默认配置
 - [Bash 工具超时不杀命令只转后台→跑飞必留野进程；真开枪的只有命令自带 timeout](feedback_bash_timeout_does_not_kill_stray_processes.md) — BASH_DEFAULT_TIMEOUT_MS 本机已设 300000 也没救(受控实验:工具 timeout=15s 死循环命令仍在跑);"shell 假死"真相=shell 在尽职 do_wait 等永不退出的孩子(查 /proc/pid/wchan);杀进程组不够(GNU timeout 另开 pgid→孙进程孤儿化)须递归杀整棵树;告警已机制化(Stop hook stray_shell_reminder + nw-reap-stray)
 
 - [拍板问题必附我的意见和理由](feedback_decisions_with_recommendation.md) — 推荐项放前面,不假装中立
