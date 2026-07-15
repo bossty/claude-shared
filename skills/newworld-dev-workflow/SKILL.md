@@ -1,6 +1,6 @@
 ---
 name: newworld-dev-workflow
-description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界最佳实践固化:TBD/DORA/Fowler/Atlassian/GitHub-GitLab merge queue/Claude Code worktree)。master=唯一可部署 mainline;每会话各自 worktree(用 Claude Code 原生 claude -w / isolation:worktree,别手搓);从 origin/master 开;短命 feature/fix 每日并 master(≤1-2天本地放宽,DORA原文 a few hours)、rebase-FF;长命安全/发布 track 禁 rebase+禁 flag、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;build/部署前必 sync 最新 master 重测(单 jar 漏并=revert master);禁 rebase 已 push/共享分支;master 串行合+合前重基重测(人肉 merge queue 防 semantic conflict);删 worktree 前 merged+pushed;~/.m2 不隔离用 -am reactor;DB/端口不隔离。triggers: 分支策略, worktree, git worktree, 多会话, 多agent并行, rebase, merge, --no-ff, feature flag, trunk-based, keep main green, merge queue, semantic conflict, 从master开, build前merge master, 单jar revert, isolation worktree, claude -w, 删worktree, .m2隔离, 部署前同步master, 短命分支, 长命track, master可部署基线, git add -A, 共享checkout
+description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界最佳实践固化:TBD/DORA/Fowler/Atlassian/GitHub-GitLab merge queue/Claude Code worktree)。master=唯一可部署 mainline;每会话各自 worktree(仓库外 /home/test/worktree-<名>+EnterWorktree path 进入,禁 name/claude -w 默认落点 .claude/worktrees);从 origin/master 开;短命 feature/fix 每日并 master(≤1-2天本地放宽,DORA原文 a few hours)、rebase-FF;长命安全/发布 track 禁 rebase+禁 flag、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;build/部署前必 sync 最新 master 重测(单 jar 漏并=revert master);禁 rebase 已 push/共享分支;master 串行合+合前重基重测(人肉 merge queue 防 semantic conflict);删 worktree 前 merged+pushed;~/.m2 不隔离用 -am reactor;DB/端口不隔离。triggers: 分支策略, worktree, git worktree, 多会话, 多agent并行, rebase, merge, --no-ff, feature flag, trunk-based, keep main green, merge queue, semantic conflict, 从master开, build前merge master, 单jar revert, isolation worktree, claude -w, 删worktree, .m2隔离, 部署前同步master, 短命分支, 长命track, master可部署基线, git add -A, 共享checkout
 ---
 
 # newworld 开发工作流铁律
@@ -9,9 +9,9 @@ description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界
 
 **核心模型**:master = 唯一 Release-Ready Mainline(永远已测、可直接部署);每会话/每 agent 各自 worktree(从 origin/master 开);短命 feature/fix(每日并 master)rebase-FF 合;长命安全/发布 track 禁 rebase、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;合入串行 + 合前并最新 master 重测(人肉 merge queue 防 semantic conflict)。
 
-## 1 — worktree 隔离(用 Claude Code 原生,别手搓)
+## 1 — worktree 隔离(落点=仓库外 /home/test/worktree-*)
 - **每会话/每 agent 各自 worktree,禁多会话共享单 checkout**。一个工作目录只有一个 HEAD/index,`git checkout` 改这棵唯一工作树 → 别会话切分支会把你的工作树文件换没(已 push 则零数据损,但工作树被毁=正常表现)。worktree 各有私有 HEAD/index、共享 objects/refs。
-- **用原生**:`claude -w <name>`(默认 `.claude/worktrees/<name>/`、从 `origin/HEAD` fresh 开)或 subagent frontmatter `isolation: worktree`(无改动自动删)。不手搓脚本。
+- **落点=仓库外**(Owner 2026-07-14 拍板,原「用原生 claude -w 别手搓」表述作废):`git worktree add /home/test/worktree-<名> -b <分支> origin/master`,进入用 EnterWorktree 的 **path 参数**;**禁 EnterWorktree name 参数 / `claude -w` 默认落点**——它们建在仓库内 `.claude/worktrees/`,全仓 grep(死代码审计/删前引用面)会扫进整仓副本重复命中,且与 worktree_guard 共享区前缀判定冲突(BL-63 已加识别容忍,属防御层非许可)。subagent frontmatter `isolation: worktree`(自动建、无改动自动删)不受此限。前端依赖硬链接克隆秒装:`cp -al /home/test/newworld/frontend-web/node_modules <worktree>/frontend-web/node_modules`(实测 1.9s;lockfile 变了再 npm ci)。
 - **同一分支禁两 worktree 并检**(git 默认 refuse);并行看同一基线 → `git worktree add -b <new> <dir> <base>`。
 - **删 worktree 前必 clean+merged+pushed**(= Claude Code 自动 sweep 判据);`rm -rf` 后必 `git worktree prune` 清孤儿;脏的 `--force`。
 - `.gitignore` 加 `.claude/worktrees/`;`.worktreeinclude` 带 gitignored 本地配置(只拷 gitignored 文件 → 先 `git check-ignore -v secrets.env` 确认它真被 ignore)。

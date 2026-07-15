@@ -1,4 +1,42 @@
 {
+  "agentPushNotifEnabled": true,
+  "disabledMcpjsonServers": [
+    "everything-claude-code__playwright",
+    "everything-claude-code__github",
+    "everything-claude-code__memory"
+  ],
+  "editorMode": "normal",
+  "effortLevel": "low",
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": {
+        "repo": "anthropics/skills",
+        "source": "github"
+      }
+    },
+    "everything-claude-code": {
+      "autoUpdate": false,
+      "source": {
+        "source": "git",
+        "url": "https://github.com/affaan-m/everything-claude-code.git"
+      }
+    },
+    "newworld-marketplace": {
+      "source": {
+        "path": "/home/test/newworld/claude-plugin",
+        "source": "directory"
+      }
+    },
+    "pua-skills": {
+      "autoUpdate": false,
+      "source": {
+        "repo": "tanweai/pua",
+        "source": "github"
+      }
+    }
+  },
+  "inputNeededNotifEnabled": true,
+  "model": "claude-fable-5[1m]",
   "permissions": {
     "allow": [
       "Bash(*)",
@@ -43,46 +81,14 @@
       "RemoteTrigger(*)",
       "PushNotification(*)",
       "NotebookEdit(*)",
-      "ShareOnboardingGuide(*)"
+      "ShareOnboardingGuide(*)",
+      "Edit(/home/test/newworld/CLAUDE.md.backup-*)"
     ],
-    "deny": [],
-    "ask": []
+    "ask": [],
+    "deny": []
   },
-  "extraKnownMarketplaces": {
-    "pua-skills": {
-      "source": {
-        "source": "github",
-        "repo": "tanweai/pua"
-      },
-      "autoUpdate": false
-    },
-    "everything-claude-code": {
-      "source": {
-        "source": "git",
-        "url": "https://github.com/affaan-m/everything-claude-code.git"
-      },
-      "autoUpdate": false
-    },
-    "anthropic-agent-skills": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/skills"
-      }
-    },
-    "newworld-marketplace": {
-      "source": {
-        "source": "directory",
-        "path": "/home/test/newworld/claude-plugin"
-      }
-    }
-  },
+  "preferredNotifChannel": "terminal_bell",
   "skillOverrides": {
-    "everything-claude-code:code-review": "off",
-    "everything-claude-code:tdd-workflow": "off",
-    "everything-claude-code:verification-loop": "off",
-    "everything-claude-code:santa-method": "off",
-    "everything-claude-code:continuous-learning-v2": "off",
-    "everything-claude-code:ck": "off",
     "everything-claude-code:accessibility": "off",
     "everything-claude-code:agent-eval": "off",
     "everything-claude-code:agent-harness-construction": "off",
@@ -108,10 +114,12 @@
     "everything-claude-code:bun-runtime": "off",
     "everything-claude-code:canary-watch": "off",
     "everything-claude-code:carrier-relationship-management": "off",
+    "everything-claude-code:ck": "off",
     "everything-claude-code:claude-api": "off",
     "everything-claude-code:claude-devfleet": "off",
     "everything-claude-code:click-path-audit": "off",
     "everything-claude-code:clickhouse-io": "off",
+    "everything-claude-code:code-review": "off",
     "everything-claude-code:code-tour": "off",
     "everything-claude-code:codebase-onboarding": "off",
     "everything-claude-code:coding-standards": "off",
@@ -123,6 +131,7 @@
     "everything-claude-code:context-budget": "off",
     "everything-claude-code:continuous-agent-loop": "off",
     "everything-claude-code:continuous-learning": "off",
+    "everything-claude-code:continuous-learning-v2": "off",
     "everything-claude-code:cost-aware-llm-pipeline": "off",
     "everything-claude-code:council": "off",
     "everything-claude-code:cpp-coding-standards": "off",
@@ -231,6 +240,7 @@
     "everything-claude-code:rust-patterns": "off",
     "everything-claude-code:rust-testing": "off",
     "everything-claude-code:safety-guard": "off",
+    "everything-claude-code:santa-method": "off",
     "everything-claude-code:security-bounty-hunter": "off",
     "everything-claude-code:security-review": "off",
     "everything-claude-code:seo": "off",
@@ -246,40 +256,31 @@
     "everything-claude-code:swift-concurrency-6-2": "off",
     "everything-claude-code:swift-protocol-di-testing": "off",
     "everything-claude-code:swiftui-patterns": "off",
+    "everything-claude-code:tdd-workflow": "off",
     "everything-claude-code:team-builder": "off",
     "everything-claude-code:terminal-ops": "off",
     "everything-claude-code:token-budget-advisor": "off",
     "everything-claude-code:ui-demo": "off",
     "everything-claude-code:unified-notifications-ops": "off",
+    "everything-claude-code:verification-loop": "off",
     "everything-claude-code:video-editing": "off",
     "everything-claude-code:videodb": "off",
     "everything-claude-code:visa-doc-translate": "off",
     "everything-claude-code:workspace-surface-audit": "off",
     "everything-claude-code:x-api": "off"
   },
-  "disabledMcpjsonServers": [
-    "everything-claude-code__playwright",
-    "everything-claude-code__github",
-    "everything-claude-code__memory"
-  ],
-  "statusLine": {
-    "type": "command",
-    "command": "sh /home/test/.claude/statusline-command.sh"
-  },
-  "tui": "default",
+  "skipDangerousModePermissionPrompt": true,
   "skipWorkflowUsageWarning": true,
+  "statusLine": {
+    "command": "sh /home/test/.claude/statusline-command.sh",
+    "type": "command"
+  },
+  "switchModelsOnFlag": false,
+  "teammateMode": "in-process",
   "theme": "light",
-  "preferredNotifChannel": "terminal_bell",
-  "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
+  "tui": "default",
   "voiceEnabled": true,
-  "model": "claude-fable-5[1m]",
   "worktree": {
     "baseRef": "fresh"
-  },
-  "effortLevel": "low",
-  "skipDangerousModePermissionPrompt": true,
-  "editorMode": "normal",
-  "switchModelsOnFlag": false,
-  "teammateMode": "in-process"
+  }
 }
