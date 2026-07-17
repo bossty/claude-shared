@@ -24,6 +24,28 @@ Restart=on-failure
 2. `launch-best.sh` 自己 `setsid nohup java` 启的那个 → **9997 已被 systemd 那个占** → 启动失败、把 `boot.log` 覆盖成一句「端口占用」
 3. 但 launch 的 readiness 探针 curl `:19997/health` **探到的是 systemd 起的那个** → **报假 READY**（结果侥幸正确，过程全错）
 
+### ⚠️ 2026-07-16 我曾在此写过一节「假 READY 更深根因」——**已自我推翻，全文作废**
+
+原文断言：「`/health` 恒返 200 → **所有 `launch-*.sh` 的 readiness 探针无条件恒绿** → 这才是假 READY 的真根因，上面第 3 条只说对一半」。
+
+**这是错的。** `launch-best.sh:58` 三台实测原文：
+```bash
+code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 3 http://127.0.0.1:19997/actuator/health ...)
+[ "$code" = "200" ] && { echo "  READY ..."; exit 0; }
+```
+**探的一直是 `/actuator/health`、判据 HTTP 200，完全正确**（文件 mtime 07-15 00:09，早于 BL-70 采集启动）。上面第 3 条的原解释（探针探到了 systemd 起的那个实例、它确实 UP）**本来就完整正确**，不需要"补"。
+
+**我怎么错的（这才是本节唯一值钱的东西）**：`:19998/health` 返 200 是我亲手实测的真事实；但「launch 脚本探 `/health`」是我**从 BL-70 交接档里那句「探针 curl `:19997/health`」直接采信、从未 `cat` 过脚本真身**——而交接档那句话本身就写错了。真事实 + 未验证的转述 = 一个不存在的"根因"，还被我写进 memory/BACKLOG、并据此说服 Owner 授权改共享模块 `newworld-common` + 部署。**同一个会话里我刚写完 [[reference_handoff_source_structure_claim_must_verify]]（交接档结论必抓真页面证伪），转头就犯**。→ 铁律强化：**引用交接档里的任何「某脚本/某配置怎么写」时，必须当场 `cat`/`grep` 那个文件本身；文档写的路径/端点/参数一律不可信。**
+
+**站得住的事实（订正后）**：
+- `/health` 及任意未映射路径，Spring 侧确曾恒返 HTTP 200（404 只在 body）——真。修法 `@ResponseStatus(HttpStatus.NOT_FOUND)` 已合 master `e79831b11` 并部署 ca-admin。
+- **修后实测：主端口 `:9999/health`→真 404 ✓；但管理端口 `:18080/health` 仍 200**（childManagementContext 不受主上下文 `@RestControllerAdvice` 管）。**故此修并未消灭"管理端口上的假绿"**，而探针恰恰都在管理端口——所幸它们本来就探对了端点，无实害。
+- **唯一真实的假绿实例 = `scripts/deploy-web.sh:174`**（探 `${WEB_PORT}/actuator/health` = `:7777/actuator/health`，而 actuator 只绑 `:18080` → 未映射 → 靠 200-包-404 假绿）。已修为 `${MGMT_PORT}`（同 commit）。**不是 launch-*.sh。**
+
+**仍然成立的铁律**：BuyVM worker 健康只认 **管理端口 + `/actuator/health` + body 含 `"status":"UP"`**；禁用 `/health`、禁只看 HTTP 状态码（管理端口至今仍会假 200）。同源坑见 [[reference_actuator_port_18080]]。
+
+**判进程数别用 `pgrep -fc "<flag>"`**：命令行里含该 flag 字符串的 shell/ssh 会自匹配，恒多算 1（实测报 2 实为 1）。用 `ps -eo cmd | grep "[j]ava -jar" | grep -c "<flag>"`。姊妹坑 = `pkill -f` 自匹配杀自己（[[reference_autossh_sidecar_tunnel_pkill_gotcha]]）。
+
 **重启姿势**：buyvm-data 用 `sudo systemctl restart newworld-data-best`；web-01/db 用 `bash /home/test/launch-best.sh`。
 
 ## 三个日志路径（最坑）

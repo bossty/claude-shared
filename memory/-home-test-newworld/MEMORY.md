@@ -5,7 +5,7 @@
 ## 近期工作 / 进行中
 - [★★HTML壳阶段二观测收口+BL-72 504三线triage (07-15)](docs/sprint/2026-07-15-bl72-504-triage/SESSION-STATE.md) — HIT偏低坐实(60sTTL×PoP分散)→edge TTL 60→300s;BL-72三线:①真504在CF Argo/LB派发层(主线,源站已证伪)②keepalive分支`fix/bl72-keepalive-hygiene`未部署③拦通配毙(200出壳91.9%随机子域=load-bearing);教训=改配置前查引用面+早期结论必fact-check
 - [★jable 封面链路事故:恢复源站原图兜底 **已合master`1271130f2`+部署验证真出片122896,分支已清** (07-15)](reference_cover_miss_not_ipban_placeholder_probe.md) — 根因=DMM封面未上架+清理删行堵死hardCap;markDead失效立BL-71;判别法见reference节同名条目
-- [★★BL-70 crawl-monthly 页范围缺口修复 **已合master`a9e7cd2f7`**(全量门2214/0,分支已清);三机硬分片全量采集进行中(ETA≈18-20h) (07-15)](docs/sprint/2026-07-15-bl70-full-month-crawl/SESSION-STATE.md) — 源站实证best每月111页(原上限50页只采45%);蓝军[BLOCKER]cap=20<27条/页静默丢片[[reference_hardcoded_cap_silent_drop_masked_by_old_concurrency]];副产双管理坑[[reference_buyvm_best_worker_systemd_vs_launch_script]];坐标系=1-based入参p→urlPage p-1
+- [★★BL-70 crawl-monthly 页范围缺口修复 **✅已收口**:合master`a9e7cd2f7`+5/6月全量采集完成核验(07-16),BACKLOG已移入§6 (07-15)](docs/sprint/2026-07-15-bl70-full-month-crawl/SESSION-STATE.md) — 源站实证best每月111页(原上限50页只采45%);三分片successPages=74/failedPages=0/overflowSkippedPages=0全达标,库存status=3 400→5814部(理论上限≈5994,跨月去重后吻合);蓝军[BLOCKER]cap=20<27条/页静默丢片[[reference_hardcoded_cap_silent_drop_masked_by_old_concurrency]];副产双管理坑[[reference_buyvm_best_worker_systemd_vs_launch_script]];坐标系=1-based入参p→urlPage p-1;**数据全躺status=3用户不可见=有意设计**(发布策略BL-68未定/best零监控BL-69);未落档副产=shard1b(p1-74复跑+737部)发起方查无实据
 - [★★BL-64(原BL-60/63) xvideos best榜接入+20类分类金标1353条 **已合master`2aeca89a5`+BL-65预览bug修复合master`0cc02f61d`**;buyvm worker真采已开(6/7月40部入库);遗留=cron未装+ca-admin dry-run两键未删,评测补强待排期 (07-14)](project_xvideos_best_onboarding_2026_07_14.md) — 预览bug根因见[[reference_handoff_source_structure_claim_must_verify]];best零入库四叠加根因(代码零调用+301+mandatory双通路绕过forbid);无码解放口径冲突致F1暴跌0.757→0.057;LLM批量模式100%失效(json_object返不了数组)
 - [★BL-59 madou.club 采集接入 开发+测试完成**未合master**(分支feat/madou-crawler,9commits);金标B类真出片PASS (07-13)](project_madou_crawler_2026_07_13.md) — 蓝军4MAJOR全修;基类null→SKIPPED守卫有跨爬虫副作用(削弱supjav熔断)→revert改madou本地根治
 - [★★BL-60/61 madou广告水印识别+厂牌映射 **❌BL-60已放弃(Owner 07-14拍板:不做自动检测,全部入库后续人工剔除)**,代码零改动零回滚(纯docs`e816421ce`);BL-61厂牌映射待单独定 (07-14)](docs/sprint/2026-07-13-madou-crawler/SESSION-STATE-BL60-61.md) — 放弃理由:角落烧录域名水印无现成方案(零样本认未知域名需LLM vision+白名单,长期人工成本不低于事后剔除)+OCR误差会误杀好片;方案非蒸发是没落档[[reference_session_jsonl_archaeology_before_redesign]];真对手=域名水印非片头横幅(真帧37/37);待Owner=整片跳过vs标记复核
@@ -14,7 +14,7 @@
 
 ## reference(load-bearing,常 recall)
 - [冷却/短路/跳过类修复生产验证:命中路径常无日志→用状态key(fail-count)分布轨迹看runaway/frozen,非grep;wiring用key格式与读侧逐字对齐证](reference_nolog_codepath_validate_via_state_key_trajectory.md) — BL-71实例:supjav无-marker重载致fail-count无限累加到56(delete分支从不执行)=靶心化石;两轮run后MAX/count冻结=无runaway;局限=未抓现行须诚实报;附跨时区date -d野sleep坑
-- [CF 504+origin=0 先查 protocol=UNK 判记账伪影再开排查](reference_cf_504_unk_protocol_accounting_artifact.md) — UNK+visits=0=请求未完成的决定性指纹;504全落miss是因果反转(慢给了连接死亡时间窗);合成cache-buster探测cf-ray尾巴绕coloCode authz;BL-72两会话排查被一个维度查询翻案
+- [CF 504+origin=0 先查 protocol=UNK 判记账伪影再开排查 **(07-16 重大订正:GFW归因已证伪)**](reference_cf_504_unk_protocol_accounting_artifact.md) — UNK+visits=0=请求未完成的决定性指纹;~~CN集中=GFW干扰~~+~~504全落miss=慢响应给时间窗、正解提HIT~~**双双证伪**(主域17.rip实测US 504=38.9%>CN 23.9%;TTL 60→300s后HIT升504纹丝不动)→当前最佳解释=浏览器预连接伪影(真浏览器200:504≈1:1,纯脚本SG零504),用户无感无需修;判别新增④地理集中必换对照源验分母⑤真浏览器vs脚本对照⑥limit必配orderBy(无序=任意N组非topN,静默截断);升plan拿coloCode官方查无记载可能白买
 - [「同几番号反复失败+产出骤降」≠IP封:历史命中URL复测+占位图语义判别;封面miss删行→markDead失效→循环重采堵死hardCap](reference_cover_miss_not_ipban_placeholder_probe.md) — awsimgsrc 404占位jpg/pics.dmm 302 now_printing=片未上架非封禁
 - [buyvm best worker: systemd unit vs launch 脚本双管理打架 + 假 READY + 三个日志路径](reference_buyvm_best_worker_systemd_vs_launch_script.md) — 只有buyvm-data有systemd unit(Restart=on-failure);launch杀进程→systemd自动拉起→launch自己启的撞端口失败,但readiness探针探到systemd那个→报假READY;logback写相对路径→日志位置由cwd决定(systemd的在/home/test/best-run/logs/data/);不靠日志判活=ss看ESTAB+CPU时间+线程数
 - [硬编码 cap < 每页条数 = 静默丢片；旧并发模式可能意外互补掩盖它](reference_hardcoded_cap_silent_drop_masked_by_old_concurrency.md) — BL-70 实例:cap=20 vs 每页27条,break后剩余7条不计入任何stats;**旧「三机同范围抢锁」的冗余扫描意外补上了缺口**,改硬分片才让它第一次真咬人→铁律=改并发/分片架构必先枚举「旧的重复扫描掩盖了哪些潜伏bug」;批量任务每台启动命令都必须显式带cap
@@ -76,6 +76,8 @@
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
+- [「失败集中在X」先验分母效应:单样本源的分布=样本构成非现象特征,必换构成不同的对照源](feedback_distribution_reflects_sample_not_phenomenon.md) — 07-16 BL-72实事故:「504的94%是CN」被两会话读成GFW针对CN,真相=canary zone用户本就94%CN(分子分母同源);换主域17.rip一查US 504=38.9%>CN 23.9%当场证伪;报比率不报绝对数+反问「成功的那批什么分布」
+- [读SESSION-STATE必先消化档头追加,与BACKLOG交叉核对再开工](feedback_session_state_header_addendum_wins.md) — 07-16实事故:BL-72主线已被追加结案,我仍按正文旧节推荐攻已证伪方向并落档,Owner据此授权错方向一轮;订正旧节须就地标注失效
 - [worktree 一律开在仓库外 /home/test/worktree-<名>，禁 EnterWorktree 默认落点 .claude/worktrees/](feedback_worktree_location_outside_repo.md) — Owner 07-14 指令；用 EnterWorktree path 参数进手动建的仓库外 worktree；node_modules 硬链接克隆 1.9s；dev-workflow skill 已订正(3109e2657)
 - [视频源金标验证必须真点正片播放](feedback_goldset_must_play_real_video.md) — 只验封面+preview 会漏正片不可播(supjav BL-58 潜伏教训);判据用站点真实播放器videoWidth>0非自建Hls默认配置
 - [Bash 工具超时不杀命令只转后台→跑飞必留野进程；真开枪的只有命令自带 timeout](feedback_bash_timeout_does_not_kill_stray_processes.md) — BASH_DEFAULT_TIMEOUT_MS 本机已设 300000 也没救(受控实验:工具 timeout=15s 死循环命令仍在跑);"shell 假死"真相=shell 在尽职 do_wait 等永不退出的孩子(查 /proc/pid/wchan);杀进程组不够(GNU timeout 另开 pgid→孙进程孤儿化)须递归杀整棵树;告警已机制化(Stop hook stray_shell_reminder + nw-reap-stray)
