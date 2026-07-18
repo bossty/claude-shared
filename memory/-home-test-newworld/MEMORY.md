@@ -13,6 +13,8 @@
 - [★supjav 断流修复(referer 429):代码完成+部署ca-admin已live核实,待真出片验证+合master **未合** (07-13)](docs/sprint/2026-07-13-supjav-referer-fix/SESSION-STATE.md) — 根因=effectiveReferer把盗链referer套到Google Drive段致429;修=hls.referer-agnostic-hosts豁免走pickReferer默认;fMP4/key路径缺口→BL-56;同型第5次[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
 
 ## reference(load-bearing,常 recall)
+- [主checkout被他会话占用时安全合master:临时detached worktree合并+回主checkout推特定sha](reference_merge_master_when_main_checkout_busy.md) — 别在主checkout直接合(会夹带别人未推送commit,实例a5a504707+152行);别用worktree_guard逃生口;push特定sha是纯网络操作不动主checkout HEAD/工作树;`git branch -d`会因HEAD是别人commit而拒,先--is-ancestor验再-D
+- [N9E规则落库+PromQL对≠engine真eval:live红验证法(压阈+for=0看alert_cur_event真出事件再逐字还原)](reference_n9e_rule_live_redtest.md) — BL-15实跑(规则142);副产既存缺口=edge pick告警链路此前从未live验证过(136/137/138稳态恒0=可能全是摆设)→**凡「稳态恒0」的告警都该做一次live红验证**;前科108 disabled=0却永不触发;局限=只证到engine生成事件,Telegram端服务器侧无法证实
 - [冷却/短路/跳过类修复生产验证:命中路径常无日志→用状态key(fail-count)分布轨迹看runaway/frozen,非grep;wiring用key格式与读侧逐字对齐证](reference_nolog_codepath_validate_via_state_key_trajectory.md) — BL-71实例:supjav无-marker重载致fail-count无限累加到56(delete分支从不执行)=靶心化石;两轮run后MAX/count冻结=无runaway;局限=未抓现行须诚实报;附跨时区date -d野sleep坑
 - [CF 504+origin=0 先查 protocol=UNK 判记账伪影再开排查 **(07-16 重大订正:GFW归因已证伪)**](reference_cf_504_unk_protocol_accounting_artifact.md) — UNK+visits=0=请求未完成的决定性指纹;~~CN集中=GFW干扰~~+~~504全落miss=慢响应给时间窗、正解提HIT~~**双双证伪**(主域17.rip实测US 504=38.9%>CN 23.9%;TTL 60→300s后HIT升504纹丝不动)→当前最佳解释=浏览器预连接伪影(真浏览器200:504≈1:1,纯脚本SG零504),用户无感无需修;判别新增④地理集中必换对照源验分母⑤真浏览器vs脚本对照⑥limit必配orderBy(无序=任意N组非topN,静默截断);升plan拿coloCode官方查无记载可能白买
 - [「同几番号反复失败+产出骤降」≠IP封:历史命中URL复测+占位图语义判别;封面miss删行→markDead失效→循环重采堵死hardCap](reference_cover_miss_not_ipban_placeholder_probe.md) — awsimgsrc 404占位jpg/pics.dmm 302 now_printing=片未上架非封禁

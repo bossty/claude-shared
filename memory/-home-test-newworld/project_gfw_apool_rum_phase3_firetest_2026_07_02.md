@@ -20,6 +20,16 @@ metadata:
 
 **★★重大纠正(2026-07-02 观测抽样,纠上文"183 降级=A 真退化"的乐观表述)**:reach 分布**双峰**(抽样 1141 格:87% =1.0 / 7.8% =0 / ~5% 中间);但抽 40 个 reach=0 格查底层 RUM:**67.5%(27/40)只由 1 个失败 beacon 支撑、32.5% 由 2-5 fail、0 个有 ≥6 fail 强证据**。→ **"183/291 降级"严重虚高,几乎全是薄样本噪声,A 池当前无强证据真封**(实为回到 A_POOL"没多少真退化"的方向,但这次能量化"为什么看起来有退化")。**根因=我实现的融合数学缺小样本收缩**:`ReachFusionMath.fuse` 在 `nodeCount=0`(纯 RUM)时 `c=0`、reach=succ/(succ+fail) 无先验伪计数 → 1 个 fail beacon 直接 reach=0(sample_min=1→reach_min=0 的机制根因)。**修法=Beta(α₀,β₀) 弱先验**:reach=(succ+α₀)/(succ+fail+α₀+β₀),薄格自动回中性、大样本才敢极端。**下一个 spec = "RUM-only 小样本收缩"(治本,替代急着接 A_POOL——接了是喂噪声给选址)**。
 
+> ## ⚠️ 2026-07-17 重大订正：下方「对消费方仍 dark / 没人读 A 格 / 纯观测零用户影响」**已失效，勿再据以关 flag**
+>
+> **BL-17 结案时实证推翻**（全文 `docs/sprint/2026-07-06-unified-domain-failover/BL17-CLOSURE.md`）：`REACH_FUSION_A_POOL_ENABLED` 已从「观测开关」变成 **live 生产数据源**，因 **07-10 上线的 reachHint**（`REACH_HINT_ENABLED=true`，update_time 2026-07-10 01:02）。证据链：`ReachHintService` 是 `reach:grid` 消费层（为 `/settings` 注入 reachHint），按 `{domain}:{isp}:{province}` 读且**不区分 category**；它消费的 `sampleCount` 正是 A 池写的 `rum_n`；`contemplateoasis.help` 经 DB 查证 `category=A` 且其 `reach:grid` 键实际存在；降级格 `devzone26.top`/`digit-zone.top`/`flowzone26.top`/`datadock26.top`/`codepulse26.cc` **全部 category=A、active**。
+>
+> **关掉的真实后果**：A 域格停写 → 消费键 TTL(1800s) 过期 → reachHint 对 A 域读不到 `rum_n` → fail-open 视为健康 → **前端对真正被封的 A 域不再沉底**＝静默砍掉已在产的功能信号。故 Owner 07-17 拍板 **`REACH_FUSION_A_POOL_ENABLED` 保持 true**，只撤了快照 cron。
+>
+> **本条下方「顺带清理(可选)…考虑 flag 关回 dark-off 彻底 YAGNI 结案」的处方同样作废**（只有「撤快照 cron」那半已执行：cron 已去、`~/apool-rum-obs`+脚本已删，69 点原始数据与 51 行脚本归档在 `docs/sprint/2026-07-06-unified-domain-failover/bl17-apool-rum-*`）。
+>
+> **可推广的教训**：backlog/memory 记的**处方**会随架构演进过期，不只是描述会过期——本例处方写于 07-02/07-09，07-10 的 reachHint 上线改了它的前提，而条目无人更新。**执行任何「关 flag / 删代码」类旧处方前，必须重新 grep 消费面**（[[feedback_verify_not_recall]]、[[feedback_session_state_header_addendum_wins]]）。三条哨兵结论仍有效，但只管「要不要接 `A_POOL_PENALTY`」，管不着数据生产 flag——**哨兵的适用范围要与动作对象对齐**。条件2 哨兵另经查证机制上永不会响 → BL-74。
+
 **运行姿态(截至 2026-07-02 夜,LIVE)**:`system_config.REACH_FUSION_A_POOL_ENABLED='true'`(group=gfw)ON **观测一周**;**对消费方仍 dark**(reachHint/A_POOL 仍 off、pick-p 只读 P 域,没人读 A 格)→ 纯观测零用户影响。ca-admin 跑 `20260702-190608-apoolrum-7e98ce16.jar`(current.jar),回滚 jar `newworld-admin-reachstale-0b6019ca.jar`。**秒回滚** = DB set false + `PUBLISH shared:ch:sysconfig-refresh REACH_FUSION_A_POOL_ENABLED` + `INCR shared:system-version`。
 
 **部署/翻 flag 实证(纠旧 memory)**:
