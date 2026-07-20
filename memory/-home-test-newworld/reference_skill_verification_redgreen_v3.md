@@ -22,4 +22,4 @@ metadata:
 ## SkillOpt 裁决（防重复论证）
 `microsoft/SkillOpt` = 把 skill 当可训练文档 + held-out 门控优化（rollout→reflect→bounded edit→gate）。**steal-idea 不 adopt**：产品要"带正确性信号的 benchmark 任务",我们 corpus 多是不可打分的领域参考;其 +19~24 点是公开 task-benchmark 数字,不迁移到我们;且 optimizer 发 LLM 调用 + Sleep 收割 transcript(含内网IP/GFW)=数据外发面,承 copy-not-install。**只偷 held-out 门控这一条思想（即本规格 #1）。**
 
-关联 [[feedback_verify_not_recall]] [[feedback_cross_component_key_format_align]]；全文 `docs/sprint/2026-06-27-toolchain-realignment/P-redgreen-skill-verification.md`。
+关联 [[feedback_verify_not_recall]] [[feedback_cross_component_key_format_align]]；全文 `docs/sprint/_archive/2026-06-27-toolchain-realignment/P-redgreen-skill-verification.md`。

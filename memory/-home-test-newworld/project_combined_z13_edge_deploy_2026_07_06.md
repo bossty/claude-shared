@@ -28,4 +28,4 @@ metadata:
 
 **行为变化面**：①relay.{S域} 从错归 organic 改按渠道归因 ②NLB-direct 无渠道落裸 P 域（dormant）③domain-health flag 翻后走索引读 ④其余 302/统计逐字节同前。**回滚**：flag 翻 false（秒级回 SCAN）；edge=git 恢复两 lua+restart；前端/web/admin 秒级 jar 回滚。
 
-**源真相源**：docs/sprint/2026-07-06-z13-domain-health-no-scan/（DESIGN/REVIEW/HANDOFF）+ docs/sprint/2026-07-05-edge-protocol-v6-alignment/PLAN.md。
+**源真相源**：docs/sprint/2026-07-06-z13-domain-health-no-scan/（DESIGN/REVIEW/HANDOFF）+ docs/sprint/_archive/2026-07-05-edge-protocol-v6-alignment/PLAN.md。

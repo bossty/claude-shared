@@ -7,7 +7,7 @@ metadata:
   originSessionId: 65a2c4d6-8a46-4959-b246-442bcc323cc6
 ---
 
-# 首屏占位 LCP 优化（2026-07-05，sprint docs/sprint/2026-07-05-firstscreen-placeholder-lcp/）
+# 首屏占位 LCP 优化（2026-07-05，sprint docs/sprint/_archive/2026-07-05-firstscreen-placeholder-lcp/）
 
 三方案全量上线（合 master merge commit 见 sprint DESIGN.md；web×6 + ca-admin `20260705-042405-firstscreen-849b1116.jar`）：
 - **A** hero blurhash 占位（Mobile 48×27 / PC 32×24，共享 `utils/blurhash-decode.js` 尺寸感知缓存）——真机前后对比：hero 灰块→模糊预览（evidence/before|after-firstscreen.png）。

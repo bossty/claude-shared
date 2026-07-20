@@ -7,7 +7,7 @@ metadata:
   originSessionId: 55b6c752-c743-48d4-9475-c0663cd54e40
 ---
 
-2026-06-15 BSP 团队(dash-auditor 消费侧 / tsdb-auditor VM 真值 / plugin-auditor 主机侧 + 蓝军 + lead 二查 + ops-db/ops-cat 执行)修复 N9E 迁 CA 后监控数据。全程证据落盘 `docs/sprint/2026-06-15-n9e-monitoring-repair/`（CHARTER/GAP-MATRIX/FIX-PLAN/REPLICA-MONITORING-SPEC/EXEC-WAVE-SPEC/LOGROTATE-SPEC/CLOSURE）。
+2026-06-15 BSP 团队(dash-auditor 消费侧 / tsdb-auditor VM 真值 / plugin-auditor 主机侧 + 蓝军 + lead 二查 + ops-db/ops-cat 执行)修复 N9E 迁 CA 后监控数据。全程证据落盘 `docs/sprint/_archive/2026-06-15-n9e-monitoring-repair/`（CHARTER/GAP-MATRIX/FIX-PLAN/REPLICA-MONITORING-SPEC/EXEC-WAVE-SPEC/LOGROTATE-SPEC/CLOSURE）。
 
 **★迁移后监控三类病根（通用，下次迁移先按这三类筛）**：
 1. **未对应**=HK 时代 label 在新 VM 整类不存在 → dashboard/alert 引用它就整块空/聚合塌缩。本次：`application`(VM 只有 `service`=admin/data/web/edge/openresty，无 app/application)→board17+alert15/18/19；`group`(http_response 真实 label 是 `target`=edge-nginx/newworld-web-local)→alert1/50/51 **静默永不触发**；redis 变量 `instance`(两台同值 127.0.0.1:6379 无法区分)→改 `ident`；redis 指标名 redis_memory_used_bytes→`redis_used_memory`。

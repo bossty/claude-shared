@@ -14,7 +14,7 @@ metadata:
 **已合 master `f0c98761` 并四线部署完成（07-06 02:32-02:45 HKT，Owner 授权 force-peak）**：线0 yml铺ca-admin(md5核对+.bak-pre-f0c98761备份)→线1 web×6→线2 fe-web×6→线3 admin jar `20260706-024449-f0c98761`→线4 fe-admin。验证：admin 启动0 ERROR+SnackSlotSpecService 17槽加载OK；jar真身含slot-specs路由+hint字段(python zipfile)；/slot-specs super-JWT探针返{"encrypted":true}=路由真mapped；fe-admin dist含"建议尺寸：PC"新串；deployed/web+frontend-web+frontend-admin 三tag=f0c98761；eu-web-01 236条ERROR=02:38:54重启秒已知Lettuce drain模式,5min后0条。部署日志 scratchpad/deploy-all-f0c98761.log。上一会话03:00定时部署已按Owner令取消(脚本改名.CANCELLED,进程已死)。
 合并踩坑：①共享 checkout `--ff-only` 对齐被 tail 吞错未生效，第一次合并建在旧基线被拒（重置重建）；②worktree `git add -A` 误裹 claude-shared/memory 镜像过期快照与他会话冲突（取 master 侧解决）——★worktree 提交前应 `git status` 核改动面只含本任务文件。
 
-## 核心发现（证据 docs/sprint/2026-07-06-snack-slot-size-hints/FINDINGS.md）
+## 核心发现（证据 docs/sprint/_archive/2026-07-06-snack-slot-size-hints/FINDINGS.md）
 - 「前台实际渲染 / etc/snack-slot-spec.yml / 管理端提示」是**三套互相矛盾的数**：YAML 15/17 槽是 v3 文档 IAB 占位值（Owner 只确认过 z02）；管理端提示硬编码且图标位判定用死 slug 前缀 `home_after_` 永不命中。最重：g01 开屏 YAML 写 1080×1920 竖屏全图，实际是固定 300×250 卡片；p01「信息下方」实际渲染 Snack08 品牌卡网格根本不是横幅；p02 侧栏 300×600 实际 300×250。
 - **上传零尺寸校验零缩放**：加密单文件流水线只 WebP 转码+500KB 降质，旧 ffmpeg resize 已是死代码；规格 YAML 此前只做存在性校验（"死规格"）。
 - 真 bug：上传响应键名错位（后端返驼峰 `origExt`，前端读 `data.orig_ext`）→ 新上传广告 orig_ext 落库恒 NULL（下游无运行时消费方，潜伏级）。

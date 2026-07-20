@@ -9,7 +9,7 @@ metadata:
 
 **触发**:Owner 担忧前端「CSS/JS 混乱和互相覆盖样式/行为」。审计结论=**有序分层非面条式**,真实冲突仅 3 处 CSS + 1 处 JS 配额争用(不是系统性混乱),故只做精准收敛不大重构。
 
-**产物**:sprint `docs/sprint/2026-07-06-frontend-maintainability-audit/`(FINDINGS.md 含 H1-H5/M1-M11+13条"不用动"反向清单;PLAN/PLAN2;progress-ledger;DEPLOY-VERIFY.md)。markdown 已提交 `3745344c`,8.2M evidence 截图留本地不入库(防 bloat)。
+**产物**:sprint `docs/sprint/_archive/2026-07-06-frontend-maintainability-audit/`(FINDINGS.md 含 H1-H5/M1-M11+13条"不用动"反向清单;PLAN/PLAN2;progress-ledger;DEPLOY-VERIFY.md)。markdown 已提交 `3745344c`,8.2M evidence 截图留本地不入库(防 bloat)。
 
 **23 Task**(subagent 实施+审查逐 Task 门控):
 - 阶段1(覆盖治理9)=**page-hide-flush.js 协调器**(单监听器+FLUSH_PRIORITY 优先级+500ms 去重+64KB 信标配额记账,取代 5 处散落 pagehide 监听)+ 5 遥测迁移 + init 幂等 + **--card-mb CSS 变量收敛**(PC 20px/Mobile 12px)+ 分页收敛。

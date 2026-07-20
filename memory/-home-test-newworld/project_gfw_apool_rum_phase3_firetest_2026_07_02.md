@@ -11,7 +11,7 @@ metadata:
 
 **方案 3→1(观测优先,Owner 定)**:阶段3=独立 flag dark 写 A 格 + 观测一周;阶段1=数据证明有退化后翻 `A_POOL_PENALTY` 接选址(migrateTo,覆盖 P→A migrate + A→A 被封跳转)并重跑 web×6 火测;数据不支持则 YAGNI。**关键设计**:①独立 flag `REACH_FUSION_A_POOL_ENABLED`(默认 false dark,与 `REACH_FUSION_ENABLED` 正交);②**demote-only**(fail-open=1.0,只打压有失败记录的格,无 RUM 证据不写 → 严格不比现状差);③只处理 `Domain.Category.A` 域(joint 含全部上报域,不过滤会污染 B/CDN);④admin 侧 SCAN joint(不改 web 热路径);⑤RUM-only 消费格短 TTL(1800s)。
 
-**实现(单点改 `ReachFusionService`,4 task TDD)**:`cellFromJointKey`(去 prefix+去尾桶)+`scanRumCells`(SCAN joint 去重)+`loadAPoolDomains`(A active∪degraded)+`runForACells`(过滤 A→readRum→`fuse(1.0,0,...)`纯 RUM→写 `reach:grid` `src=rum_only`)+`runOnce` flag-on 才跑 A 路径 + 4 gauge。**分支 `worktree-gfw-reach-apool-rum`(8 commits,未合 master)**;17/17 单测 + 全模块 2089/0-fail。spec `docs/superpowers/specs/2026-07-02-gfw-reach-apool-rum-fusion-design.md` / plan `.../plans/2026-07-02-gfw-reach-apool-rum.md` / runbook `docs/sprint/2026-07-02-gfw-reach-apool-rum/DEPLOY-FIRETEST.md`(均在分支)。
+**实现(单点改 `ReachFusionService`,4 task TDD)**:`cellFromJointKey`(去 prefix+去尾桶)+`scanRumCells`(SCAN joint 去重)+`loadAPoolDomains`(A active∪degraded)+`runForACells`(过滤 A→readRum→`fuse(1.0,0,...)`纯 RUM→写 `reach:grid` `src=rum_only`)+`runOnce` flag-on 才跑 A 路径 + 4 gauge。**分支 `worktree-gfw-reach-apool-rum`(8 commits,未合 master)**;17/17 单测 + 全模块 2089/0-fail。spec `docs/superpowers/specs/2026-07-02-gfw-reach-apool-rum-fusion-design.md` / plan `.../plans/2026-07-02-gfw-reach-apool-rum.md` / runbook `docs/sprint/_archive/2026-07-02-gfw-reach-apool-rum/DEPLOY-FIRETEST.md`(均在分支)。
 
 **★火测 PASS(2026-07-02 11:14 UTC 翻 flag,11:17 轮激活)**:
 - **安全**:0 ERROR;S/P 融合 `gfw_reach_cells`~13534 健康、probe_age 正常 → **SCAN 6441 joint 键未拖垮融合轮**(R1 成本担忧化解)。

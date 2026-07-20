@@ -21,7 +21,7 @@ metadata:
 4. **上次事故清理漏 EU**：EU replica 卡指死 CA 的 IO=No 态 ~1.5h，EU 用户读陈旧 18.6 万笔。教训：**回滚清理必须对全部 replica 逐一对账，不只主角**。
 
 **方法论（owner 拍板，已验证 work）**：
-- **检查点式步进 runbook** `docs/sprint/2026-06-12-os-alignment/CUTOVER-RUNBOOK-CHECKPOINTED.md`（commit 3b7f29ef）：A 可逆前置/B 摘流/C 不可逆核心；每步=专家执行+验证判据+失败决策；**失败即 STOP 不自动续跑不自动回滚**；回滚是显式人工步骤分 PONR 前（解冻+重启 HK web+CF re-arm 三件套）/PONR 后（**绝不解冻 HK**，情形 A/B 决策树）；只有 S6 六节点循环脚本化。
+- **检查点式步进 runbook** `docs/sprint/_archive/2026-06-12-os-alignment/CUTOVER-RUNBOOK-CHECKPOINTED.md`（commit 3b7f29ef）：A 可逆前置/B 摘流/C 不可逆核心；每步=专家执行+验证判据+失败决策；**失败即 STOP 不自动续跑不自动回滚**；回滚是显式人工步骤分 PONR 前（解冻+重启 HK web+CF re-arm 三件套）/PONR 后（**绝不解冻 HK**，情形 A/B 决策树）；只有 S6 六节点循环脚本化。
 - 4 个 DRY helper：cf-drain-hk/cf-rearm-hk（snapshot 持久 $HOME/.cutover-snapshots）/preflight-master-reachability（7 节点×3306+6379 三态门）/cutover-s6-repoint（aws-data 最先 G4+F1 fail-fast+ss 真连断言）。
 - **diag 法则**：refused(111)=路径通没人 listen（app 层）；timeout(110)=网络 drop（peering/路由/SG）。探 refused 前先确认目标主机真跑该服务（.222 是 DB、redis 在 .128，探错主机=伪信号）。
 - **drain-before-stop**：停任何 serving 节点前必先从 CF steering 摘流+验零流量（HK 实测 2033 req/min 真流量）；region web 是流量目的地**绝不能 CF 摘**，只能应用层 quiesce。

@@ -9,7 +9,7 @@ metadata:
 
 # 2026-06-05 监控告警 multi-agent RCA（5人团队交叉挑刺+全员通过）
 
-owner 抛三告警(⚠️Redis 284 / 🔴JS错误 9117/7938=114.9% / 🔴API失败 18.1% 19816/109195)。组 TeamCreate `alert-rca`：4取证(monitor-analyst=N9E/redis-thread=Redis线程/multiregion=多区域/frontend-404=前端404) + 蓝军 reviewer，互发 SendMessage 挑刺不串轮次，lead 仲裁。档 `docs/sprint/2026-06-05-incident-alert-rca/`(SEED-EVIDENCE + FINDINGS-SYNTHESIS + agents/*)。
+owner 抛三告警(⚠️Redis 284 / 🔴JS错误 9117/7938=114.9% / 🔴API失败 18.1% 19816/109195)。组 TeamCreate `alert-rca`：4取证(monitor-analyst=N9E/redis-thread=Redis线程/multiregion=多区域/frontend-404=前端404) + 蓝军 reviewer，互发 SendMessage 挑刺不串轮次，lead 仲裁。档 `docs/sprint/_archive/2026-06-05-incident-alert-rca/`(SEED-EVIDENCE + FINDINGS-SYNTHESIS + agents/*)。
 
 ## 五数定性（全员签字+蓝军GO）
 - **API 18.1%**：**非源站故障**(origin Tomcat 24h 5xx=0 + web.log 服务端失败0.10%)，但**含 ~6.6% 真实跨洋 CF-504**(详下)+1.5%良性abort+~8%纯客户端(adblock/CN neterr)。根因 fetch.js FIND-4(6-04 commit `65fff601`)接通 api_error/api_success 埋点(改前恒0)→16-20%"首次可测非新故障"；阈值 `API_FAIL_RATE_THRESHOLD`未随"死→活"重标定→上线即误报。**FIND-4是修复非病因，禁revert**(owner反诘揪出)。

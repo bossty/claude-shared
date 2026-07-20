@@ -13,7 +13,7 @@ metadata:
 
 **域名没被烧(别买域)**:阿里云拨测 `boce.aliyun.com/detect/http`(playwright 驱动;itdog 6/21 大面积故障)对 5 个 R_SNACK apex(ux1a.{assetlibs/imgedustock/node-sync/previewedu/stream-lesson}/snack/static/snack05/dcd24532.js)各 200+ CN 节点拨测:每 apex 100+ 节点 HTTP 200+真图、延迟多数<2s、DNS 污染<2%、TLS 全握手(SNI 被烧 IDC 也 RST)。**坑**:boce 下载有 **64KB cap**(图 94KB)→ 所有节点显示精确 64.00KB 不是截断,证不了完整下载。DNS 也没污染(CN 解析器 114/223.5.5.5 返正确 CF IP)。CF 对浏览器 `content-encoding:br` 压缩了不可压的加密图(纯开销,但压缩响应无 Content-Length→截断检测跳过非误判源)。CORS 反射正常(A/P 域 origin 都回 ACAO)。cdn fail 的 from_root 近1h top20 全 snack/图片域零视频(refute 视频主导)。
 
-**蓝军复核 + lead 二查**(`docs/sprint/2026-06-21-cdn-fail-metric-rca/agents/reviewer.md` + DESIGN §2):核心结论成立。额外揪 **F3 双计数真 bug(BLOCKER)**:`encrypted-image.js _doLoad` 首次失败+重试再失败=2 次 reportFailure→fail counter 翻倍+双重轮转。
+**蓝军复核 + lead 二查**(`docs/sprint/_archive/2026-06-21-cdn-fail-metric-rca/agents/reviewer.md` + DESIGN §2):核心结论成立。额外揪 **F3 双计数真 bug(BLOCKER)**:`encrypted-image.js _doLoad` 首次失败+重试再失败=2 次 reportFailure→fail counter 翻倍+双重轮转。
 
 **修复**(分支 `feature/cdn-fail-metric-denominator`,commit d6031964,已 push,**未部署未合 master**):**纯前端,后端/N9E rule 不用改**(beacon controller `record`/`compensateOk` 早支持 cdn ok,只是前端从没发)。① `encrypted-image.js` 成功加载→`traceCdn('ok',{type:'snack'})` 给 rule 42 真实分母(缓存命中不发口径干净;走 enqueueOk 采样+okByLevel 补偿不爆 beacon)② F3 修:`_reportFailureOnce`+`_reportedRef` 跨首次+重试共享,每链路最多上报一次(**用 ref 非 _retried 守卫**——保 decrypt 失败→重试才首次 fetch 失败仍正常上报一次)③ `cdn-failover.js` reportFailure 的 traceCdn('fail') 带 type 流到表供离线 breakdown。测试+4,encrypted-image 11/11、全 frontend 825/825 绿。video/images 的 ok 埋点留后续(本 PR 只 snack)。
 

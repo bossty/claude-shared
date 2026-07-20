@@ -7,7 +7,7 @@ metadata:
   originSessionId: f4b7ce6c-ece8-460f-99f3-acc518f764e6
 ---
 
-5人 agent 团队（D1数据/D2 CF/D3前端/D4业界/蓝军裁判，**不跨轮次沟通+全员一致签字**）验 Owner 假设「前端性能最大瓶颈=index.html+静态文件没缓存到CF」。终稿 `docs/sprint/2026-06-05-cf-static-cache-versioning/FINAL-DESIGN.md`（全员✅）。
+5人 agent 团队（D1数据/D2 CF/D3前端/D4业界/蓝军裁判，**不跨轮次沟通+全员一致签字**）验 Owner 假设「前端性能最大瓶颈=index.html+静态文件没缓存到CF」。终稿 `docs/sprint/_archive/2026-06-05-cf-static-cache-versioning/FINAL-DESIGN.md`（全员✅）。
 
 **★前提证伪（金标=origin请求数，非cf-cache-status）**：hashed `/assets/*.js|css` 字节大头回源=**0**已100%卸载（双节点web.log 10.7min双算法+同窗.js=19425排假0）。静态缓存缺失仅占性能~5-10%且属源站负载维度**非用户感知延迟**。真凶仍是**跨洋CF Anycast+cloudflared tunnel(~60%)**：源站urt p95=**8ms** vs 用户TTFB p75=**1340ms**(167×)，复现[[project_peak_perf_debate_2026_05_29]]。INP~28%(LCP p75=4434)。用户感知大头归 decoupled-geo-lb sprint，本sprint分流不碰。
 

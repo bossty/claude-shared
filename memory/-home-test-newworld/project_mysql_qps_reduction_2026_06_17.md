@@ -38,7 +38,7 @@ metadata:
 - 峰窗 digest 复采 host PID 253838 今晚 23:35 HKT 自动跑(`/tmp/qps_peak_2026-06-17.txt`)，坐实脉冲态构成。
 
 ## 未尽 backlog
-- P1 JDBC 会话态消冗（方法存 `docs/sprint/2026-06-17-mysql-qps-reduction/DEPLOY-PLAN-canary.md §P1`，QPS 涨到真高负载再启）。
+- P1 JDBC 会话态消冗（方法存 `docs/sprint/_archive/2026-06-17-mysql-qps-reduction/DEPLOY-PLAN-canary.md §P1`，QPS 涨到真高负载再启）。
 - anti-adblock Phase 2（夸克/小米反拦截）+ snacks_hidden 拆分 + B-2 @Scheduled 告警（待 Owner 拍）。
 - snack getSnacksBySlot `@Cacheable(unless="#result==null")`（C2 MINOR，missing/disabled slug 仍打库）。
 

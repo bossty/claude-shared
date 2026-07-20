@@ -17,7 +17,7 @@ metadata:
 
 ## 调研结论（13源，0个整包安装）
 - 铁律：**copy-not-install**——禁 symlink 上游第三方 repo、禁第三方 hook 注入会话、禁 npx/curl|bash 安装器（SkillSpector 实测连扫自己+superpowers 都判 DO_NOT_INSTALL=二元裁决是噪声，价值在 issue 清单当 checklist）。
-- 落地：新建 skill `newworld-audit-rigor`（双引证 finding+3类高漏报+attacker=victim+豁免纪律）；编辑 `multi-agent-coord`（蓝军只传 ARTIFACT+CONTRACT 不传 CLAIM+跨模型只读二审）；`commit-message-precision`（diff 可视化对照）。全文 `docs/sprint/2026-06-27-toolchain-realignment/`。
+- 落地：新建 skill `newworld-audit-rigor`（双引证 finding+3类高漏报+attacker=victim+豁免纪律）；编辑 `multi-agent-coord`（蓝军只传 ARTIFACT+CONTRACT 不传 CLAIM+跨模型只读二审）；`commit-message-precision`（diff 可视化对照）。全文 `docs/sprint/_archive/2026-06-27-toolchain-realignment/`。
 
 ## 账户/plugin 状态
 - A 补装 4 plugin：lua-lsp/playwright/skill-creator/claude-api（A 原缺；newworld plugin **不装**，软链已覆盖防双载）。

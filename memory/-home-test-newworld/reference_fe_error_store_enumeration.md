@@ -18,4 +18,4 @@ metadata:
 
 **枚举法**（admin 端点 `/api/v1/monitor/error-top?range=24h` 有 @RequireMenu+@EncryptResponse 不便 curl）：直连 prod Redis（ca-redis 172.34.1.128:6379 Dragonfly，**需 AUTH**，REDIS_PASSWORD 从 web `/proc/PID/environ` 取、禁打印）。web 节点**无 redis-cli**→写原生 RESP python 脚本(socket，无需 redis 库)：AUTH→SCAN `monitor:error-samples*`/`monitor:error-top*`→HGETALL/ZRANGE WITHSCORES→按 msgKey 去重配分数→归一化(strip UA/域名/数字/hash)成"族"。
 
-2026-06-13 实测：1952 raw distinct → 归一 **397 族**。脚本+全表 docs/sprint/2026-06-13-fe-error-triage/FE-ERROR-FULL-TAXONOMY.txt。访问走 [[feedback_multiagent_prod_ops_auth_backstop]] auth-backstop。详见 [[project_fe_error_triage_2026_06_13]]。
+2026-06-13 实测：1952 raw distinct → 归一 **397 族**。脚本+全表 docs/sprint/_archive/2026-06-13-fe-error-triage/FE-ERROR-FULL-TAXONOMY.txt。访问走 [[feedback_multiagent_prod_ops_auth_backstop]] auth-backstop。详见 [[project_fe_error_triage_2026_06_13]]。

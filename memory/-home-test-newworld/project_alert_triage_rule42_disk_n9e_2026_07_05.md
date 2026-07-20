@@ -28,7 +28,7 @@ SSH "Permanently added" 每连必打噪音 = UserKnownHostsFile /dev/null 的必
 **续（同会话，Owner 升级为全项目监控统一 N9E）**：
 - 批1：新建规则 **120 MYSQL-CONN-HIGH/121 MYSQL-REPLICA-LAG/122 MYSQL-DOWN/123 REDIS-DOWN/124 REDIS-CONN-HIGH**（promql 全 VM 实测+absent 阳性对照）；★REDIS-MEM-HIGH 漂移方向反转=**yaml 陈旧 DB 真值是活的**（抄 yaml 前必核 DB）。回镜 `3a309bca`。
 - 批2：删 checkMysql/checkRedis（★主从延迟检查连 master 查 SHOW REPLICA STATUS 恒空=上线起即死），SystemMonitorTask 仅剩前端监控。合 master `1a86b38f`，部署 ca-admin（jar dbredisn9e-bfddaa5e，7min 观察 0 ERROR+consumer 17 次消费）。
-- **全项目盘点+批3-5 计划落档 `docs/sprint/2026-07-05-monitoring-unification/PLAN.md`**：批3=web RUM 告警收编（MonitorService 补 Counter，弱与门拆两条正交规则 http_response 探:7777）；批4=**data 爬虫零告警盲区**（盘点最大发现，断流无信号）；批5=replica-lag-watchdog.sh 与规则121双轨退役/WebHealthCheckTask 删除(需 Owner 推翻 06-14 保 bean 决定)/双 telegram 桥核实/C 类保留项照 CfZoneAuditService 标杆（gauge→VM 留历史）逐步镜像。BaiduTokenAlertTask 实际已停用(@Scheduled 注释)。
+- **全项目盘点+批3-5 计划落档 `docs/sprint/_archive/2026-07-05-monitoring-unification/PLAN.md`**：批3=web RUM 告警收编（MonitorService 补 Counter，弱与门拆两条正交规则 http_response 探:7777）；批4=**data 爬虫零告警盲区**（盘点最大发现，断流无信号）；批5=replica-lag-watchdog.sh 与规则121双轨退役/WebHealthCheckTask 删除(需 Owner 推翻 06-14 保 bean 决定)/双 telegram 桥核实/C 类保留项照 CfZoneAuditService 标杆（gauge→VM 留历史）逐步镜像。BaiduTokenAlertTask 实际已停用(@Scheduled 注释)。
 - ★categraf 官方可用未用插件：http_response(ca-web 已启用)/net_response/dns_query/x509_cert(ca-monitor 已启用)/ping/procstat/systemd/exec。
 
 **批3/批4 完成（同夜，Owner"都做，按流程开工"）**：

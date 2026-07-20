@@ -15,6 +15,6 @@ metadata:
 
 **★方法论铁律(本次最大收获,金标层层揪)**：**「能用/调用在」≠「和 HK 一致」**。①ops 报"version.js 200 done"→lead 复核出 cache-control s-maxage=1天(只验200没验头);②ops 审计报"guard.lua 一致(require在)"→lead 坚持 `md5sum` diff 才揪出文件本体漂移。**验证必到「字节级一致」不是「功能可用」**。同 [[feedback_no_handwritten_numbers_from_tools]]。
 
-**治本落地**：①preflight 补丁 `RUNBOOK §4 前置#0`(切流前每 pool origin 必验 version.js 200+hash==主;**金标"内容域SNI 200"拦不住 stale dist,旧origin对`/`也返200**)+ HK 每次前端部署必同步 region;②region 镜像治本 SPEC `docs/sprint/2026-06-06-region-origin-mirror/SPEC.md`(5开放决策待owner:config-as-code/扩展deploy脚本/镜像化)。docs 全在 `docs/sprint/2026-06-05-decoupled-geo-lb/agents/ops-*.md`,commit 46178885。
+**治本落地**：①preflight 补丁 `RUNBOOK §4 前置#0`(切流前每 pool origin 必验 version.js 200+hash==主;**金标"内容域SNI 200"拦不住 stale dist,旧origin对`/`也返200**)+ HK 每次前端部署必同步 region;②region 镜像治本 SPEC `docs/sprint/_archive/2026-06-06-region-origin-mirror/SPEC.md`(5开放决策待owner:config-as-code/扩展deploy脚本/镜像化)。docs 全在 `docs/sprint/_archive/2026-06-05-decoupled-geo-lb/agents/ops-*.md`,commit 46178885。
 
 **关联**：geo-lb 切流见 [[reference_cf_lb_always_use_https_loop_universal_ssl]]；region 节点见 SESSION-STATE-multiregion;P0 iOS 白屏修复(bec8af53,待非峰窗部署+同步region)+ P1.5 index.html SWR(CF 2026-02-26 起支持边缘异步SWR纠偏6/03旧论,真blocker=index壳带set-cookie _vid需零cookie)见 [[project_cf_static_cache_versioning_2026_06_05]]。

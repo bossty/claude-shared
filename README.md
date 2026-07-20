@@ -1,6 +1,6 @@
 # claude-shared — 双账户 Claude Code 工程化体系唯一真相源
 
-> 建立：2026-06-27 toolchain-realignment sprint（`~/newworld/docs/sprint/2026-06-27-toolchain-realignment/`）。
+> 建立：2026-06-27 toolchain-realignment sprint（`~/newworld/docs/sprint/_archive/2026-06-27-toolchain-realignment/`）。
 > 解决：`~/.claude`（账户 A）与 `~/.claude-work`（账户 B）的 skills/memory/规范漂移（A 34 skill/91 memory，B 0 skill/143 memory，重叠 <1%）。
 > 机制：本 git repo 为唯一真相源，两账户 symlink 引入 → 改一处两账户同步 → git 记录每次演进。
 > 远端：**GitHub 私有仓库 `bossty/claude-shared`（2026-07-03 Owner 定,推翻此前"无远端"）**,由 backup cron 每日推送（此为异地备份主渠道）。

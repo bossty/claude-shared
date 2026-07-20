@@ -18,7 +18,7 @@ metadata:
 - 安全项 ~13 审计期重构
 - qa 终态 mvn test 4 模块 0F/0E（common 440 / admin 1700 / web 597 / data 507）+ 前端 538/60
 
-**16 条教训 L-1~L-16**（全文 `docs/sprint/2026-05-17-full-code-audit/sprint-report.md §5`），2026-05-17 Owner 授权 sink：
+**16 条教训 L-1~L-16**（全文 `docs/sprint/_archive/2026-05-17-full-code-audit/sprint-report.md §5`），2026-05-17 Owner 授权 sink：
 - SDLC 流程类 → `newworld-sdlc-agent-team` skill WARN-7~11：background worktree 隔离不可靠/foreground 优先、agent 自述 commit 必 git 实证、蓝军复核修复 commit、gate 条目必 triage、dev 必 mvn test-compile。
 - 代码工具类 → CLAUDE.md Lessons Learned：安全项判定含行为变更维度、LSP 瞬态 vs mvn 权威、删分支级联清理、清理决策 code-side+access log 实证、UI v-if 恢复双引擎、部署 pre-flight 枚举 commit。
 

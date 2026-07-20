@@ -26,6 +26,6 @@ metadata:
 **已合 master `9584f57d`（Owner 授权 A 案）**：为避免经含他们未合工作的分支合 master，从净 origin/master `cherry-pick` 我的两个独立 P2 提交（43627d50+033c8368）→ 净分支 fix/channel-stats-p2-clean 重测 2130 全绿。合 master 时 push 撞竞态被拒（他们恰好同时把 saturation 合进 master=`11078abc`，纠葛自动消失）→ 基于新 master 重合、合并树重测全绿 → 合入 `9584f57d`。两条分支（clean+batch）已删、worktree 已清。★教训复用：多会话并发部署时"我的 commit 与他人 commit 无代码依赖"→ cherry-pick 净剥离是解耦合 master 的干净手法；合 master push 前 master 可能已动，撞竞态重 fetch 重合即可（别硬 force）。
 **07-06 业务证据闭环（次晨 03:50 日报验证全过）**：①arrivals 断流 70 天后首次落库——07-05 日报 10 渠道全有到达数（pgeqd 320/v6nki 92/合计 618）；②基线日志出现"质量分基线: watchMid=4, pagesMid=1.6, videoMid=0.2"（非"使用默认值"），机制生效。③搭车部署确认：07-06 02:44 snack 会话部署 f0c98761（含我 P2 合并 9584f57d 祖先），ca-admin jar 真身解包实测 collectReportChannels/findNaturalReport 都在——多会话下"祖先关系+真身解包"双验是搭车确认标准动作。
 **★新发现待 Owner 拍板（基线换源口径）**：自适应基线生效后暴露设计层假设已破——organic 桶被 bot 灌水（人均观看仅 4.3s，06-29 bot RCA 在案），watchMid=4 太低致渠道质量分从 74~90 散布压缩到 89~94（区分度丢失）；organic 自身 16→43。修复前"读空桶=永远默认值"歪打正着保留区分度。三选项已呈 Owner：a.接受现状 b.基线换源（全渠道加权中位数/剔 bot organic）c.回退默认中点等 bot 治理。
-**边缘 V6 对齐 sprint 已立项**：`docs/sprint/2026-07-05-edge-protocol-v6-alignment/PLAN.md`（合 master e8157c7e），动工待 Owner 排期授权。
+**边缘 V6 对齐 sprint 已立项**：`docs/sprint/_archive/2026-07-05-edge-protocol-v6-alignment/PLAN.md`（合 master e8157c7e），动工待 Owner 排期授权。
 **坑补记**：nw-redis 07-05 改逐参转义后，redis 命令必须分开传参（`nw-redis <host> [svc] KEYS 'pattern'`），整条引成一个字符串会被当单命令报 unknown command。
 **坑**：服务器与本机时区都是 HKT(+0800)非 UTC，看日志时间先对时；nw_cap_reminder.py hook 脚本会话中途被并行会话删除致本会话 Bash 全被挡（后被恢复），存量会话捕获的 hook 链引用的脚本别删。

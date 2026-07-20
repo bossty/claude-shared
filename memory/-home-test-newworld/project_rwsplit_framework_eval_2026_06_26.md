@@ -7,7 +7,7 @@ metadata:
   originSessionId: 6eecae1c-95e0-4231-a84e-4ccc79979b6c
 ---
 
-Owner 问"用业界标准读写分离 + 标准注入能否根治这些跨洋读护栏问题"。4 专家(MySQL/Redis/业界) + 蓝军 + lead prod 实证评估。全档 `docs/sprint/2026-06-26-rwsplit-framework-eval/`(SYNTHESIS+4 agent) + `docs/sprint/2026-06-26-redis-readfrom-poc/PRD.md`(v2 蓝军闭环)。承 [[project_crossocean_read_guardrail_2026_06_25]]。
+Owner 问"用业界标准读写分离 + 标准注入能否根治这些跨洋读护栏问题"。4 专家(MySQL/Redis/业界) + 蓝军 + lead prod 实证评估。全档 `docs/sprint/_archive/2026-06-26-rwsplit-framework-eval/`(SYNTHESIS+4 agent) + `docs/sprint/_archive/2026-06-26-redis-readfrom-poc/PRD.md`(v2 蓝军闭环)。承 [[project_crossocean_read_guardrail_2026_06_25]]。
 
 **命门=CA 读写都在 master**(无 CA Redis replica；CA web 读写都打本地 .128)→ 读写分离在 CA 退化零收益,收益只在 EU(实测流量 CA 59%/EU 41%,EU 非少数但现状已正确路由,框架价值是防错非提速)。
 

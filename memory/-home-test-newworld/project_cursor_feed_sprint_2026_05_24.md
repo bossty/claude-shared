@@ -130,7 +130,7 @@ metadata:
 
 ---
 
-## 22 条铁律候选（详见 `docs/sprint/2026-05-24-cursor-feed/CLAUDE-MD-LESSONS-CANDIDATE.md`）
+## 22 条铁律候选（详见 `docs/sprint/_archive/2026-05-24-cursor-feed/CLAUDE-MD-LESSONS-CANDIDATE.md`）
 
 主体 L1-L15（P0-P9）：前后端 contract e2e 渲染验证 / dev 状态档虚报 grep 实代码 / cohort 池各层独立 AC / SHUFFLE_WINDOW 业务语义 / PRD SQL 幻象字段 / IDB seenIds reset 陷阱 / for 循环 Redis pipeline / VO 三方校验 / 3 次 owner 反诘即停手 / Fisher-Yates 算数验证 / DB 读压力归零实证 / OQ 合并前拍板 / cohort 池模式标准模板 / mvn PASS 必要不充分 / tab 顺序业务决策
 

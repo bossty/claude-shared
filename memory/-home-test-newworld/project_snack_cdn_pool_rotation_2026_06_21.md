@@ -32,4 +32,4 @@ metadata:
 - `CdnPoolProvisionRotateController` POST `/api/v1/internal/cdn-pool/provision-rotate`(dryRun=true默认)+GET`/status/{jobId}`；R2-F5：secret默认changeme启动WARN，prod须systemd设NW_INTERNAL_API_SECRET。
 - v42 `cdn_pool_rotate_job` 表+实体/mapper。蓝军 Round-2 7条(F1并入F3/F7非问题,余5改)；CdnPool 18/18+全admin 1878绿。
 
-**一键执行（Owner 另令，dryRun=false）**：`POST provision-rotate bucket=asset count=5 subPerRoot=5 dryRun=false` → 后台买5域→标snack→等active(NS传播)→自动rotate → GET status 看进度 → 观察 cdn-fail 率降。**无需 CF purge**(新自定义域front同R2 bucket)。执行前可 CN 实证 SNI-burn 假设。设计 `docs/sprint/2026-06-21-snack-cdn-domain-rotation/DESIGN.md`(§5.5 连买带轮换+§7.1/7.2 两轮蓝军)。
+**一键执行（Owner 另令，dryRun=false）**：`POST provision-rotate bucket=asset count=5 subPerRoot=5 dryRun=false` → 后台买5域→标snack→等active(NS传播)→自动rotate → GET status 看进度 → 观察 cdn-fail 率降。**无需 CF purge**(新自定义域front同R2 bucket)。执行前可 CN 实证 SNI-burn 假设。设计 `docs/sprint/_archive/2026-06-21-snack-cdn-domain-rotation/DESIGN.md`(§5.5 连买带轮换+§7.1/7.2 两轮蓝军)。

@@ -9,7 +9,7 @@ metadata:
 
 # newworld DB 真生产迁移（2026-05-27）
 
-**Sprint commit**: `55dd26ad` master HEAD push origin（+2913/-0 lines, 12 files docs/sprint/2026-05-27-prod-migration/）
+**Sprint commit**: `55dd26ad` master HEAD push origin（+2913/-0 lines, 12 files docs/sprint/_archive/2026-05-27-prod-migration/）
 **前置**: `a19c2046` cacheEvictAll endpoint / `975cca58` sample-keys-stratified.sh / `5/26` dragonfly-research POC sprint
 
 ## 迁移结果
@@ -216,4 +216,4 @@ T+7d   旧 aws-db 真退役 stop instance
 - T+7d 旧 aws-db stop instance（保 EBS）
 - T+30d 旧 aws-db terminate（释放 EBS）
 
-详见 `docs/sprint/2026-05-27-prod-migration/sprint-report.md`
+详见 `docs/sprint/_archive/2026-05-27-prod-migration/sprint-report.md`

@@ -11,7 +11,7 @@ metadata:
 
 **合 master 过程**：master 期间前进 60+ commit 且双方都动了 CLAUDE.md/plugin → 在临时 worktree（本工作树有他会话未提交改动，不碰）解 3 冲突：CLAUDE.md=瘦身版折入 master 新增的 nw-toolbox+会话命令段（成 193 行仍<200，两行文档登记转入 DOC_INDEX.md）；plugin.json=0.3.0 胜 0.2.3（java-review 两侧同内容）；claude-shared/MEMORY.md=取真相源现值。合并树 pre-push ci-local 全绿后推 master。⚠️ merge commit 在裸 worktree 需 `--no-verify`（lint-staged 找不到 eslint，无 node_modules）——质量由 pre-push ci-local 兜底。
 
-**输入**：三 agent 并行调研（blog-sweep=claude.com/blog+engineering 21 篇工程实践文精读 / docs-sweep=Claude Code 官方文档 25 页 / local-inventory=本地 8 类盘点），报告全文归档 `docs/sprint/2026-07-03-cc-best-practices-optimization/`（含差距矩阵 25 条 + 不采纳项及理由，防重复论证）。
+**输入**：三 agent 并行调研（blog-sweep=claude.com/blog+engineering 21 篇工程实践文精读 / docs-sweep=Claude Code 官方文档 25 页 / local-inventory=本地 8 类盘点），报告全文归档 `docs/sprint/_archive/2026-07-03-cc-best-practices-optimization/`（含差距矩阵 25 条 + 不采纳项及理由，防重复论证）。
 
 **落地改动**：
 - **根 CLAUDE.md 345→168 行**：skill 索引压缩为分组名地图（触发靠 frontmatter description 预载，根档长描述纯冗余；修复 28+6 vs 实有 37 计数漂移）；服务器全表撤 `docs/AWS_HK_DEPLOYMENT.md`（易变信息禁进根档——EIP 已绑根档仍写"非 EIP"是漂移实证）；文档索引全文迁**新档 `docs/DOC_INDEX.md`**（durable 登记铁律随迁，DOC_GOVERNANCE §五 同步收紧 ~300→~200 行口径）；反发现段指针化 GFW_AND_NETWORK §0.3（顺手闭环其"CLAUDE.md 待订正"标记）；新增「上下文与压缩」段（compact 必保留：改动文件清单/测试命令/分支+sha/部署 Step N/未决 Owner 决策）。

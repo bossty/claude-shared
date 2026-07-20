@@ -13,6 +13,14 @@ description: dev-senior / 任何 commit 必须保证 commit message 精确量化
 
 ## 铁律
 
+### 0. 量化数字由 prepare-commit-msg hook 机械生成（2026-07-19 起，禁手写）
+
+commit message **标题行**的量化段（`（N 文件，N file(s) changed, +X/-Y）`）自 2026-07-19 起由 git `prepare-commit-msg` hook（`scripts/git-hooks/prepare-commit-msg.sh`）从 `git diff --cached --shortstat` **机械追加**——人手写的数字（含上次生成的、以及错的）会被就地剥掉换成真数字。起因：数字手写反复出错（本 skill 案例 `af26340d` 超报、`4132c6b3` sprint-closure 超报 1.6x 皆手写），**假精确比没有更糟**（用户拿假数字对 diff 反而误信）。
+
+- hook 经 `frontend-web/package.json` 的 `simple-git-hooks` 装出；**fail-open**（脚本缺席只 no-op、绝不阻断 commit），merge / rebase / cherry-pick / 空 staged 均跳过，对同一 staged 内容幂等。
+- **本铁律其余部分逻辑不变，数字永远真**：下文「数字必须与 `git diff --stat` 一致」现在由 hook 保证；**蓝军 reviewer 的 cross-check（message 数字 vs `git diff --stat`）照旧**——只是不再会抓到"手滑写错的数字"，火力转向 **message 的文字描述是否覆盖 stat**（scope creep 的语义判断，hook 管不了）。
+- **写 message 时不用再手打数字**：只写语义描述（改了什么 / 为什么），数字交给 hook。禁在标题手写 `（…文件…changed…）` 段（会被覆盖，且属违规）。
+
 ### 1. Commit message 必须精确量化改动
 
 ❌ **禁**：

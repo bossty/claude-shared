@@ -17,6 +17,6 @@ metadata:
 
 **其他坑/铁律**：①edge openresty 部署是 **restart 非 reload**（short_redirect/pool_snapshot_puller 是 lua 模块,require 缓存,reload 不重新 require 改动不生效）②CNAME→proxied LB hostname 模型现网已验证(17.rip/bytebase26.top 的 @+* 都→tcos-canary proxied→200)非新发明③WS1 验收:A 域无手动激活 API(走调度器)+无干净 deactivate→峰窗强行触发+手动 release 风险>价值,改"现网模型证实=新代码产出 target"等价闭环④context-mode hook 拦 mvn(dev-senior 工具集无 ctx_execute)→lead 用 ctx_execute 兜底跑⑤死 tunnel(A-HK/A-OR/P-tunnel)owner 裁定"HK 退役回滚弹药是伪命题"直接删不留 re-arm。
 
-**部署**：admin(aws-ca-admin 新 jar 0bde1c6f,旧 jar rollback)+edge×3(usca-1/2/aws-s,各.deploy-bak rollback)+死 tunnel 删。全程峰窗 FORCE_PEAK(owner 授权)、逐台、rollback 位齐、站点零影响。详见 docs/sprint/2026-06-13-code-topology-realignment/(PLAN+reviewer 两轮+phase4-deploy)。
+**部署**：admin(aws-ca-admin 新 jar 0bde1c6f,旧 jar rollback)+edge×3(usca-1/2/aws-s,各.deploy-bak rollback)+死 tunnel 删。全程峰窗 FORCE_PEAK(owner 授权)、逐台、rollback 位齐、站点零影响。详见 docs/sprint/_archive/2026-06-13-code-topology-realignment/(PLAN+reviewer 两轮+phase4-deploy)。
 
 **How to apply**：①任何基建迁移/退役后必 fact-check 实代码旧拓扑假设(死 IP/tunnel ID/region 硬编码),尤其域名/DNS/健康检查/监控这类"配置驱动但可能硬编码源 IP/tunnel"的流程 ②退役服务器前查它兼任的角色(build host/CI/relay/proxy 对端白名单——见 [[project_phase_f_admin_data_california_2026_06_13]] buyvm UFW 同类)③蓝军挑刺 lead 必实测二查(误报下调+漏报坐实双向)④edge lua 改动必 restart 非 reload⑤LB-CNAME 模型用 SystemConfig 键不硬编码(LB 改名零 deploy)。关联 [[project_hk_web_retirement_2026_06_13]]、[[project_phase_f_admin_data_california_2026_06_13]]。

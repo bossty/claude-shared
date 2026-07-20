@@ -14,7 +14,7 @@ SDLC sprint `2026-05-17-shadow-diff-retire`：数据驱动提前退役 `shadow_d
 **SDLC Phase 1-5 闭环**：
 - Phase 3 删 7 类：`f4b63085`（web ShadowDiffLogger/RetryHitRecorder）/ `f6b92465`（admin EdgeOpsShadowDiffController+StatsShadowDiffController+AnalyticsV5MetricsScheduler+v4 gauge）/ `aa2aa458`（common ShadowDiffLogMapper+DTO）；qa admin 1700 0F/0E。
 - Phase 4：全量部署（含 B 档 backlog 7 commit 一并上线）+ `RENAME TABLE shadow_diff_log TO _retired_shadow_diff_log_20260517`（4091 行保留，软删非 DROP）。
-- **Phase 4b 待办**：真 `DROP TABLE _retired_shadow_diff_log_20260517` 最早 2026-05-24，DBA-gated，见 `docs/sprint/2026-05-17-shadow-diff-retire/PHASE-4b-real-drop.md`。
+- **Phase 4b 待办**：真 `DROP TABLE _retired_shadow_diff_log_20260517` 最早 2026-05-24，DBA-gated，见 `docs/sprint/_archive/2026-05-17-shadow-diff-retire/PHASE-4b-real-drop.md`。
 
 **4 教训已 sink**：
 - deploy 类 → `newworld-deploy-runbook` skill 教训补充：① 部署 pre-flight 必确认本地已 push（`git rev-list origin/master..HEAD` 非空先 push；本 sprint Phase 4 因 15 commit 未 push 差点 build 旧码、ops HALT 拦下）；② sprint 收尾"待部署"项须跟踪禁搁置。

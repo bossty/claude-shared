@@ -21,8 +21,8 @@ metadata:
 
 **零故障删除流程**：删 ref/方法/资产不改 master 运行逻辑→低险；删前蓝军独立复核(禁采信 analyst 表)+lead 二查抽样`::`全扫；删后**必跑全模块 `mvn test-compile`(捕悬空)+ 真 `mvn test` + 前端 vite build** 才 commit；大批量交 dev-senior 执行但**lead 必全量二查(它会漏验/漏 test 引用)**。
 
-**本轮结果(已 push)**：清 #1 source-rules.yml 归档·#2 VisitorAlias 簇·#3b markBlocked·#4+白名单 17死方法+12 XML+死资产·#5 2别名；**保留(误报/有意/LIVE)**：refreshValidChannelCodes(改名)·resolveExtForTranscode·broadcastVisibility·isRateLimited·getSnackBySlot(s)·bootstrap.min.css。审计档 `docs/sprint/2026-06-15-deadcode-audit/SYNTHESIS.md`。
+**本轮结果(已 push)**：清 #1 source-rules.yml 归档·#2 VisitorAlias 簇·#3b markBlocked·#4+白名单 17死方法+12 XML+死资产·#5 2别名；**保留(误报/有意/LIVE)**：refreshValidChannelCodes(改名)·resolveExtForTranscode·broadcastVisibility·isRateLimited·getSnackBySlot(s)·bootstrap.min.css。审计档 `docs/sprint/_archive/2026-06-15-deadcode-audit/SYNTHESIS.md`。
 
-**死表 DROP(收尾)**：删 mapper 代码后表仍在 prod，需 owner 拍板手工 DROP。**app DB 用户 `newworld` 只有 DML、无 DDL → DROP 报 `ERROR 1142 DROP command denied`**；DROP 必须在 DB 主机 `ca-mysql-master` 用 `sudo mysql`(root socket) 执行（预检/mysqldump 备份可用 app 用户从 ca-admin 连 DB_HOST）。顺序：先部署死代码清理 jar(去掉表访问者如 @Scheduled cron)→预检行数/last_seen 确认死→mysqldump 备份→root DROP→admin+web journalctl 验无 `table-not-found`/1146。visitor_alias 已于 2026-06-17 DROP。runbook=`docs/sprint/2026-06-15-deadcode-audit/RUNBOOK-drop-visitor-alias.md`。
+**死表 DROP(收尾)**：删 mapper 代码后表仍在 prod，需 owner 拍板手工 DROP。**app DB 用户 `newworld` 只有 DML、无 DDL → DROP 报 `ERROR 1142 DROP command denied`**；DROP 必须在 DB 主机 `ca-mysql-master` 用 `sudo mysql`(root socket) 执行（预检/mysqldump 备份可用 app 用户从 ca-admin 连 DB_HOST）。顺序：先部署死代码清理 jar(去掉表访问者如 @Scheduled cron)→预检行数/last_seen 确认死→mysqldump 备份→root DROP→admin+web journalctl 验无 `table-not-found`/1146。visitor_alias 已于 2026-06-17 DROP。runbook=`docs/sprint/_archive/2026-06-15-deadcode-audit/RUNBOOK-drop-visitor-alias.md`。
 
 **工具坑**：`pkill/pgrep -f <pattern>` 当 pattern 出现在自己命令行里会匹配并杀掉自身 shell(exit 144)——杀进程按 PID 或避开自匹配词。SSH 别名会被其他会话规范化(本会话 `aws-ca-admin`→`ca-admin`)，解析失败先查 `~/.ssh/config` 真别名别当环境故障；aws-* public IP 动态。

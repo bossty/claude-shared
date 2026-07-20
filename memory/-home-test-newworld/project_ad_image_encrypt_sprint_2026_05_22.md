@@ -100,4 +100,4 @@ a7333e28 feat(AESUtil): Java byte API + Java↔Python 跨端向量 PASS
 - [[newworld-cf-cache-verify]] skill（本 sprint 新建）
 - [[project_anti_adblock_sprint_2026_05_21]]（前置 sprint）
 - `frontend-web/src/utils/cdn-failover.js` `probeAndSwitch` (HRW + Power-of-3 + Happy Eyeballs)
-- `docs/sprint/2026-05-22-ad-image-encrypt/PRD.md` v3
+- `docs/sprint/_archive/2026-05-22-ad-image-encrypt/PRD.md` v3

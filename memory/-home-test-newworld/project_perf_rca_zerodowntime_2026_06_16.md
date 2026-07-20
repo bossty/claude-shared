@@ -24,7 +24,7 @@ PR-2 **达成设计目标但 Phase-2 未全闭**：总 slow 率 ca01 3.04%→2.0
 ## ★★ 残余 :05 脉冲真根因 = Dragonfly 快照（非应用任务，Q1 误判更正）
 **ca-redis-master .128 的 Dragonfly `--snapshot_cron="*/5 * * * *"`（每5min wall-clock 快照），单次 `last_success_save_duration_sec=62s`**（数据集长大，rdb_changes 65万/maxmemory 12gb）。每 :00/:05/:10 快照 fork/序列化瞬时 stall 整个 .128 → 所有 web .128 读慢 → 跨全端点 :05 脉冲。**完美解释：wall-clock 对齐(cron字面)/扛过所有 app 重启(Redis 自身调度)/W2+W3 都在/EU 非免疫(蓝军证 exact-window 也 3.43%=.248 同 */5)**。
 - **Q1-FINAL 把脉冲归因 admin SiteStatsSyncTask/ViewCountSyncService 是误判**；真根因是 Dragonfly 快照。PR-2 节流应用写只削了「与快照重叠的池重建 burst」(~33-55%)，治不了快照本身（正交）。
-- 配置源：systemd ExecStart 写死 + `docs/sprint/2026-05-26-dragonfly-research/scripts/install-dragonfly.sh:53`（当时 Gate4 期望「*/5 < 1s I/O」，dataset 涨后失效=62s）。
+- 配置源：systemd ExecStart 写死 + `docs/sprint/_archive/2026-05-26-dragonfly-research/scripts/install-dragonfly.sh:53`（当时 Gate4 期望「*/5 < 1s I/O」，dataset 涨后失效=62s）。
 - **修复方向（prod Redis 改，先讨论）**：① 降频 */5→*/30 或 hourly（减脉冲次数）② 快照只在 replica 跑、master 不快照（master 读永不 stall，最优）③ df_snapshot_format 加速 ④ S3：CA web 真本地 replica（读离 master）。EU .248 待证（eu-redis-slave SSH key 拒）。
 
 ## 零停机峰窗实证（owner 命题）

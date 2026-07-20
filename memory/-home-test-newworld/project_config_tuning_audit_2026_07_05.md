@@ -7,7 +7,7 @@ metadata:
   originSessionId: f7df67bc-8bb4-4d3c-a31f-ead18e787961
 ---
 
-2026-07-05 全组件（MySQL/Dragonfly/Spring-JVM/OpenResty/cloudflared/内核）参数调优审计 + 执行。报告与执行日志全在 `docs/sprint/2026-07-05-config-tuning-audit/`（SUMMARY.md / ADDENDUM-missing-mechanisms.md / EXECUTION-LOG.md + 6 分报告 + exposure-euweb.md + tomcat-saturation-rca.md）。
+2026-07-05 全组件（MySQL/Dragonfly/Spring-JVM/OpenResty/cloudflared/内核）参数调优审计 + 执行。报告与执行日志全在 `docs/sprint/_archive/2026-07-05-config-tuning-audit/`（SUMMARY.md / ADDENDUM-missing-mechanisms.md / EXECUTION-LOG.md + 6 分报告 + exposure-euweb.md + tomcat-saturation-rca.md）。
 
 **已执行（Owner 放行，证据在 EXECUTION-LOG.md）**：binlog 事务压缩 ON（zstd，**非持久**，观察一周后需 SET PERSIST，基线 mysql-bin.001046）；Dragonfly maxmemory 12G→10G + 收敛重启（旧 replicaof 退役 HK IP 根除，unit 快照 cron 生效，重启影响=每 web 节点约 1 条请求级超时）；ca-redis overcommit=1+max_map_count 持久化；MySQL redo 512M→3G（SET PERSIST）；nginx worker_rlimit_nofile 65535×7 节点；web×6 JVM flag 统一（三件套 GC 日志/HeapDump/ExitOnOOM，EU 堆 6→8G）；cloudflared 收敛 2026.6.1（web×6+monitor，admin 留 apt 2026.6.0）。N9E 规则 13 REDIS-MEM-HIGH 是比例式，maxmemory 改动自适应无需改。
 

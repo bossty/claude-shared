@@ -19,4 +19,4 @@ metadata:
 
 **backlog**：QImg DB encrypt_ts↔R2 对账 · 反爬 WAF(迅雷抓播放地址) · vue insertBefore Snack09 Teleport repro · plyr setter finite guard · 部署 stale chunk grace(系统根因) · 域池补给。
 
-**协作教训**见 [[feedback_multiagent_prod_ops_auth_backstop]]。sprint 文档 docs/sprint/2026-06-13-fe-error-triage/(FE-ERROR-FULL-TAXONOMY.txt+agents/)。
+**协作教训**见 [[feedback_multiagent_prod_ops_auth_backstop]]。sprint 文档 docs/sprint/_archive/2026-06-13-fe-error-triage/(FE-ERROR-FULL-TAXONOMY.txt+agents/)。

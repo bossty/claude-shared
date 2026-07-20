@@ -5,7 +5,7 @@ description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界
 
 # newworld 开发工作流铁律
 
-> 业界最佳实践固化(~15 权威源:git 官方 / Claude Code 官方 / DORA / Fowler / Atlassian / GitHub & GitLab merge queue / trunkbaseddevelopment)。与 CLAUDE.md「分支与上线流程铁律」对齐;细节研究见 `docs/sprint/2026-06-27-dev-workflow-bestpractices/`。
+> 业界最佳实践固化(~15 权威源:git 官方 / Claude Code 官方 / DORA / Fowler / Atlassian / GitHub & GitLab merge queue / trunkbaseddevelopment)。与 CLAUDE.md「分支与上线流程铁律」对齐;细节研究见 `docs/sprint/_archive/2026-06-27-dev-workflow-bestpractices/`。
 
 **核心模型**:master = 唯一 Release-Ready Mainline(永远已测、可直接部署);每会话/每 agent 各自 worktree(从 origin/master 开);短命 feature/fix(每日并 master)rebase-FF 合;长命安全/发布 track 禁 rebase、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;合入串行 + 合前并最新 master 重测(人肉 merge queue 防 semantic conflict)。
 

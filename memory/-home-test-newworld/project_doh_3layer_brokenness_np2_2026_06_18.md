@@ -9,7 +9,7 @@ metadata:
 
 查"前端 DoH 错误上报多"挖出 **DoH 加密域名池（反封锁兜底通道）上线至今一直死，三层 brokenness**（2026-06-18）。
 
-**★ 新会话接 np2 必先读 `docs/sprint/2026-06-18-doh-np2-design/SESSION-STATE.md`**（LIVE 状态/决策/踩坑全在），再 PRD.md + agents/reviewer.md。
+**★ 新会话接 np2 必先读 `docs/sprint/_archive/2026-06-18-doh-np2-design/SESSION-STATE.md`**（LIVE 状态/决策/踩坑全在），再 PRD.md + agents/reviewer.md。
 
 **三层坏**：
 1. **crypto 密钥不匹配**：后端 `ConfigCryptoUtil.encrypt`（固定 key SHA-256(MK+"CONFIG_ENCRYPT")）vs 前端 WASM `decrypt(ts)`（时间戳 key SHA-256(MK+(ts/300000*300000))）→ 100% 解密失败。prod 实锤 28 个 `np1 解密失败 error=undefined`。**单测全 mock decryptFn 掩盖**（蓝军 B-1 揪出，lead 真 WASM 二进制验证）。

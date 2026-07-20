@@ -9,9 +9,9 @@ metadata:
 
 # 前端版本检测 + 更新机制审计（2026-06-03，5 人 barrier-crossfire）
 
-> ⚠️⚠️ **待 reconcile 的冲突（新会话先解）**：本审计 BLOCKER-1（更新机制被动、controllerchange 不 reload、卡旧版）**可能已被 commit `90e6dca1`（6/03 18:36，SW activate `client.navigate` 强制换新，+30 lines sw.js）治本**，但 90e6dca1 疑未合入当前 HEAD(e8aff6bb)。与同日 memory [[project_sw_force_update_rca_2026_06_03]]（该 fix 的 RCA）**直接冲突**。**审计团队跑时未读到该 fix memory（charter 遗漏）、盯的是 sw-bridge controllerchange 而非 sw.js activate 的 client.navigate = 潜在盲点。** 新会话必须先核实 90e6dca1 是否已合入线上 sw.js：已修→BLOCKER-1 作废（其余洞仍有效）；未合→审计成立。详 `docs/sprint/2026-06-03-fe-version-audit/SPRINT-FINAL.md` 顶部 banner。
+> ⚠️⚠️ **待 reconcile 的冲突（新会话先解）**：本审计 BLOCKER-1（更新机制被动、controllerchange 不 reload、卡旧版）**可能已被 commit `90e6dca1`（6/03 18:36，SW activate `client.navigate` 强制换新，+30 lines sw.js）治本**，但 90e6dca1 疑未合入当前 HEAD(e8aff6bb)。与同日 memory [[project_sw_force_update_rca_2026_06_03]]（该 fix 的 RCA）**直接冲突**。**审计团队跑时未读到该 fix memory（charter 遗漏）、盯的是 sw-bridge controllerchange 而非 sw.js activate 的 client.navigate = 潜在盲点。** 新会话必须先核实 90e6dca1 是否已合入线上 sw.js：已修→BLOCKER-1 作废（其余洞仍有效）；未合→审计成立。详 `docs/sprint/_archive/2026-06-03-fe-version-audit/SPRINT-FINAL.md` 顶部 banner。
 
-owner 问 frontend-web 版本检测+更新机制是否有问题（"记得是 version.txt 比对、对不上任何操作触发更新"）。全文 `docs/sprint/2026-06-03-fe-version-audit/SPRINT-FINAL.md`。
+owner 问 frontend-web 版本检测+更新机制是否有问题（"记得是 version.txt 比对、对不上任何操作触发更新"）。全文 `docs/sprint/_archive/2026-06-03-fe-version-audit/SPRINT-FINAL.md`。
 
 ## 结论：有真问题，但不在 owner 担心的缓存层
 

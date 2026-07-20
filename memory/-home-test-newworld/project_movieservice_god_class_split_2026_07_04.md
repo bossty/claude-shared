@@ -25,4 +25,4 @@ metadata:
 
 **★部署验证坑**：API 响应全加密(`{"encrypted":true,"data":"<AES>"}`)→ 无法从响应取 movieId;节点 **mysql 客户端缺失 + DB_USERNAME 不在 environ**（app 配置默认）→ nw-mysql 取 id 失败;/proc/environ 需 `sudo cat`(不能 `sudo tr <redirect`，重定向在 sudo 前由 ssh 用户执行)。验证靠:搜索/热搜/featured/popular 200+加密真数据(覆盖 MovieSearchService+MovieVoConverter 路径)+ 启动 @PostConstruct OK(bloom)+ deploy-web.sh 内建 warm business-gate。
 
-设计+评审全档 `docs/sprint/2026-07-04-movieservice-split/DESIGN.md`。关联 [[feedback_shared_master_race_push_reject]]（本次 push 又遇 ci-local hook 已推、显式 push 报 no-op 拒绝）、[[project_cache_unification_2026_07_03]]（同为 web load-bearing 重构范式）。代码精简审查现 A/C/D/B5 完成，剩 B4 爬虫收敛 13 家。
+设计+评审全档 `docs/sprint/_archive/2026-07-04-movieservice-split/DESIGN.md`。关联 [[feedback_shared_master_race_push_reject]]（本次 push 又遇 ci-local hook 已推、显式 push 报 no-op 拒绝）、[[project_cache_unification_2026_07_03]]（同为 web load-bearing 重构范式）。代码精简审查现 A/C/D/B5 完成，剩 B4 爬虫收敛 13 家。

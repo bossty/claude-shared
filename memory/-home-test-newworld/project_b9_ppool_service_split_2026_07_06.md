@@ -29,7 +29,7 @@ metadata:
 
 **本会话累计 3 个上帝类拆分分支待 Owner 授权合 master**：[[project_b7_configcontroller_split_2026_07_06]](web) + [[project_b5_cf_http_client_split_2026_07_06]](admin CfHttpClient) + 本 B9(admin PPoolService)。
 
-**剩余 deferred**：B9 的 Z13PenaltyService+完整 PickPService(需先前者)；B5 的 7 资源域拆分；B6 DomainLifecycleService 2259(★B14 测试级联雷)；B8 爬虫 2088。DESIGN 全文 `docs/sprint/2026-07-06-b9-pickp-service/DESIGN.md`。
+**剩余 deferred**：B9 的 Z13PenaltyService+完整 PickPService(需先前者)；B5 的 7 资源域拆分；B6 DomainLifecycleService 2259(★B14 测试级联雷)；B8 爬虫 2088。DESIGN 全文 `docs/sprint/_archive/2026-07-06-b9-pickp-service/DESIGN.md`。
 
 
 ---
@@ -38,7 +38,7 @@ metadata:
 - **抽出的 public service 方法触发 arch/依赖分析**：telegramAlertService 起初误判为传输层独占删掉→编译报 8 处 resource 方法 cannot find symbol，实为资源域告警也用→必须保留（grep 用点先于删字段）。stringRedisTemplate 才是传输独占(0 resource 用)可删。
 - **@InjectMocks + 两个同类型 mock 会注反**（B7 同款）：CfHttpClient 内部无此问题(构造器只 cfApiMetrics)，但测试注入 mock httpClient 到传输层——两个测试文件（CloudflareApiServiceTest + CloudflareApiServiceBranchCoverageTest）的 setUp 都要改：构造真实 CfHttpClient→注入 mock httpClient/retrySleeper 到它→setField 到 cfService.cfHttpClient（@Spy 范式，端到端测试经真实传输层跑）。**漏改第二个测试文件→25 errors**（一个 god class 常有多个测试文件，全 grep）。
 - **传输测试符号迁移**：test 引用 `CloudflareApiService.CfTransientException/CF_REQUEST_TIMEOUT/classifyOp/CURRENT_CF_ACCOUNT` + 反射 private handleCfResponse/retrySleeper/computeBackoff → 全部改指 CfHttpClient；handleResponse 转 public 后反射可简化直调。sed/perl 批量改 + 分类 invoke 目标(cfService vs cfHttpClient)。
-**剩余 deferred**（下批候选）：B5 的 7 资源域 service 拆分(WAF/DoH/DNS/Zone/Worker/R2/Tunnel，各自 DESIGN)；B6 DomainLifecycleService 2259 行(★注意 B14 测试级联雷)；B8 爬虫 2088；B9 OpsController。DESIGN 全文 `docs/sprint/2026-07-06-b5-cf-http-client/DESIGN.md`。
+**剩余 deferred**（下批候选）：B5 的 7 资源域 service 拆分(WAF/DoH/DNS/Zone/Worker/R2/Tunnel，各自 DESIGN)；B6 DomainLifecycleService 2259 行(★注意 B14 测试级联雷)；B8 爬虫 2088；B9 OpsController。DESIGN 全文 `docs/sprint/_archive/2026-07-06-b5-cf-http-client/DESIGN.md`。
 
 ---
 **并入摘要（原 project_b7_configcontroller_split_2026_07_06.md，2026-07-07 memory 整理；全文在 git 历史 claude-shared）**

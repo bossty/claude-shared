@@ -14,7 +14,7 @@ metadata:
 - **jdtls 在 Java25 实测 OK**：官方标 Java≤24 是文档保守，jdtls 跑 JDK25 多模块导入+find-references 无致命错（金标实证）。
 - **Volar 3.0+ 删了 standalone/take-over 模式**：`.vue` 里 TS 符号 find-references **必走 hybrid**——`.vue` 路由进 `typescript-language-server` + initializationOptions 挂 `@vue/typescript-plugin`（bundled 在 @vue/language-server/node_modules，require.resolve 可解析）+ tsserver path。单跑 `vue-language-server` 对 .vue 做 find-ref = 0命中+timeout。取舍：换来 .vue TS 导航全通，放弃 Volar 模板/CSS 专属诊断（CC 单扩展名只能挂一个 server）。
 - **本机 server 装在 `~/.local`**：npm global prefix=/usr root-owned 会 EACCES → `npm i -g --prefix /home/test/.local`。
-- **金标验证法（死代码审计救场）**：挑只被 `Class::method` 方法引用的方法（grep `method(`=0 会判死），jdtls find-references 命中真引用。实证 `MenuKey::defaultForAdmin`(2命中)、`convertToListVO`(13命中=10::+3lambda)、TS `formatDuration`(14含跨文件进.vue)。可重放探针 `docs/sprint/2026-06-17-lsp-config/{lsp_probe.py,vue_hybrid_probe.py}`。**更新死代码审计 SOP：`::` 方法引用盲区现可用 LSP find-references 覆盖**（见 [[reference_deadcode_audit_sop]]）。
+- **金标验证法（死代码审计救场）**：挑只被 `Class::method` 方法引用的方法（grep `method(`=0 会判死），jdtls find-references 命中真引用。实证 `MenuKey::defaultForAdmin`(2命中)、`convertToListVO`(13命中=10::+3lambda)、TS `formatDuration`(14含跨文件进.vue)。可重放探针 `docs/sprint/_archive/2026-06-17-lsp-config/{lsp_probe.py,vue_hybrid_probe.py}`。**更新死代码审计 SOP：`::` 方法引用盲区现可用 LSP find-references 覆盖**（见 [[reference_deadcode_audit_sop]]）。
 
 ## Plugin 打包（commit 49040607）
 - 结构：`<root>/.claude-plugin/plugin.json`（仅 `name` 必填,kebab-case）+ `skills/<name>/SKILL.md`（**单文件 .md 不行,必须目录形态**）+ `agents/*.md` + `hooks/hooks.json` + `scripts/*.py` + README。marketplace：`marketplace.json` {name,owner,plugins:[{name,source相对路径,description}]}。

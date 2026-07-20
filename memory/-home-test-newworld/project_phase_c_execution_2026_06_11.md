@@ -1,13 +1,13 @@
 ---
 name: project-phase-c-execution-2026-06-11
-description: 2026-06-11/12 Phase C 完成(A66+P62+C4全迁CA/EU region 5xx=0)；★Phase D(master cutover HK→CA)2026-06-12 失败+已回滚事故(S5 redis-cli卡死→fence漏回滚SG→502/503)。compact后必读 docs/sprint/2026-06-11-migration-sequence-redesign/MASTER-HANDOFF-2026-06-12.md
+description: 2026-06-11/12 Phase C 完成(A66+P62+C4全迁CA/EU region 5xx=0)；★Phase D(master cutover HK→CA)2026-06-12 失败+已回滚事故(S5 redis-cli卡死→fence漏回滚SG→502/503)。compact后必读 docs/sprint/_archive/2026-06-11-migration-sequence-redesign/MASTER-HANDOFF-2026-06-12.md
 metadata: 
   node_type: memory
   type: project
   originSessionId: 64b5f5d1-9590-4971-9f5b-8d2e351a83eb
 ---
 
-2026-06-11 **真执行了 live 生产流量迁移**（不只是设计）。compact/新会话接手必读 `docs/sprint/2026-06-11-migration-sequence-redesign/SESSION-HANDOFF.md`（★★★ 段）+ `terminal-tasks/PHASE-C-EXEC-LOG.md`（live prod 状态权威）。
+2026-06-11 **真执行了 live 生产流量迁移**（不只是设计）。compact/新会话接手必读 `docs/sprint/_archive/2026-06-11-migration-sequence-redesign/SESSION-HANDOFF.md`（★★★ 段）+ `terminal-tasks/PHASE-C-EXEC-LOG.md`（live prod 状态权威）。
 
 **已对 live 生效**：
 - **Phase C A 域批灰度 66/66 = 100%**：C0→C1(2)→C2(7)→C3(20)→C4(20)→C5a(15)→C5b(17.rip 主站)，6 批全程 5xx=0，A 域 CNAME tcos→tcos-canary、用户流量迁 CA/EU。CA/EU 实时承接正常(5 节点 200/5xx=0/CPU 9 成空闲)。
@@ -27,7 +27,7 @@ metadata:
 
 **剩余(owner-gated,非今夜)**：admin/data scheduling 恢复(Phase F)；HK 真排空终确认；Phase D(master cutover HK→CA cutover-ws1.sh)→E→F(admin/data 迁 CA)→G(HK 退役+删旧 P-tunnel 1af743b6+代码硬编码清理)；S 域(10)走 LA edge 归 Phase F。
 
-## ★2026-06-12 后续(全详情见 docs/sprint/2026-06-11-migration-sequence-redesign/MASTER-HANDOFF-2026-06-12.md)
+## ★2026-06-12 后续(全详情见 docs/sprint/_archive/2026-06-11-migration-sequence-redesign/MASTER-HANDOFF-2026-06-12.md)
 - **C 类4域(账号0672a94a,tunnel a92dcc44)也迁完**(方案①连接器,region cloudflared-c metrics:20254,停HK)。admin/data scheduling **已恢复**。所有服务器本机直连(EU DB=ubuntu@3.65.1.28 Instance Connect装常驻key+别名;删死别名aws-db/nw-us-db-replica)。AWS凭证=`AWS_PROFILE=nw-dev`(命令必带--region,SG在ap-east-1/EU实例eu-central-1)。
 - **★Phase D失败事故(2026-06-12)**：DRY_RUN=0跑cutover-ws1.sh→pre-flight全过→**卡死S5**(redis-cli主机没装+脚本本地跑够不到内网Redis IP)→S6从没跑→**fence已revoke HK SG 0.0.0.0/0:3306**→region web(172.34 CA)被挡在HK DB外→**接口批量502/503+图片挂**。lead两失误:RCA先错怪DB只读(实测region web 0只读错/reads全200,只admin调度写撞只读)、回滚漏re-authorize SG。**恢复**=解冻HK super_read_only OFF+`aws ec2 authorize-security-group-ingress --region ap-east-1 sg-0f78086b48f545846 tcp 3306 0.0.0.0/0`+重启HK web→站点恢复。
 - **残留待清**:CA孤儿master(revert时replicator密码`Repl!c@t0r_nw2026`被拒疑轮换)/EU binlog purged需重建/CA Redis孤儿master(REPLICAOF NO ONE)。
@@ -41,7 +41,7 @@ metadata:
 
 **方法论**：owner 三次反诘全救场(scope/HK排空/跨账号)→prod 实测>doc(aws-s/容量/cross-account 多次纠 doc)；BSP 多 agent+lead 二查；traffic-first 逐批可秒回滚。专家团队(arch-f/ramp-c/accept-de/bluearmy) **未解散**待命。见 [[project-terminal-arch-B-single-california-2026-06-10]]。
 
-## ★2026-06-12 OS 统一工程 + Phase D 就绪（compact 后必读 `docs/sprint/2026-06-12-os-alignment/SESSION-HANDOFF.md`）
+## ★2026-06-12 OS 统一工程 + Phase D 就绪（compact 后必读 `docs/sprint/_archive/2026-06-12-os-alignment/SESSION-HANDOFF.md`）
 - **owner 令**：所有 aws 服务器 OS **版本统一 Ubuntu 26.04** + 时区全 **HKT**。team `osalign`(arch/webops/bluearmy) 出 OS-ALIGN-PROGRAM.md FINAL。owner 拍 D1-D6 全准。
 - **已完成**：D1 replica_skip_errors 统一 OFF(CA 生效/HK 待 Phase D 重启/EU 本就 OFF)；**新 CA DB 172.34.1.222 Ubuntu 26.04 建好**(从 HK CLONE+全配置对齐,取代旧 AL2023 .239,别名 aws-region-usw1-db 已 repoint .222)；**D3 web 全 Ubuntu 26.04**(CA×3+EU×2 新节点,外部 hammer 200,旧 5 台 D6 退役 stopped+AMI delete-after 2026-06-19);IP swap .239→.222 全仓。
 - **★Phase D master cutover HK→CA = 全员签字 GO-ready 但未执行**(owner compact 前不跑,compact 后拍 GO+窗口)。脚本 cutover-ws1.sh commit **0b200053**,0-BLOCKER。上次 4 根因全闭合(砍SG fence/S5 python raw-socket+settimeout/abort-trap解冻HK/durability flip)+新护栏(S2.5 PONR人工门/HK_REPL_PWD强制热备)。执行=export HK_REPL_PWD+5个IP+REDIS_PWD,DRY_RUN=0,S2.5暂停lead实测放行S3。CA .222/EU/HK/CA Redis 就绪二查全绿。
