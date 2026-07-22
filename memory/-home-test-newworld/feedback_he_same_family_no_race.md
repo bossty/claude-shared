@@ -18,4 +18,4 @@ Happy Eyeballs v2（RFC 8305）在**跨族（v4 × v6）**时才真正 parallel 
 **参考**：
 - RFC 8305 Happy Eyeballs v2
 - IMC 2025 论文（具体标题待补）
-- docs/P_TO_A_MIGRATION.md §9 v3.2.4 架构决策
+- docs/domain/P_TO_A_MIGRATION.md §9 v3.2.4 架构决策

@@ -54,7 +54,7 @@ type: reference
 - 详见 docs/PRODUCT_ANALYSIS.md
 
 ## 文档位置
-- docs/HD_COVER_SOURCES.md — 封面方案
-- docs/ACTOR_AVATAR_SOURCES.md — 头像方案
-- docs/MOVIE_PREFIX_STUDIO_MAP.md — 番号→厂商映射
+- docs/media/IMAGE_SOURCES.md — 封面方案
+- docs/media/IMAGE_SOURCES.md — 头像方案
+- docs/crawler/MOVIE_PREFIX_STUDIO_MAP.md — 番号→厂商映射
 - docs/PRODUCT_ANALYSIS.md — 产品分析

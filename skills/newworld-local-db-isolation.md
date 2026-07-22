@@ -44,4 +44,4 @@ java -jar newworld-data/target/newworld-data-0.0.1-SNAPSHOT.jar --app.scheduling
 
 ## 源
 - CLAUDE.md L341-L357
-- 配套文档 `docs/LOCAL_DEV_ENVIRONMENT.md`
+- 配套文档 `docs/infra/LOCAL_DEV_ENVIRONMENT.md`

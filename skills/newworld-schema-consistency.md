@@ -94,7 +94,7 @@ fi
 - `newworld-deploy-checklist` 第 5 项（本 skill 是其系统性展开）
 - `newworld-deploy-runbook`
 - `newworld-multi-agent-coord`（schema 变更必走 multi-agent）
-- `docs/audit-suppressions.md`（DBA-gated 例外抑制清单）
+- `docs/security/audit-suppressions.md`（DBA-gated 例外抑制清单）
 
 ---
 

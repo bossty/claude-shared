@@ -220,7 +220,7 @@ bash /newworld/scripts/deploy-frontend.sh
 
 脚本封装：本地 build → tar → scp 分发全部 6 节点（ca-web-01/02/03/04 + eu-web-01/02）→ 各节点原子切换 → version.txt 一致校验 → **enforce sync-seeds 全节点 + wc -c >= 32B**，任一失败 abort 不切流量。
 
-> **不再保留手敲版本**——backup 8 个里 4 个 s.dat 0 字节证明纯文字步骤会腐烂（详见 `docs/DEPLOY_PITFALLS.md` 2026-05-10）。
+> **不再保留手敲版本**——backup 8 个里 4 个 s.dat 0 字节证明纯文字步骤会腐烂（详见 `docs/infra/DEPLOY_PITFALLS.md` 2026-05-10）。
 > 必要时设 `DRY_RUN=1 bash /newworld/scripts/deploy-frontend.sh` 预览每一步。
 
 ### 前端回滚

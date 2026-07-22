@@ -14,7 +14,7 @@ metadata:
 > 2. **monitor path：`/actuator/health` → 实测是 `/health`**。⚠️ **核心论点不受影响且更需强调**：monitor 经 tunnel 落到 `:80` OpenResty catch-all，**app 全崩仍答 200**，真 actuator 在 `:18080` 够不着 → **pool 级健康检查对「实例崩溃重启循环」结构性失明，不会自动摘除**。
 > 3. **判别教训（本次差点判错）**：**CF LB 的存在性不能用业务域自己的 zone 判定**——LB 对象不挂在业务域 zone 上，查 `/zones/{业务域}/load_balancers` 返空是**预期内的空**。正确姿势＝先看业务域 DNS CNAME 指向哪个**宿主 zone**（实测 A 域→`tcos-canary.dnsv106.com`、P 域→`p-lb.lbedge.org`），再去宿主 zone 查 `/load_balancers`。一次「预期内的空」曾被读成「LB 不存在」，差点据此推翻 `CLAUDE.md`「A/P 域经 CF LB geo-steering」——该表述经本次核实**为真**。
 > 4. **粒度结论（部署/金丝雀会用到）**：LB 只做 **CA↔EU 区域级 geo 故障转移**，每个 pool 只挂 1 个 origin（origin 内部是 tunnel connector 自动 HA）→ **CF 侧无单机权重旋钮**，无法先切 1% 试水。且 `region_pools` 实测 WNAM/ENAM/NEAS/OC/SEAS 五区都优先 CA pool。
-> 5. **姊妹漂移（同批查出，未修）**：`docs/AWS_HK_DEPLOYMENT.md` 的 tunnel 表写 A-tunnel（`63594ad3`）服务 ca-web-01..04 + eu-web-01/02 共 6 台同一 tunnel；**实测 eu-web-01 token 解码是另一 tunnel（`cde6d3f3`），与 CA 四台的 `38ef476d` 不同** → 真实是 **CA 4-way + EU 2-way 两个独立 tunnel，只在 geo LB 层汇合**。
+> 5. **姊妹漂移（同批查出，未修）**：`docs/infra/AWS_HK_DEPLOYMENT.md` 的 tunnel 表写 A-tunnel（`63594ad3`）服务 ca-web-01..04 + eu-web-01/02 共 6 台同一 tunnel；**实测 eu-web-01 token 解码是另一 tunnel（`cde6d3f3`），与 CA 四台的 `38ef476d` 不同** → 真实是 **CA 4-way + EU 2-way 两个独立 tunnel，只在 geo LB 层汇合**。
 >
 > 证据与上下文：`docs/superpowers/specs/2026-07-19-bl12-secret-fail-fast-design.md` §6.2 步骤 4 与 §7.5/§7.6。
 

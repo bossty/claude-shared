@@ -47,7 +47,7 @@ metadata:
 ## 待办（下 sprint）
 - 生产 cutover SOP（v36 migration 上线时机 / Redis ad:*→snack:* 切量 / cache 实例重启 / 4 节点验证 / **N9E dashboard PromQL `metric=ads_*`→snacks_* + guard.lua reload**）
 - ⚠️ **3 个 standalone/历史 SQL 含 ad** owner 决策归档 vs 改名（`ad_import_production.sql`/`v34_ad_pinned_order.sql` 改了破坏 replay/`add_missing_indexes.sql`）
-- MINOR: `docs/AD_SYSTEM.md` 文件名含 AD（文档改名，owner 决策）/ migration Step 2+3 合并减 MDL
+- MINOR: `docs/stats/AD_SYSTEM.md` 文件名含 AD（文档改名，owner 决策）/ migration Step 2+3 合并减 MDL
 - Phase 5 reviewer-final 终审：条件 GO（0 BLOCKER / 3 MAJOR 已闭环 / 2 MINOR 非阻塞）
 
 ## ★6/02 真上线实战 + 上线后 UI 回归修复（cutover 成功 + 广告样式修复，全 live 验证）

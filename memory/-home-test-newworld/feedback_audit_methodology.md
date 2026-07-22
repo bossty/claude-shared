@@ -33,7 +33,7 @@ originSessionId: fe398321-ee74-4942-9f53-cfbb4ac5e1d8
 6. **必读 audit-suppressions.md 跳过已抑制项**（5/5 stats-audit P9 V1 教训）：审计 sprint 派任何 P8 / 蓝军前，Task Prompt 必须含：
    ```
    RULE 0: 在做任何分析前，先 Read：
-   - docs/audit-suppressions.md —— 抑制清单，跳过已列项
+   - docs/security/audit-suppressions.md —— 抑制清单，跳过已列项
    - CLAUDE.md "代码审计规范" 章节
    违反 RULE 0 的发现 = 0 价值。
    ```

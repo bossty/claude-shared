@@ -12,7 +12,7 @@ description: N9E v8 监控体系运维 — categraf v0.5 schema 子目录化（i
 - 改 Spring Boot actuator 暴露策略
 - 排查"告警规则不 eval"或"target host_ip 空"
 
-## 触发后必读：`docs/MONITORING_SETUP.md` § 6（添主机 SOP）/ § 7（添告警 SOP）
+## 触发后必读：`docs/infra/MONITORING_SETUP.md` § 6（添主机 SOP）/ § 7（添告警 SOP）
 
 ## 6 个深坑（按 sprint 沉淀顺序）
 
@@ -81,4 +81,4 @@ NULL → alert engine 完全不 eval，`alert_his_event` 永远 0 条。debug 1+
 
 ## 源
 - CLAUDE.md L886-L910（N9E v8 监控体系）
-- 配套：`docs/MONITORING_SETUP.md` § 6 / § 7
+- 配套：`docs/infra/MONITORING_SETUP.md` § 6 / § 7

@@ -18,7 +18,7 @@ metadata:
 - **A5 A-F全实证✅ + G Owner授权✅** → 组A收口(docs/sprint/2026-06-21-reachhint-tri-probe/A5-ACCEPTANCE-CHECKLIST.md)。
 
 ## 组B B1(下一步,动真流量,开新会话专做)
-- ★**我会话尾部暴露真缺口**:连查3次渠道-S域 entry/迁移数据模型(promotion_channel_domain/channel_domain_daily_stats)全空/列名猜错——**没真正搞懂"渠道怎么从S域入口进、怎么把一个S域从edge迁到execute-api"**。组B B1前**必先精读** `docs/S_P_ARCH_V3_3.md`/`SHORT_LINK_PLAYBOOK.md`/`S_ENTRY_LUA.md` 搞懂模型。
+- ★**我会话尾部暴露真缺口**:连查3次渠道-S域 entry/迁移数据模型(promotion_channel_domain/channel_domain_daily_stats)全空/列名猜错——**没真正搞懂"渠道怎么从S域入口进、怎么把一个S域从edge迁到execute-api"**。组B B1前**必先精读** `docs/domain/S_P_ARCH_V3_3.md`/`SHORT_LINK_PLAYBOOK.md`/`S_ENTRY_LUA.md` 搞懂模型。
 - 组B需:①最低流量S域候选 ②高峰窗00:00-02:00采样 ③Owner每步gate ④门禁:CN可达≥老edge/302成功≥99%/pick-p命中/自愈<8min。
 - 回退弹药全在(web/admin jar备份+前端dist.backup+live S域没动edge可秒回+execute-api删CNAME即下线)。
 

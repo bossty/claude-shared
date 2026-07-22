@@ -9,7 +9,7 @@ metadata:
 
 # 全代码审计批次1 P1安全 sprint（2026-07-03）
 
-真相源清单 `docs/sprint/2026-07-02-full-code-audit/FINDINGS.md`（~113条=2P0+24P1+87P2）。审计规范：先分析后修、`finder`项逐条亲证真伪、误报不改、修前Owner复核每项。抑制清单 `docs/audit-suppressions.md` 审计前必读。
+真相源清单 `docs/sprint/2026-07-02-full-code-audit/FINDINGS.md`（~113条=2P0+24P1+87P2）。审计规范：先分析后修、`finder`项逐条亲证真伪、误报不改、修前Owner复核每项。抑制清单 `docs/security/audit-suppressions.md` 审计前必读。
 
 ## 批次1：5项P1安全（合master `16fdec6c` --no-ff，各带测试，已部署ca-admin验证）
 每项修法都是**可复用安全pattern**：

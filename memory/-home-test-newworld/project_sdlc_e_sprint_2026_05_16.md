@@ -51,4 +51,4 @@ dev-senior 在状态档主动说明 `HomeDesktopSections.vue` 含大量预存 TS
 - 上游 spec `docs/superpowers/specs/2026-05-14-agent-team-sdlc-design.md`
 - 前序 sprint [[project_sdlc_lsp2_2026_05_16]]（LSP-2，A/B/C/D 类）+ [[project_sdlc_w3_dryrun_2026_05_15]]（W3 dry-run）
 - sprint 产物 `docs/sprint/_archive/2026-05-16-vue-tsc-e/`（PRD v3 / agents/*.md / sprint-report.md；closeout sprint 已归档至 _archive/）
-- 候选 audit-suppression：HomeDesktopSections.vue 预存 TS2339（baseline 非 §E scope）—— 待 Owner 决定是否入 `docs/audit-suppressions.md`
+- 候选 audit-suppression：HomeDesktopSections.vue 预存 TS2339（baseline 非 §E scope）—— 待 Owner 决定是否入 `docs/security/audit-suppressions.md`

@@ -79,7 +79,7 @@ sprint a0687a5：4 个 hypothesis 全实证：
 
 ## #20 gg/hm/yy 补注册延伸闭环（5/12 P8 倒查 abc1d7e）
 
-a0687a5 PAID_PROMO_VERIFY 文档 Q3 用 `stat_date >= '2026-05-05'` 窗口误判"4 channel 全 0 uv 测试遗留"。P8 倒查实证：gg002/hm002/yy001 是真实历史 **path-style 推广**（`swiftgroup26.cc/hm002` 印证 `docs/SHORT_LINK_PLAYBOOK.md` L17），合计 60.6 万 UV / 520 万 PV / 6510 万秒 watch（4/7-5/8 W14 cutover 后自然消失）。owner 选 A 路径补注册 + B 候选（status=0 + retired_at=NOW）：
+a0687a5 PAID_PROMO_VERIFY 文档 Q3 用 `stat_date >= '2026-05-05'` 窗口误判"4 channel 全 0 uv 测试遗留"。P8 倒查实证：gg002/hm002/yy001 是真实历史 **path-style 推广**（`swiftgroup26.cc/hm002` 印证 `docs/domain/SHORT_LINK_PLAYBOOK.md` L17），合计 60.6 万 UV / 520 万 PV / 6510 万秒 watch（4/7-5/8 W14 cutover 后自然消失）。owner 选 A 路径补注册 + B 候选（status=0 + retired_at=NOW）：
 - ✅ INSERT 3 行 promotion_channel id=18/19/20（status=0 + exempt_orphan_check=1 + retired_at=2026-05-12 06:37:21）
 - ❌ **不**补 promotion_channel_domain：3 主域全 **P 类**，与 owner 5/8 拍板 `channel↔S 1:1 binding` + `channel-P 无状态` 冲突；bind_category v34 收口只允许 'S'
 - ✅ 文档 ERRATA：`docs/PAID_PROMO_ATTRIBUTION_VERIFY_2026_05_12.md` L111 后加纠错 + 真实 UV 表 + 修复行动 + 教训 link

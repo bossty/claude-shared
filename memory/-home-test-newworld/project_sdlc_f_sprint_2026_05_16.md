@@ -44,4 +44,4 @@ main session 的 Bash cwd 误入 dev-senior worktree，首次 `git merge` 实为
 - 上游 spec `docs/superpowers/specs/2026-05-14-agent-team-sdlc-design.md`
 - 前序 sprint [[project_sdlc_e_sprint_2026_05_16]] / [[project_sdlc_lsp2_2026_05_16]] / [[project_sdlc_w3_dryrun_2026_05_15]]
 - sprint 产物 `docs/sprint/_archive/2026-05-16-deprecated-f/`（PRD v3 / agents/*.md / sprint-report.md；closeout sprint 已归档至 _archive/）
-- 候选 audit-suppressions：backward-compat 测试组保留调 deprecated 方法（非迁移遗漏）—— 待 Owner 决定入 `docs/audit-suppressions.md`
+- 候选 audit-suppressions：backward-compat 测试组保留调 deprecated 方法（非迁移遗漏）—— 待 Owner 决定入 `docs/security/audit-suppressions.md`

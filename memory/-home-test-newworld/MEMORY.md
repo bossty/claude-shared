@@ -3,6 +3,9 @@
 > **backlog 单一真相源 = 仓库 `docs/BACKLOG.md`（BL-1~27，建于 2026-07-10 `b452e7d0`）**。memory 只记教训与已完成事实，**不记待办状态**（待办写进 BACKLOG.md）；下方条目里的 backlog 引用一律指向 BL-x 编号。
 
 ## 近期工作 / 进行中
+- [B5 CloudflareApiService拆分批1已合master 400d0db1a(2580→2114行,CfHttpClient传输层);后续7资源域批未开工;绕过点窄口子范式可复用;BL-24「未开工」描述需订正](project_cf_httpclient_split_b5_2026_07_06.md) — BL-111补沉淀
+- [kanav爬虫05-30 Owner拍板搁置非废弃:代码保留gated-off默认禁用,从未部署/验收;PRD在已删归档目录,重启须git找回](project_kanav_crawler_shelved_2026_05_30.md) — BL-111补沉淀
+- [生产Dragonfly选型依据(2026-05-26 POC):主业务2.22x-2.97x胜Redis+REPLICAOF零停机33s实证;反甜区=单条串行SET/Lua/HLL热key;无AOF故5min RPO;隔离benchmark协议+memtier必dry-run](project_dragonfly_selection_poc_2026_05_26.md) — BL-111补沉淀
 - [★★★GFW P0 ④ **二次翻案并实证收口**：病因在内部——裸 `403` 判据吞掉自家 40% 成功探测，已修复上线合 master (07-20/21)](../../../../newworld/docs/sprint/2026-07-20-gfw-p0-gate-productionize/SESSION-STATE.md) — **🔴 最终定性=我方 bug 非外部劣化**：无词边界裸`403`跑在结果已渲染后且无成功证据兜底,把结果表`403ms`(耗时)/`403.40KB/s`(速率)当拦截页整域丢弃成功探测(被丢行节点状态全200);对照实验(同边车/同批域/同源,唯一变量=成功证据兜底)**denied 40.6%→0.0%、成功率 57.2%→97.2%**;修复`182db34ed`合master`0966e0f39`,live sha`5aa50ed1…`(07-20 19:24 UTC部署);方法论见[[reference_negative_control_must_match_probe_semantics]];**遗留=tcptest 07-16自死另有其因未受本次影响仍待查、F2(aliyun侧diag取样)因失败样本消失至今未真实验证、闸门阈值前提失效(真实容量97%非60%)需跑满数轮再重审**；~~④ 重新定性=外部探测源劣化非闸门校准错也非我方 bug（aliyun 07-09/10 风控灰度~40% 拒绝）~~**（此定性已于 07-21 被对照实验推翻）**；六条旧结论全证伪（07-17 部署致因/07-16 归零/403 自伤/轮数翻倍/融合被切断可修）；边车补丁**已部署 live（07-20 15:47，sha `678715e9…`）**，随后蓝军(fable 5)审出 8 条(4 MAJOR)、Owner 拍板全修再部署第二版；★canary 首轮必开诊断取样当取样轮否则会误报通过，**但 07-20 订正:禁按旧写法设 `PROBE_DIAG_SAMPLE=1`——那是进程级开关、会让全部生产轮次把页面文本写 journal，改用每请求 `diag:true`**；★★蓝军 8 条**没一条能靠自审发现**(自写的 mock 遮蔽断链/假测试自己看不出/错误期望被写进断言)；准入新增前置=分叉合流（生产 `b295c36b5` 不在 master，P0 lib 在准入分支不存在）
 - [★★HTML壳阶段二观测收口+BL-72 504三线triage (07-15)](docs/sprint/2026-07-15-bl72-504-triage/SESSION-STATE.md) — HIT偏低坐实(60sTTL×PoP分散)→edge TTL 60→300s;BL-72三线:①真504在CF Argo/LB派发层(主线,源站已证伪)②keepalive分支`fix/bl72-keepalive-hygiene`未部署③拦通配毙(200出壳91.9%随机子域=load-bearing);教训=改配置前查引用面+早期结论必fact-check **(07-19订正:BL-72 已 Owner 07-16 拍板收官,§6;正文①「真504在CF Argo/LB派发层」主线归因已证伪→真相=CF 记账伪影/浏览器预连接,见 [[reference_cf_504_unk_protocol_accounting_artifact]])**
 - [★jable 封面链路事故:恢复源站原图兜底 **已合master`1271130f2`+部署验证真出片122896,分支已清** (07-15)](reference_cover_miss_not_ipban_placeholder_probe.md) — 根因=DMM封面未上架+清理删行堵死hardCap;markDead失效立BL-71;判别法见reference节同名条目
@@ -14,6 +17,12 @@
 - [★supjav 断流修复(referer 429):代码完成+部署ca-admin已live核实,**已合master`e3dc68ca3`(07-19订正:原「待验证+未合」已过期,BL-55 §6)** (07-13)](docs/sprint/_archive/2026-07-13-supjav-referer-fix/SESSION-STATE.md) — 根因=effectiveReferer把盗链referer套到Google Drive段致429;修=hls.referer-agnostic-hosts豁免走pickReferer默认;fMP4/key路径缺口→BL-56;同型第5次[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
 
 ## reference(load-bearing,常 recall)
+[文档为文档背书不是证据：X档说Y档有效只当线索](reference_doc_vouching_for_doc_is_not_evidence.md) — BL-118 两次合并误判同源；档头与正文矛盾则两者都不可信；权威性排序=常量>注释、生产实查>文档
+- [cohort 池化必须 list+count 双覆盖，且做全栈适用扫描而非逐个打补丁](reference_cohort_pool_list_count_dual_coverage.md) — 只改 list 会把慢 SQL 挪到 PageHelper auto-count 上；附三层缓存决策树与深翻页 maxPageNum 2000→200 兜底
+- [抓源站视频流必须做 frame 归属判定，URL 关键词宽松匹配会把广告小组件流认成正片](reference_media_stream_attribution_needs_frame_ownership.md) — supjav「MOUFLON 加密」整套前提是广告 iframe 流量，真正片纯明文含 720p+；据此凭空立项过一个解扰器
+- [采集集体冻结先查 /tmp：tmpfs 被泄漏 profile/HLS 临时文件占满 → chromium 无共享内存断连 → 实例重建同样失败 → 池归零](reference_tmpfs_leak_starves_playwright_pool.md) — 生产 pool-size=1 把「一次重建失败」放大成永久死亡，全程只有一行 log.error；初版 RCA 误判成「finally 漏归还」被蓝军证伪
+- [Redis拒绝active-active完整论证链(2026-06-02):换引擎门槛0/3永不触发;唯一进urt跨洋写=feed markSeen正解改异步;多地写同key正解=region维key非CRDT(KeyDB LWW丢增量);replica白名单必到call-site粒度;pub/sub选version-key轮询fail-safe](reference_redis_no_active_active_decision_chain.md) — 再有人提Redis多活先走本条,别重跑调研
+- [广告转化下跌误诊教训(2026-05):真因=灰产落地域轮换被封会周期复发;「5/7下降」=统计口径假象(session_count平稳即判据);拨测必用DB完整URL含端口路径,裸域名443曾测出假「不可达」](reference_ad_conversion_drop_misdiagnosis_2026_05.md) — binlog保留仅~6天,事发早取证
 - [负对照/证伪实验的采样口径必须与被测判据逐字一致，否则量出假零、整条论证链坍塌；「外部环境劣化」最能让人停止排查自家代码](reference_negative_control_must_match_probe_semantics.md) — GFW ④ 实事故:裸`403`判据(无词边界、跑在结果已渲染后、无成功证据兜底)把结果表`403ms`/`403.40KB/s`当拦截页,整域丢弃已拿到的成功探测(被丢行节点状态全是200),被误诊为「aliyun外部风控灰度40%拒绝」9天;对照实验denied 40.6%→0.0%、成功率57.2%→97.2%;翻案前的「四重闭合」全塌,致命错=②负对照声称「正常结果表403出现0次」(判据裸扫全文,负对照只查状态码列→假零),①i.i.d.分布拟合与自伤相容不能证伪、③域名不含403无关、④循环论证;★adjacent标志区分不了自伤(`403ms`=true/`403.40KB/s`=false两者都是自伤,据它估82.1%实为100%);★`journalctl --utc --since '<裸时间>'`的--utc只改输出显示不改解析→假空,须显式UTC后缀;裸子串误命中一天四次连蓝军自己也栽
 - [「不存在/没做/未发生」类断言必须两条独立判据交叉验证；find -newermt 撞 cp -p 保留 mtime = 必然漏检](reference_absence_claims_need_two_independent_probes.md) — 07-20 实事故:凭记忆查错备份路径(档里写/opt/…/backups,我查/home/ubuntu/backups)+兜底find因-p保留旧mtime结构性漏检→向Owner发出错误指控「agent声称做了备份但没做」,实则备份一直在;伴随证据一眼可证伪(同目录有3个0714历史批次);铁律=判存在性用路径+sha256不用时间、查证坐标先回读原始记载禁凭记忆、把单次异常升格成「规律」前停一拍(叙事惯性会让人跳过验证);与[[reference_bare_substring_gate_needs_success_evidence_backstop]]是硬币两面
 - [「文本匹配即丢弃」类判据必须有成功证据兜底，否则裸子串必误杀](reference_bare_substring_gate_needs_success_evidence_backstop.md) — 误命中取决于调用点有无成功证据兜底，不是概率问题；三实例同源（403 无词边界撞 `1403ms`／频控判据漏裸文案／判据跑在关广告前致广告词误丢整域）；★结构性防护优于把正则写准=「仅零帧时才跑判据」使判据写宽也吃不掉成功结果；判据无真样本则结论不可证伪→默认关的脱敏诊断取样 + `classified=none` 即盲区样本
@@ -84,6 +93,7 @@
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
+- [Owner 授权:必要时自行拉 agent team + 难任务用 fable 5 subagent-driven](feedback_convene_team_and_fable5_for_hard_tasks.md) — 07-21 站立授权,不必每次等点名;难度高就上最强模型+多视角别省钱;主线程仍保持薄只回收结论
 - [「失败集中在X」先验分母效应:单样本源的分布=样本构成非现象特征,必换构成不同的对照源](feedback_distribution_reflects_sample_not_phenomenon.md) — 07-16 BL-72实事故:「504的94%是CN」被两会话读成GFW针对CN,真相=canary zone用户本就94%CN(分子分母同源);换主域17.rip一查US 504=38.9%>CN 23.9%当场证伪;报比率不报绝对数+反问「成功的那批什么分布」
 - [读SESSION-STATE必先消化档头追加,与BACKLOG交叉核对再开工](feedback_session_state_header_addendum_wins.md) — 07-16实事故:BL-72主线已被追加结案,我仍按正文旧节推荐攻已证伪方向并落档,Owner据此授权错方向一轮;订正旧节须就地标注失效
 - [worktree 一律开在仓库外 /home/test/worktree-<名>，禁 EnterWorktree 默认落点 .claude/worktrees/](feedback_worktree_location_outside_repo.md) — Owner 07-14 指令；用 EnterWorktree path 参数进手动建的仓库外 worktree；node_modules 硬链接克隆 1.9s；dev-workflow skill 已订正(3109e2657)

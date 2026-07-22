@@ -27,7 +27,7 @@ metadata:
 
 ## 前端侧 + lead 仲裁 + ops（main session 补全，2026-06-04 收官）
 
-**数据源复用法**：生产前端错误数据在 Dragonfly `172.31.19.174:6379`(aws-db-poc 无 redis-cli)。从 **aws-web-01 用 redis-cli**，密码 `REDISCLI_AUTH=$(sudo tr '\0' '\n' </proc/$(pgrep -f newworld-web|head -1)/environ|grep ^REDIS_PASSWORD=|cut -d= -f2-)`（**变量名 REDIS_PASSWORD 非 REDIS_PWD**）。schema 见 docs/FRONTEND_MONITOR.md。
+**数据源复用法**：生产前端错误数据在 Dragonfly `172.31.19.174:6379`(aws-db-poc 无 redis-cli)。从 **aws-web-01 用 redis-cli**，密码 `REDISCLI_AUTH=$(sudo tr '\0' '\n' </proc/$(pgrep -f newworld-web|head -1)/environ|grep ^REDIS_PASSWORD=|cut -d= -f2-)`（**变量名 REDIS_PASSWORD 非 REDIS_PWD**）。schema 见 docs/frontend/FRONTEND_MONITOR.md。
 
 **前端 5 类修复 commit `65fff601`(npm 598 pass+QA 四象限全绿+已部署)**：
 - **A `Script error.`空source(2.8万)= 第三方/iOS应用内WebView注入噪音，非缺crossorigin**(三域 curl 证主bundle已带crossorigin+CORS、bundle反查全站1处throw、QA WebKit headless 0复现)。修=monitor.js `source==''&&msg==='Script error.'`→`script_error_noise`(后端独立桶)。线上验证 script-error-noise 桶 4076 出现、js-errors 槽降至 344(噪音已剥离 KPI 回归)。

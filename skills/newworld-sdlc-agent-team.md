@@ -107,7 +107,7 @@ subagent_type: reviewer
 tools: [Read, Bash (read-only), Glob, Grep]
 can_send_to: [review→任何 senior（单向）, escalate_to_owner]
 独立 context window（不可见 pm-helper 思维过程）
-必读 docs/audit-suppressions.md 跳过已知抑制项
+必读 docs/security/audit-suppressions.md 跳过已知抑制项
 max_round=2（超出强制 escalate_to_owner）
 ```
 

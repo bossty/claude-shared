@@ -14,7 +14,7 @@ metadata:
 **输入**：三 agent 并行调研（blog-sweep=claude.com/blog+engineering 21 篇工程实践文精读 / docs-sweep=Claude Code 官方文档 25 页 / local-inventory=本地 8 类盘点），报告全文归档 `docs/sprint/_archive/2026-07-03-cc-best-practices-optimization/`（含差距矩阵 25 条 + 不采纳项及理由，防重复论证）。
 
 **落地改动**：
-- **根 CLAUDE.md 345→168 行**：skill 索引压缩为分组名地图（触发靠 frontmatter description 预载，根档长描述纯冗余；修复 28+6 vs 实有 37 计数漂移）；服务器全表撤 `docs/AWS_HK_DEPLOYMENT.md`（易变信息禁进根档——EIP 已绑根档仍写"非 EIP"是漂移实证）；文档索引全文迁**新档 `docs/DOC_INDEX.md`**（durable 登记铁律随迁，DOC_GOVERNANCE §五 同步收紧 ~300→~200 行口径）；反发现段指针化 GFW_AND_NETWORK §0.3（顺手闭环其"CLAUDE.md 待订正"标记）；新增「上下文与压缩」段（compact 必保留：改动文件清单/测试命令/分支+sha/部署 Step N/未决 Owner 决策）。
+- **根 CLAUDE.md 345→168 行**：skill 索引压缩为分组名地图（触发靠 frontmatter description 预载，根档长描述纯冗余；修复 28+6 vs 实有 37 计数漂移）；服务器全表撤 `docs/infra/AWS_HK_DEPLOYMENT.md`（易变信息禁进根档——EIP 已绑根档仍写"非 EIP"是漂移实证）；文档索引全文迁**新档 `docs/DOC_INDEX.md`**（durable 登记铁律随迁，DOC_GOVERNANCE §五 同步收紧 ~300→~200 行口径）；反发现段指针化 GFW_AND_NETWORK §0.3（顺手闭环其"CLAUDE.md 待订正"标记）；新增「上下文与压缩」段（compact 必保留：改动文件清单/测试命令/分支+sha/部署 Step N/未决 Owner 决策）。
 - **NEW_SESSION_PROMPT.md 重写**：删滞留 2 个月的 4/30 封面 404 陈旧任务段；补会话卫生（/clear 一会话一类任务、/goal 长任务可验证完成条件、/compact 定向、/btw 侧问）、大需求反向面试、模型升级重审脚手架、checkpoint 不跟踪 bash 改动。
 - **`.claude/settings.json` 加 permissions**：deny 读 .env/*.pem/id_rsa*；**ask（非 deny）读 secrets.env**——deny 会破坏"secrets.env 改动必 diff 对账"工作流。
 - **`scripts/check-skill-plugin-drift.sh` 新增**：home 真相源 37 skill ↔ plugin SKILL.md 逐字节 diff 双向查（缺失/漂移/孤儿），RED-GREEN 已验；挂 ci-local.sh 软告警不拦 push。

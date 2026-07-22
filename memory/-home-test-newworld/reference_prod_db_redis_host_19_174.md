@@ -23,7 +23,7 @@ metadata:
 **2026-05-31 全量 stale IP 清扫（commit `a5940b2f` + 后续）**：
 - 实测真值（IMDSv2）：aws-web-01 public `43.198.206.231`、aws-web-02 `43.198.240.144`、aws-data `18.167.41.192`（internal 全稳定 .27.120/.121/.130）。**aws-* 非 EIP，public IP stop/start 会变，仅 SSH 用（回源走 CF Tunnel），以 IMDSv2 实测为准**。
 - 修了 9 个 durable 档的死 IP（CLAUDE.md / AWS_HK_DEPLOYMENT / AWS_MONITOR / AWS_S_INFRASTRUCTURE / EDGE_VPS / NEW_SESSION_PROMPT / P_POOL_GLOBAL_SHARED / SHORT_LINK_PLAYBOOK / S_ENTRY_LUA）；历史 runbook/plan/sprint 档不改写。
-- ⚠️ **secret 泄漏**：`docs/NEW_SESSION_PROMPT.md` 曾含明文 DB 密码入 git（已改占位符 `$DB_PASSWORD`，但 **git 历史仍含**，owner 决定密码轮换+历史清理"先不改"，遗留待办）。
+- ⚠️ **secret 泄漏**：`docs/process/NEW_SESSION_PROMPT.md` 曾含明文 DB 密码入 git（已改占位符 `$DB_PASSWORD`，但 **git 历史仍含**，owner 决定密码轮换+历史清理"先不改"，遗留待办）。
 - 🔴 **W4-CRAW 工具 latent bug**：`tools/tag_dict_filler.py` 的 prod-DB 安全护栏 `if host in ("172.31.27.200","18.166.209.100")` **不含现行 .19.174 → 对真 prod 库静默失效**；`config.py`/`export_runner.sh` 默认 DB_HOST 兜底仍是死的 .27.200（带 env 跑才正常）。**教训：DB 迁移后必 grep 全仓库硬编码 IP 护栏/默认值，不止改文档**。
 
 关联 [[feedback_secrets_env_diff_baseline]]（/proc/environ 验真注入）、[[project_db_migration_2026_05_27]]（5/28 灾难重建全文）、[[reference_cf_waf_referer_skiplist]]。

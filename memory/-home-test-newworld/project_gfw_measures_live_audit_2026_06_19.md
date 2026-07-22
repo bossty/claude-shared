@@ -15,7 +15,7 @@ metadata:
 1. **DNSSEC全线假的**:11个域(A/B/C全类:17.rip/byteatlas.top等/dhlearnpipe.com等/mindportal26.net)实测 DS全空+RRSIG全无=CF压根没签名/DS没推注册商。代码enableDnssec()调了但零生效。文档§5.4/§5.8"所有域名开启"不实。缓解:CF代理+HSTS+应用层AES还在,非裸奔但这层防线是假的。
 2. **N_AG非CF兜底是死腿仍下发**:N_AG=https://d2qou1y0q9.execute-api.ap-east-1.amazonaws.com(**HK ap-east-1**),SW Happy Eyeballs 250ms第二顺位竞速腿;边缘答403但后端Lambda→EC2 origins 172.31.27.120/121 是HK VPC已2026-06-13退役→"CF被封时唯一非CF逃生通道实际不存在"却仍推给每客户端。应清N_AG或CA/EU重建非CF入口。
 
-**📄 docs/GFW_AND_NETWORK.md 严重stale**勿当现状:拓扑还是退役HK/BuyVM(web-01 209.141.57.183)、CDN旧键CDN_CF_URLS_*、说探针已删(实有lite版)、说relay"不部署"(实在跑)。
+**📄 docs/network/GFW_AND_NETWORK.md 严重stale**勿当现状:拓扑还是退役HK/BuyVM(web-01 209.141.57.183)、CDN旧键CDN_CF_URLS_*、说探针已删(实有lite版)、说relay"不部署"(实在跑)。
 
 **⛔ 按设计移除**:首屏内容接口(featured/recent/categories/tags)实测明文(e8135159撤AES换LCP);guard.lua白名单+Strike封禁2026-04-19起禁用只留限速。
 

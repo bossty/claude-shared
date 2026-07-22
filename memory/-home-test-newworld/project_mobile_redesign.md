@@ -30,4 +30,4 @@ type: project
 
 **Why:** 用户留存数据极差，需要产品层面改版而非只做技术优化。
 
-**How to apply:** 封面采集和移动端改版并行推进，docs/PRODUCT_ANALYSIS.md 和 docs/HD_COVER_SOURCES.md 有完整方案。
+**How to apply:** 封面采集和移动端改版并行推进，docs/PRODUCT_ANALYSIS.md 和 docs/media/IMAGE_SOURCES.md 有完整方案。

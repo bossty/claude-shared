@@ -7,7 +7,7 @@ metadata:
   originSessionId: eda7ef50-950e-4d1c-9bb9-e14e4381e2c3
 ---
 
-2026-07-11，Owner 授权（Gate A，走金丝雀）把 BL-34（前端错误上报治理）上生产，BL-40（web 本地 dev loopback region 误判拒启动修复，生产行为中性）搭顺风车。**`docs/CANARY_RUNBOOK.md`（BL-33）首次真实执行**。
+2026-07-11，Owner 授权（Gate A，走金丝雀）把 BL-34（前端错误上报治理）上生产，BL-40（web 本地 dev loopback region 误判拒启动修复，生产行为中性）搭顺风车。**`docs/infra/CANARY_RUNBOOK.md`（BL-33）首次真实执行**。
 
 ## 部署事实
 

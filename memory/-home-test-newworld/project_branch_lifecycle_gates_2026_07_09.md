@@ -11,7 +11,7 @@ metadata:
 
 1. **真缺陷已修**：`pre-push-gate.sh:79` 对叶子后端模块生成 `backend-pl:<模块>` scope，但 `ci-local.sh` 无对应分支 → 只改 newworld-web/admin/data 的 push 零后端测试放行。修法 = ci-local.sh 补 `backend-pl:?*` 分支跑 `mvn -pl <模块> -am test` + scope 白名单（未知 scope fail-safe 升全量）。实测：reactor 3 项目 BUILD SUCCESS 1:06min（此前 0 秒空转）。
 2. **合 master 慢门**：pre-push 检测目标 ref=refs/heads/master 且代码类改动 → 升全量。附带机械闭合「B 测完后 master 被抢先推进」竞态（non-ff 拒推→重 merge→慢门重测）。
-3. **分支全生命周期 SOP** 落 `docs/BRANCH_LIFECYCLE.md`（七步：扫撞车→origin/master 切出→禁 rebase 只 merge→merge master 重测→Owner 授权→慢门→安全清理），CLAUDE.md 分支铁律段同步扩写。
+3. **分支全生命周期 SOP** 落 `docs/process/BRANCH_LIFECYCLE.md`（七步：扫撞车→origin/master 切出→禁 rebase 只 merge→merge master 重测→Owner 授权→慢门→安全清理），CLAUDE.md 分支铁律段同步扩写。
 4. **审计澄清**：pre-commit/pre-push 无真重复（分层干净，唯一跨层项 skill-drift 是有意双保险）；全量约 7 分钟在业界「<10 分钟直接全量」口径内，不上更细粒度选测（后端隐式耦合多，依赖图不可靠）。
 
 **Why**: 闸门自身的 bug 静默放行是最危险的一类（绿灯≠跑过）；调研三来源 = Not-Rocket-Science Rule / Fowler 语义冲突 / TIA（martinfowler.com/articles/rise-test-impact-analysis.html）。

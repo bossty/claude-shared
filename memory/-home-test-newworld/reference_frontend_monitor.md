@@ -4,7 +4,7 @@ description: 2026-04-17 建立的 Redis 分桶 + admin Top N 仪表盘 + 扩展/
 type: reference
 originSessionId: 315225a0-4872-4aa2-b73b-4b4f2e570643
 ---
-前端错误监控全链路文档：`docs/FRONTEND_MONITOR.md`
+前端错误监控全链路文档：`docs/frontend/FRONTEND_MONITOR.md`
 
 关键 Redis key 前缀（5min slot = yyyyMMddHHmm，TTL 30min）：
 - `monitor:js-errors:{slot}` 真 JS 错误（告警用）

@@ -9,7 +9,7 @@ metadata:
 
 BL-30（生产 99 天无有效备份 P0）2026-07-10 第二会话收口。分支 `fix/backup-source-replica` 已推 origin（尾 commit `edca85c4`），**已合 master `ed48119f`（Owner 2026-07-10 授权，vf 每日全备），分支与 worktree 已按安全协议清理**。
 
-已建成（全部实测有证据，见 docs/DR_RUNBOOK.md + docs/sprint/_archive/2026-07-10-bl30-dr-drill/SESSION-STATE.md）：
+已建成（全部实测有证据，见 docs/infra/DR_RUNBOOK.md + docs/sprint/_archive/2026-07-10-bl30-dr-drill/SESSION-STATE.md）：
 - eu-mysql-slave 每日 12:30 HKT root cron 核心档备份，两段式 dump（结构全对象+数据段黑名单排除），七道哨兵 fail-safe，21 用例红绿。
 - 排除清单 fact-check **推翻两处表名推断**：vid_metadata 可排除（跨域 UV 滚动工作表 7 天自愈）；vid_alias_log（cluster_root 唯一落库热路径直读）与 visitor_fingerprint（first-touch 归因唯一持久源，Redis 源 7d TTL 不可回溯）必须备份。核心档实测 0.98GiB/dump 143s/replica lag=0。
 - 监控闭环：status.prom→categraf input.exec→N9E 规则 139/140（139 已真实红绿验：触发→TG 送达→自动恢复）。
