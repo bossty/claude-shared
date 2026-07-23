@@ -1,6 +1,6 @@
 ---
 name: newworld-backend-design
-description: Newworld 后端设计核心 — Result<T> 包装 + EncryptResponse + Web 教育主题伪装路径；TwoLevelCache (Caffeine L1 + Redis L2) + @Cacheable/@CacheEvict + 6 版本号驱动 (contentVersion 等)；推荐系统 3 层硬同步 (data/web/frontend)；配置三层判定 (代码常量 / application.yml / system_config DB)；Bloom Filter write-through + rebuild 兜底，禁 miss-then-DB；Web 模块只读查询标 @Transactional(readOnly=true) 但禁包 Redis 写。Triggers on controller, result wrapper, Result<T>, encryptresponse, cacheable, cacheevict, twolevelcache, contentversion, settings/version, 推荐三层, related, MovieLimit, VideoPlayer, system_config, application.yml, bloomfilter, write-through, miss-then-db, readOnly 事务, 缓存穿透, MovieRecommendationService, CacheConstants, MovieCacheRefreshListener.
+description: Newworld 后端设计核心 — Result<T> 包装 + EncryptResponse + Web 教育主题伪装路径；TwoLevelCache (Caffeine L1 + Redis L2) + @Cacheable/@CacheEvict + 6 版本号驱动 (contentVersion 等)；推荐系统 3 层硬同步 (data/web/frontend)；配置三层判定 (代码常量 / application.yml / system_config DB)；Bloom Filter write-through + rebuild 兜底，禁 miss-then-DB；Web 模块只读查询标 @Transactional(readOnly=true) 但禁包 Redis 写。Triggers on controller, result wrapper, Result<T>, encryptresponse, cacheable, cacheevict, twolevelcache, contentversion, settings/version, 推荐三层, related, MovieLimit, VideoPlayer, system_config, application.yml, bloomfilter, write-through, miss-then-db, readOnly 事务, 缓存穿透, MovieRecommendationService, CacheConstants, MovieCacheRefreshListener, MovieBloomFilterService, SidBloomService, Redisson, RBloomFilter, RBloomFilterNative, RedisBloom, BF.ADD, guava bloomfilter 分布式.
 ---
 
 > **执行机制**：靠判断力（Result 包装/两级缓存/推荐三层架构）
@@ -63,6 +63,8 @@ description: Newworld 后端设计核心 — Result<T> 包装 + EncryptResponse 
 2. **保留周期 rebuild 作兜底**：Pub/Sub at-most-once，10 min 定时 rebuild 自愈
 3. **禁止 "miss 查 DB 兜底"**：违反防穿透本意；miss 直接返 404
 4. **Listener 内部顺序**：先 `refreshBloomFilter()` → 再 `evictByPattern(列表缓存)`。反转 = 列表清完回源拿新片但 bloom 未刷 → miss 404 窗口
+5. **当前实现 = Guava per-instance**：`MovieBloomFilterService`（2026-07-04 从 MovieService 上帝类抽出；另有 `SidBloomService`）每实例本地 `BloomFilter<Integer>` + `AtomicReference` 原子替换，write-through `addToBloom()`（Guava put 幂等）+ 10min `refreshBloomFilter()` 定时 rebuild 兜底。**已知限制**：无跨实例分布式同步——两实例各自 rebuild 有一致性窗口（错峰时 A 认「存在」B 认「不存在」），百万 DAU + 动态增长下表现为零星穿透/间歇 404。31K 元素 @0.01 FPP ≈ 37KB/实例。
+6. **升级路径（一致性窗口成问题时才做，非紧急）**：首选 **Redisson `RBloomFilter`**（开源版，pom 加一行、无需 Redis module、共享 Redis key = 无同步窗口、增量 `add()` 入库即生效）；装了 RedisBloom module（Redis 8.0+ 内置）可用 `RBloomFilterNative` / `BF.ADD`+`EXPANSION` scalable 自动扩容，但本项目规模（电影库 <100 万）远未到 Guava 2^32 天花板、收益有限。**不选** Orestes-Bloomfilter（2026-01-08 已 archive）、Stream-Lib（维护冷清无分布式优势）、自研轮子。
 
 ## 6. Web 模块 readOnly 事务（演进路径）
 
@@ -89,3 +91,4 @@ description: Newworld 后端设计核心 — Result<T> 包装 + EncryptResponse 
 - CLAUDE.md L399-L477（API/缓存/推荐/配置）
 - CLAUDE.md L753-L774（Bloom Filter）
 - CLAUDE.md L116-L120（readOnly 事务）
+- §5 项5-6（当前 Guava per-instance 实现 + 分布式限制 + Redisson 升级路径）提炼自 `docs/recon/p7_research_bloom_java_redis.md`（Java/Redis 布隆实现调研，2026-04-22；已删除留墓碑，`git show` 取回）
