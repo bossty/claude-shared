@@ -4,6 +4,8 @@ description: 三个真实事故教训：SQL migration 必执行 / PageHelper 禁
 type: feedback
 originSessionId: f41fc13a-9772-4519-93e4-19914facf340
 ---
+**部分机制化（半接管，其余靠判断力）：** pre-commit 闸门 `scripts/check-sql-ledger.sh` 只拦「新 `sql/*.sql` 文件名是否登记进 §4 ledger 表格」（`:7` 自述「不核实已跑环境」）——只覆盖下方第 1 项的「登记」子集，**不证明已在生产 DB 真跑**；第 2 项（PageHelper 双 LIMIT）、第 3 项（启动函数真调用）、E2E 真实性红线**无任何机制**，全靠判断力 + prod profile 真跑 + grep 验证。
+
 ## 背景
 
 2026-04-14 01:15 两生产 bug 同时爆发 + 12:00 发现 Sprint 1 TP-02 从未生效。单日内 P9 错过三次事前 verify 机会。

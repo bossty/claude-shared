@@ -6,11 +6,13 @@ metadata:
   type: feedback
 ---
 
+**已机制化（仅检测层）：** Stop hook `.claude/scripts/stray_shell_reminder.py` + 收割器 `scripts/nw-toolbox/nw-reap-stray`（详见下方 How 2–3）只做「事后扫野进程 + 告警/收割」，**不阻止**命令跑飞——预防（命令自带 `timeout`、禁 `cut -c`|`rev`、禁 `updatedInput` 改写）全靠判断力，下方铁律保留。
+
 **Bash 工具的超时不杀命令，只把它转后台继续跑。** 所以任何跑飞的命令都会留下野进程——**与命令内容无关**，枚举具体命令永远治不完。真正能开枪的只有命令**自带**的 `timeout N ...` 前缀。
 
 **Why:**（2026-07-12 实事故 + 受控实验，反直觉，最易误信官方旋钮）
-- 实事故：一条命令里的 `rev` 撞上非法 UTF-8 死循环，包装 bash 卡在 `do_wait` 等它，**存活 30 分钟无人发现**（Owner 先看见的："还有一个 shell 在运行"）。
-- 官方旋钮**治不了**：`BASH_DEFAULT_TIMEOUT_MS`（本机已设 300000=5min）与工具的 `timeout` 参数，**只约束「这次工具调用等多久」，不约束「命令活多久」**。受控实验坐实：工具 timeout=15s，死循环命令 15s 后照样在跑，harness 只是把它转成后台任务。官方 docs 未记录超时后的处置语义（社区 issue 说 SIGTERM，与实测不符）。
+- 实事故：一条命令里的 `rev` 撞上非法 UTF-8 死循环，包装 bash 卡在 `do_wait` 等它，**存活 30 分钟无人发现**。
+- 官方旋钮**治不了**：`BASH_DEFAULT_TIMEOUT_MS`（本机已设 300000=5min）与工具的 `timeout` 参数，**只约束「这次工具调用等多久」，不约束「命令活多久」**。受控实验坐实：工具 timeout=15s，死循环命令 15s 后照样在跑，harness 只是把它转成后台任务。
 - 该次的具体肇事 idiom（中文项目高复发）：`cut -c` **按字节切**（GNU coreutils 不做多字节）→ 把汉字劈成半个 → 非法 UTF-8 喂给 util-linux `rev` → **`rev` 死循环**。取行头尾用 `awk` substr 或 python，别用 `cut -c` 切完再喂 `rev`。红绿验过：切在汉字边界=正常退出，劈半=死循环。
 
 **How to apply:**

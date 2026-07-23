@@ -7,6 +7,8 @@ metadata:
   originSessionId: 8c1fcb79-0cfc-4ab7-83a2-3dc3a94850e3
 ---
 
+**部分机制化（半接管，其余靠判断力）：** `scripts/ci-local.sh:24-30` 的共享 checkout 守卫拦的是「在主 checkout（`/home/test/newworld`）直接跑 ci-local 与并行会话撞车」这一**相邻场景**（非 `NW_GATE_CALLER=1` 即 exit 1）；它**不防**本条真正的场景——**同一 worktree 内在门禁后台运行期间并行 `mvn clean`**。后者仍全靠判断力。
+
 pre-push 门禁（ci-local.sh 全量测试）后台运行期间，同一 worktree 内禁止任何并行 `mvn`（尤其 `clean`）和源码改动（merge/checkout 也算）。
 
 **Why**：2026-07-03 C 组缓存统一 push 期间并行 `mvn clean package` 把 `newworld-common/target` 从门禁测试 classpath 底下抽掉 → admin 模块大片 `NoClassDefFoundError`（如 ConfigVersionRegistry）→ ci-local 误判失败拦下 push；并行期间打的 jar 也不可信。

@@ -7,8 +7,9 @@ metadata:
   originSessionId: c5caee8a-f62d-4b1f-a4c0-3a770cdda70b
 ---
 
-任何时间的生产部署（web/admin/data/前端/openresty/edge 等一切线上变更）都必须先获得 Owner 拍板，**不分高低峰期**；唯一例外是 Owner 已提前授权的明确范围。
+**已机制化：** `scripts/lib/git-preflight.sh` Gate A（`OWNER_DEPLOY_APPROVED=1` 才放行，`:75`）在部署脚本入口硬拦——未声明 Owner 拍板直接拒绝。
 
-**Why:** 2026-07-05 上午两个会话相隔 27 秒并发跑 deploy-web.sh（互不知情、各自认为"该部署了"），B 的产物每台只活 25 秒即被 A 覆盖、B 自报成功——部署时机与授权只靠会话自行判断必然失守。原有 off-peak guard 只拦峰窗，给了"非峰窗可自行部署"的错误暗示，Owner 当日明确：拍板不分时段。
+任何时间的生产部署（web/admin/data/前端/openresty/edge）都必须先获 Owner 拍板，**不分高低峰期**；唯一例外=Owner 提前授权的明确范围。原教训：2026-07-05 两会话相隔 27 秒并发 deploy-web.sh，B 产物每台只活 25 秒被 A 覆盖仍自报成功→时机与授权只靠会话自判必失守（旧 off-peak guard 只拦峰窗，反给"非峰窗可自行部署"错误暗示）。
 
-**How to apply:** 部署前必须先向 Owner 报告"要部署什么（分支/sha/影响面）"并获得明确同意；获得后以 `OWNER_DEPLOY_APPROVED=1` 前缀运行部署脚本（[[git-preflight]] Gate A 机制层硬拦，未声明直接拒绝）。提前授权也必须是 Owner 明说的范围，不得自行推定"上次同意过类似的"。相关：[[feature-branch-deploy-test-then-merge]]、[[deploy-caution]]。
+**Why:** 机制拦得住"没带 `OWNER_DEPLOY_APPROVED`"，拦不住"自行推定上次同意过类似的"——授权范围判断仍靠人。
+**How to apply:** 部署前向 Owner 报"部署什么（分支/sha/影响面）"获明确同意；提前授权必须是 Owner 明说范围，禁自行外推。相关 [[feature-branch-deploy-test-then-merge]]、[[deploy-caution]]。
