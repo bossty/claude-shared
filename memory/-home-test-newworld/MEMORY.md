@@ -2,60 +2,63 @@
 
 > **backlog 单一真相源 = 仓库 `docs/BACKLOG.md`（BL-1~27，建于 2026-07-10 `b452e7d0`）**。memory 只记教训与已完成事实，**不记待办状态**（待办写进 BACKLOG.md）；下方条目里的 backlog 引用一律指向 BL-x 编号。
 
-## 近期工作 / 进行中
-- [B5 CloudflareApiService拆分批1已合master 400d0db1a(2580→2114行,CfHttpClient传输层);后续7资源域批未开工;绕过点窄口子范式可复用;BL-24「未开工」描述需订正](project_cf_httpclient_split_b5_2026_07_06.md) — BL-111补沉淀
-- [kanav爬虫05-30 Owner拍板搁置非废弃:代码保留gated-off默认禁用,从未部署/验收;PRD在已删归档目录,重启须git找回](project_kanav_crawler_shelved_2026_05_30.md) — BL-111补沉淀
-- [生产Dragonfly选型依据(2026-05-26 POC):主业务2.22x-2.97x胜Redis+REPLICAOF零停机33s实证;反甜区=单条串行SET/Lua/HLL热key;无AOF故5min RPO;隔离benchmark协议+memtier必dry-run](project_dragonfly_selection_poc_2026_05_26.md) — BL-111补沉淀
-- [★★★GFW P0 ④ **二次翻案并实证收口**：病因在内部——裸 `403` 判据吞掉自家 40% 成功探测，已修复上线合 master (07-20/21)](../../../../newworld/docs/sprint/2026-07-20-gfw-p0-gate-productionize/SESSION-STATE.md) — **🔴 最终定性=我方 bug 非外部劣化**：无词边界裸`403`跑在结果已渲染后且无成功证据兜底,把结果表`403ms`(耗时)/`403.40KB/s`(速率)当拦截页整域丢弃成功探测(被丢行节点状态全200);对照实验(同边车/同批域/同源,唯一变量=成功证据兜底)**denied 40.6%→0.0%、成功率 57.2%→97.2%**;修复`182db34ed`合master`0966e0f39`,live sha`5aa50ed1…`(07-20 19:24 UTC部署);方法论见[[reference_negative_control_must_match_probe_semantics]];**遗留=tcptest 07-16自死另有其因未受本次影响仍待查、F2(aliyun侧diag取样)因失败样本消失至今未真实验证、闸门阈值前提失效(真实容量97%非60%)需跑满数轮再重审**；~~④ 重新定性=外部探测源劣化非闸门校准错也非我方 bug（aliyun 07-09/10 风控灰度~40% 拒绝）~~**（此定性已于 07-21 被对照实验推翻）**；六条旧结论全证伪（07-17 部署致因/07-16 归零/403 自伤/轮数翻倍/融合被切断可修）；边车补丁**已部署 live（07-20 15:47，sha `678715e9…`）**，随后蓝军(fable 5)审出 8 条(4 MAJOR)、Owner 拍板全修再部署第二版；★canary 首轮必开诊断取样当取样轮否则会误报通过，**但 07-20 订正:禁按旧写法设 `PROBE_DIAG_SAMPLE=1`——那是进程级开关、会让全部生产轮次把页面文本写 journal，改用每请求 `diag:true`**；★★蓝军 8 条**没一条能靠自审发现**(自写的 mock 遮蔽断链/假测试自己看不出/错误期望被写进断言)；准入新增前置=分叉合流（生产 `b295c36b5` 不在 master，P0 lib 在准入分支不存在）
-- [★★HTML壳阶段二观测收口+BL-72 504三线triage (07-15)](docs/sprint/2026-07-15-bl72-504-triage/SESSION-STATE.md) — HIT偏低坐实(60sTTL×PoP分散)→edge TTL 60→300s;BL-72三线:①真504在CF Argo/LB派发层(主线,源站已证伪)②keepalive分支`fix/bl72-keepalive-hygiene`未部署③拦通配毙(200出壳91.9%随机子域=load-bearing);教训=改配置前查引用面+早期结论必fact-check **(07-19订正:BL-72 已 Owner 07-16 拍板收官,§6;正文①「真504在CF Argo/LB派发层」主线归因已证伪→真相=CF 记账伪影/浏览器预连接,见 [[reference_cf_504_unk_protocol_accounting_artifact]])**
-- [★jable 封面链路事故:恢复源站原图兜底 **已合master`1271130f2`+部署验证真出片122896,分支已清** (07-15)](reference_cover_miss_not_ipban_placeholder_probe.md) — 根因=DMM封面未上架+清理删行堵死hardCap;markDead失效立BL-71;判别法见reference节同名条目
-- [★★BL-70 crawl-monthly 页范围缺口修复 **✅已收口**:合master`a9e7cd2f7`+5/6月全量采集完成核验(07-16),BACKLOG已移入§6 (07-15)](docs/sprint/_archive/2026-07-15-bl70-full-month-crawl/SESSION-STATE.md) — 源站实证best每月111页(原上限50页只采45%);三分片successPages=74/failedPages=0/overflowSkippedPages=0全达标,库存status=3 400→5814部(理论上限≈5994,跨月去重后吻合);蓝军[BLOCKER]cap=20<27条/页静默丢片[[reference_hardcoded_cap_silent_drop_masked_by_old_concurrency]];副产双管理坑[[reference_buyvm_best_worker_systemd_vs_launch_script]];坐标系=1-based入参p→urlPage p-1;**数据全躺status=3用户不可见=有意设计**(发布策略BL-68未定/best零监控BL-69);未落档副产=shard1b(p1-74复跑+737部)发起方查无实据
-- [★★BL-64(原BL-60/63) xvideos best榜接入+20类分类金标1353条 **已合master`2aeca89a5`+BL-65预览bug修复合master`0cc02f61d`**;buyvm worker真采已开(6/7月40部入库);遗留=ca-admin dry-run两键**已删(07-19订正:07-16 BL-65 止血删 DRY_RUN_SLUGS + BEST_ENABLED=false)**,评测补强①~④待排期(BL-65 §1) (07-14)](project_xvideos_best_onboarding_2026_07_14.md) — 预览bug根因见[[reference_handoff_source_structure_claim_must_verify]];best零入库四叠加根因(代码零调用+301+mandatory双通路绕过forbid);无码解放口径冲突致F1暴跌0.757→0.057;LLM批量模式100%失效(json_object返不了数组)
-- [★BL-59 madou.club 采集接入 开发+测试完成**已合master`18897cc8d`(07-19订正:原「未合master」已过期,BACKLOG §6;生产已按Owner指令停采清库、配置可逆保留)**;金标B类真出片PASS (07-13)](project_madou_crawler_2026_07_13.md) — 蓝军4MAJOR全修;基类null→SKIPPED守卫有跨爬虫副作用(削弱supjav熔断)→revert改madou本地根治
-- [★★BL-60/61 madou广告水印识别+厂牌映射 **❌BL-60已放弃(Owner 07-14拍板:不做自动检测,全部入库后续人工剔除)**,代码零改动零回滚(纯docs`e816421ce`);BL-61厂牌映射**已完成合master`ac1ea35ec`(07-19订正:原「待单独定」已过期,§6;40前缀/17厂牌离线建表、采集运行时零LLM依赖)** (07-14)](docs/sprint/2026-07-13-madou-crawler/SESSION-STATE-BL60-61.md) — 放弃理由:角落烧录域名水印无现成方案(零样本认未知域名需LLM vision+白名单,长期人工成本不低于事后剔除)+OCR误差会误杀好片;方案非蒸发是没落档[[reference_session_jsonl_archaeology_before_redesign]];真对手=域名水印非片头横幅(真帧37/37);待Owner=整片跳过vs标记复核
-- [★★xvideos金标复核+region规则改造+入库端接入 **已合master`372db27c1`(07-13 --no-ff,分支已清;07-19考古订正:原「未合/10commits」是合并前陈旧快照,实合25commits,见GOLDSET-BRANCH-ARCHAEOLOGY档)** 准确率93.0%→**97.0%**(held-out97.0%/未见uploader97.6%) (07-13)](docs/sprint/2026-07-12-xvideos-goldset/SESSION-STATE.md) — 撤回上会话「自评」签字(同模型自评被三盲评员逮出25个漏);核心教训=源站tag本身脏(`-3d`/`hentai`/`young-man`皆不可信见tag即判);Owner四拍板(cn=内容非产地/AMWF按女优算/禁硬编码刷100%/实现入库端);待拍板=CAS分流+duration过滤
-- [★supjav 断流修复(referer 429):代码完成+部署ca-admin已live核实,**已合master`e3dc68ca3`(07-19订正:原「待验证+未合」已过期,BL-55 §6)** (07-13)](docs/sprint/_archive/2026-07-13-supjav-referer-fix/SESSION-STATE.md) — 根因=effectiveReferer把盗链referer套到Google Drive段致429;修=hls.referer-agnostic-hosts豁免走pickReferer默认;fMP4/key路径缺口→BL-56;同型第5次[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
+## 近期工作 / 进行中（生成段：nw-bl render-memory-recent，禁手编）
+
+- ★BL-145 DoH TXT 同步无互斥:并发运行互删记录 → 83011 写失败致域名池残缺（分支 `fix/doh-sync-concurrency-race`，认领 2026-07-22） — 详情 `docs/sprint/2026-07-22-bl145-doh-sync-race/SESSION-STATE.md`
+- ★BL-144 伞形：agent-first 项目重构（分支 `feat/bl144-state-consolidation`，认领 2026-07-22） — 详情 `docs/sprint/2026-07-22-bl144-agent-first-restructure/PRD.md`
+- ★BL-78 BuyVM 三台采集机零监控 + 6 实例无回滚（分支 `feat/bl78-bl69-crawler-monitoring`，认领 2026-07-21）
+- ★BL-76 GFW P0 部署工具安全线（分支 `fix/gfw-supervised-p0-rollout`，认领 2026-07-19）
+- ★BL-12 全局 secret fail-fast 校验器（分支 `feat/bl12-secret-fail-fast`，认领 2026-07-19）
+- ★BL-1 aws-s 跨洋 pick-p RPC 常态失败 2.92% 治理（分支 `fix/bl1-pickp-read-timeout-700`，认领 2026-07-19）
+
+> 上表由 BL 台账 in-progress 条目生成(nw-bl render-memory-recent);旧手写近期行已随 BL-144 阶段②生成化移除,状态查 docs/BACKLOG.md。
+
 
 ## reference(load-bearing,常 recall)
-[文档为文档背书不是证据：X档说Y档有效只当线索](reference_doc_vouching_for_doc_is_not_evidence.md) — BL-118 两次合并误判同源；档头与正文矛盾则两者都不可信；权威性排序=常量>注释、生产实查>文档
-- [cohort 池化必须 list+count 双覆盖，且做全栈适用扫描而非逐个打补丁](reference_cohort_pool_list_count_dual_coverage.md) — 只改 list 会把慢 SQL 挪到 PageHelper auto-count 上；附三层缓存决策树与深翻页 maxPageNum 2000→200 兜底
-- [抓源站视频流必须做 frame 归属判定，URL 关键词宽松匹配会把广告小组件流认成正片](reference_media_stream_attribution_needs_frame_ownership.md) — supjav「MOUFLON 加密」整套前提是广告 iframe 流量，真正片纯明文含 720p+；据此凭空立项过一个解扰器
-- [采集集体冻结先查 /tmp：tmpfs 被泄漏 profile/HLS 临时文件占满 → chromium 无共享内存断连 → 实例重建同样失败 → 池归零](reference_tmpfs_leak_starves_playwright_pool.md) — 生产 pool-size=1 把「一次重建失败」放大成永久死亡，全程只有一行 log.error；初版 RCA 误判成「finally 漏归还」被蓝军证伪
-- [Redis拒绝active-active完整论证链(2026-06-02):换引擎门槛0/3永不触发;唯一进urt跨洋写=feed markSeen正解改异步;多地写同key正解=region维key非CRDT(KeyDB LWW丢增量);replica白名单必到call-site粒度;pub/sub选version-key轮询fail-safe](reference_redis_no_active_active_decision_chain.md) — 再有人提Redis多活先走本条,别重跑调研
-- [广告转化下跌误诊教训(2026-05):真因=灰产落地域轮换被封会周期复发;「5/7下降」=统计口径假象(session_count平稳即判据);拨测必用DB完整URL含端口路径,裸域名443曾测出假「不可达」](reference_ad_conversion_drop_misdiagnosis_2026_05.md) — binlog保留仅~6天,事发早取证
-- [负对照/证伪实验的采样口径必须与被测判据逐字一致，否则量出假零、整条论证链坍塌；「外部环境劣化」最能让人停止排查自家代码](reference_negative_control_must_match_probe_semantics.md) — GFW ④ 实事故:裸`403`判据(无词边界、跑在结果已渲染后、无成功证据兜底)把结果表`403ms`/`403.40KB/s`当拦截页,整域丢弃已拿到的成功探测(被丢行节点状态全是200),被误诊为「aliyun外部风控灰度40%拒绝」9天;对照实验denied 40.6%→0.0%、成功率57.2%→97.2%;翻案前的「四重闭合」全塌,致命错=②负对照声称「正常结果表403出现0次」(判据裸扫全文,负对照只查状态码列→假零),①i.i.d.分布拟合与自伤相容不能证伪、③域名不含403无关、④循环论证;★adjacent标志区分不了自伤(`403ms`=true/`403.40KB/s`=false两者都是自伤,据它估82.1%实为100%);★`journalctl --utc --since '<裸时间>'`的--utc只改输出显示不改解析→假空,须显式UTC后缀;裸子串误命中一天四次连蓝军自己也栽
-- [「不存在/没做/未发生」类断言必须两条独立判据交叉验证；find -newermt 撞 cp -p 保留 mtime = 必然漏检](reference_absence_claims_need_two_independent_probes.md) — 07-20 实事故:凭记忆查错备份路径(档里写/opt/…/backups,我查/home/ubuntu/backups)+兜底find因-p保留旧mtime结构性漏检→向Owner发出错误指控「agent声称做了备份但没做」,实则备份一直在;伴随证据一眼可证伪(同目录有3个0714历史批次);铁律=判存在性用路径+sha256不用时间、查证坐标先回读原始记载禁凭记忆、把单次异常升格成「规律」前停一拍(叙事惯性会让人跳过验证);与[[reference_bare_substring_gate_needs_success_evidence_backstop]]是硬币两面
-- [「文本匹配即丢弃」类判据必须有成功证据兜底，否则裸子串必误杀](reference_bare_substring_gate_needs_success_evidence_backstop.md) — 误命中取决于调用点有无成功证据兜底，不是概率问题；三实例同源（403 无词边界撞 `1403ms`／频控判据漏裸文案／判据跑在关广告前致广告词误丢整域）；★结构性防护优于把正则写准=「仅零帧时才跑判据」使判据写宽也吃不掉成功结果；判据无真样本则结论不可证伪→默认关的脱敏诊断取样 + `classified=none` 即盲区样本
-- [信号「整月0→突增」先查采集机制何时建的，别当劣化；翻案靠跨改动的同口径基线](reference_signal_onset_is_collector_birth_not_phenomenon.md) — GFW ④ 实例：denied 信号 07-13 才存在，整月 0 是没代码不是没现象；07-13 前「全绿」是坏探针伪影（fill 超时仍报 done、每域恒 151 节点=未绑定行）；真起点 07-09/10 靠边车层 `[probe] error` 才量出（admin 侧旧码把失败吞成假成功、无同口径基线）；附「178/176 其实是 no_trust 不是 denied」口径串号 + 三点 diff 的 `-` 侧是合并基不是对比分支
-- [sprint 文档归档清算三坑:机械判据「memory提过=已完结」系统性过宽(抽样30%→全量51%降级)+--exclude-dir=_archive按basename误排同名目录+悬空扫描扩展名必含.js/.yaml/.yml/.html](reference_doc_archive_audit_pitfalls.md) — BL-79实践;归档/清理批量动作机械清单只出候选,必配全量人工复核+保守方向;exclude用路径不用basename;git grep秒级胜rg超时
-- [主checkout被他会话占用时安全合master:临时detached worktree合并+回主checkout推特定sha](reference_merge_master_when_main_checkout_busy.md) — 别在主checkout直接合(会夹带别人未推送commit,实例a5a504707+152行);别用worktree_guard逃生口;push特定sha是纯网络操作不动主checkout HEAD/工作树;`git branch -d`会因HEAD是别人commit而拒,先--is-ancestor验再-D
-- [N9E规则落库+PromQL对≠engine真eval:live红验证法(压阈+for=0看alert_cur_event真出事件再逐字还原)](reference_n9e_rule_live_redtest.md) — BL-15实跑(规则142);副产既存缺口=edge pick告警链路此前从未live验证过(136/137/138稳态恒0=可能全是摆设)→**凡「稳态恒0」的告警都该做一次live红验证**;前科108 disabled=0却永不触发;局限=只证到engine生成事件,Telegram端服务器侧无法证实
-- [冷却/短路/跳过类修复生产验证:命中路径常无日志→用状态key(fail-count)分布轨迹看runaway/frozen,非grep;wiring用key格式与读侧逐字对齐证](reference_nolog_codepath_validate_via_state_key_trajectory.md) — BL-71实例:supjav无-marker重载致fail-count无限累加到56(delete分支从不执行)=靶心化石;两轮run后MAX/count冻结=无runaway;局限=未抓现行须诚实报;附跨时区date -d野sleep坑
-- [CF 504+origin=0 先查 protocol=UNK 判记账伪影再开排查 **(07-16 重大订正:GFW归因已证伪)**](reference_cf_504_unk_protocol_accounting_artifact.md) — UNK+visits=0=请求未完成的决定性指纹;~~CN集中=GFW干扰~~+~~504全落miss=慢响应给时间窗、正解提HIT~~**双双证伪**(主域17.rip实测US 504=38.9%>CN 23.9%;TTL 60→300s后HIT升504纹丝不动)→当前最佳解释=浏览器预连接伪影(真浏览器200:504≈1:1,纯脚本SG零504),用户无感无需修;判别新增④地理集中必换对照源验分母⑤真浏览器vs脚本对照⑥limit必配orderBy(无序=任意N组非topN,静默截断);升plan拿coloCode官方查无记载可能白买
-- [「同几番号反复失败+产出骤降」≠IP封:历史命中URL复测+占位图语义判别;封面miss删行→markDead失效→循环重采堵死hardCap](reference_cover_miss_not_ipban_placeholder_probe.md) — awsimgsrc 404占位jpg/pics.dmm 302 now_printing=片未上架非封禁
-- [buyvm best worker: systemd unit vs launch 脚本双管理打架 + 假 READY + 三个日志路径](reference_buyvm_best_worker_systemd_vs_launch_script.md) — 只有buyvm-data有systemd unit(Restart=on-failure);launch杀进程→systemd自动拉起→launch自己启的撞端口失败,但readiness探针探到systemd那个→报假READY;logback写相对路径→日志位置由cwd决定(systemd的在/home/test/best-run/logs/data/);不靠日志判活=ss看ESTAB+CPU时间+线程数
-- [硬编码 cap < 每页条数 = 静默丢片；旧并发模式可能意外互补掩盖它](reference_hardcoded_cap_silent_drop_masked_by_old_concurrency.md) — BL-70 实例:cap=20 vs 每页27条,break后剩余7条不计入任何stats;**旧「三机同范围抢锁」的冗余扫描意外补上了缺口**,改硬分片才让它第一次真咬人→铁律=改并发/分片架构必先枚举「旧的重复扫描掩盖了哪些潜伏bug」;批量任务每台启动命令都必须显式带cap
-- [手敲启动的 worker 重启必丢 env→回落退役默认值 10.0.0.40；worker 假「UP」但业务必败](reference_handstarted_worker_restart_loses_env.md) — BL-68 实事故：照抄 ps 命令行抄不到 environ→Redis/DB 连退役地址，但 health 仍 200、HTTP 正常响应、只有采集静默全失败（白查两轮，极易误判成源站/代码 bug）；判别=日志现 10.0.0.40 即 env 丢失；铁律=一律用 launch-*.sh（已补 launch-best.sh）、杀进程禁 pkill -f 会自匹配、`sudo tr < /proc/environ` 会因 shell 重定向无权限而失败须 `sudo cat | tr`；姊妹坑=logback 日志文件属 root 致 worker 长期盲跑零日志（BL-65 真采时亦然）
+- [pipefail管道「生产者|提前退出消费者」大输入SIGPIPE 141静默翻转判定,一天四逮](reference_pipefail_early_exit_consumer_sigpipe.md) — 闸门脚本禁echo|grep -q/awk提前exit,改herestring/纯bash;修复必grep同文件全部同构点;红绿验必含>64KB用例
+- [每日增长型产物必算稳态占用对照盘容量](reference_daily_growth_steady_state_capacity.md) — binlog/备份爬坡期水位会涨到稳态;运行值vs持久化值diff揪未落档SET GLOBAL
 
-- [交接档说「方案随 context 蒸发」必先去会话 jsonl 考古再重做](reference_session_jsonl_archaeology_before_redesign.md) — madou BL-60/61 实例：档里写死「方案正文已蒸发、需重新设计」，一次 grep 就翻案（两份完整设计完好躺在 `~/.claude/projects/.../*.jsonl`）；根因=subagent 返回的正文主线程只口头复述一句就转场、从未整段落档→**铁律：subagent 的设计/调查正文必须当场整段写进 sprint 档**；考古法=双账户目录 grep -c 打分定位→派 subagent python 解析只回结论；附带翻出「footer 是从属关系」这个 Owner 猜测早被实证证伪却从未汇报
-- [交接档「源站无某字段」结论必抓真页面证伪+preview上传不校验类型坑](reference_handoff_source_structure_claim_must_verify.md) — BL-65 best 预览无法播放真根因=上会话凭代码注释「/best/不暴露preview」推断(实则列表页data-video JSON 27/27都带previewVideo mp4直链,一次curl grep翻案);preview上传链路不验magic bytes→JPEG被当视频静默传;preview key按movieId复用+CF immutable 30d=stale必purge;回填端点backfill-preview可复用
-- [金标真值与被评测配置同源=循环论证;多标签macro类集必须两榜固定一致](reference_goldset_truth_config_same_source_circularity.md) — 真值信号与配置输入同一套→F1看不见同向传播的噪声,该配置分数只是「与知情标注的一致性上界」;破法=抽50-100条用独立信号做一次性校准审计;macro「+21%」曾因两榜类集不同(结构性不覆盖类在一榜拖底、另一榜被自动排除)而虚高,固定16类后真实+0.05~0.07;同模型双实例≠独立标注员,per-class一致性表必带support列
-- [git push exit 141=SIGPIPE:慢门晾死SSH连接,门绿但一字节没推](reference_git_push_141_sigpipe_slow_gate.md) — pre-push全量门7min期间GitHub断开git早已建好的连接→送包吃SIGPIPE;日志"BUILD SUCCESS+ci-local全绿+EXIT=141"极易误读成推送成功(madou BL-59实事故:6个commit含master merge在本地躺一天);判别实验=SKIP_CI_LOCAL=1秒过即坐实;已配~/.ssh/config ServerAliveInterval 30/CountMax 20根治;**铁律=push后必核origin真值,禁以"门绿"推断"已推送"**
+[给既有流程加钩子必须单独证明「钩子真的执行过」，测试全绿常是绕开新代码](reference_new_hook_needs_execution_proof.md) — 加钩子前须通读宿主早退点+造必触发输入单独验
+[文档校准必须三层：校准→蓝军审diff→复验处置](reference_doc_calibration_needs_three_layers.md) — 52 份实测 0 份自评可信；每层都逮到上一层的错；蓝军须审真实 diff 不看自述
+[文档为文档背书不是证据：X档说Y档有效只当线索](reference_doc_vouching_for_doc_is_not_evidence.md) — 档头与正文矛盾则两者都不可信;权威性=常量>注释、生产实查>文档
+- [cohort 池化必须 list+count 双覆盖](reference_cohort_pool_list_count_dual_coverage.md) — 只改list是把慢SQL挪到count上;须全栈扫描而非逐个打补丁
+- [抓源站视频流必须做 frame 归属判定](reference_media_stream_attribution_needs_frame_ownership.md) — URL关键词宽松匹配会把广告小组件流误认成正片,据此凭空立项过一个解扰器
+- [采集集体冻结先查 /tmp：tmpfs 泄漏致池归零](reference_tmpfs_leak_starves_playwright_pool.md) — pool-size=1把「一次重建失败」放大成永久死亡,全程只有一行log.error
+- [Redis拒绝active-active完整论证链(2026-06-02)](reference_redis_no_active_active_decision_chain.md) — 换引擎门槛0/3永不触发;再有人提Redis多活先走本条,别重跑调研
+- [广告转化下跌误诊教训(2026-05)](reference_ad_conversion_drop_misdiagnosis_2026_05.md) — 真因=灰产落地域轮换被封周期复发;拨测必用DB完整URL含端口路径;binlog只留~6天须早取证
+- [负对照采样口径必须与被测判据逐字一致，否则量出假零](reference_negative_control_must_match_probe_semantics.md) — GFW④实事故:裸403判据误杀成功探测、误诊9天;★journalctl --utc只改显示不改解析
+- [「不存在/没做/未发生」类断言必须两条独立判据交叉验证](reference_absence_claims_need_two_independent_probes.md) — find -newermt 撞 cp -p 保留mtime=必然漏检;判存在性用路径+sha256不用时间;与[[reference_bare_substring_gate_needs_success_evidence_backstop]]是硬币两面
+- [「文本匹配即丢弃」类判据必须有成功证据兜底](reference_bare_substring_gate_needs_success_evidence_backstop.md) — 否则裸子串必误杀;★结构性防护优于把正则写准;判据无真样本则结论不可证伪
+- [信号「整月0→突增」先查采集机制何时建的，别当劣化](reference_signal_onset_is_collector_birth_not_phenomenon.md) — 翻案靠跨改动的同口径基线;坏探针会伪造「全绿」
+- [sprint 文档归档清算三坑](reference_doc_archive_audit_pitfalls.md) — 机械判据「memory提过=已完结」系统性过宽须全量复核;exclude用路径不用basename
+- [主checkout被他会话占用时安全合master](reference_merge_master_when_main_checkout_busy.md) — 临时detached worktree合并+回主checkout推特定sha;直接合会夹带别人未推送commit
+- [N9E规则落库+PromQL对≠engine真eval](reference_n9e_rule_live_redtest.md) — live红验证法(压阈+for=0看真出事件);★凡「稳态恒0」的告警都该做一次live红验证
+- [冷却/短路/跳过类修复的生产验证:命中路径常无日志](reference_nolog_codepath_validate_via_state_key_trajectory.md) — 用状态key(fail-count)分布轨迹看runaway/frozen,非grep
+- [CF 504+origin=0 先查protocol=UNK判记账伪影(07-16重大订正:GFW归因已证伪)](reference_cf_504_unk_protocol_accounting_artifact.md) — 最佳解释=浏览器预连接伪影,用户无感无需修;地理集中必换对照源验分母
+- [「同几番号反复失败+产出骤降」≠IP封](reference_cover_miss_not_ipban_placeholder_probe.md) — 历史命中URL复测+占位图语义判别;封面miss删行→markDead失效→循环重采堵死hardCap
+- [buyvm best worker: systemd unit vs launch脚本双管理打架](reference_buyvm_best_worker_systemd_vs_launch_script.md) — 会报假READY;判活=ss看ESTAB+CPU时间+线程数,非日志
+- [硬编码 cap < 每页条数 = 静默丢片](reference_hardcoded_cap_silent_drop_masked_by_old_concurrency.md) — 旧并发冗余扫描意外补缺口掩盖它,改硬分片才第一次真咬人
+- [手敲启动的worker重启必丢env→回落退役默认值10.0.0.40](reference_handstarted_worker_restart_loses_env.md) — worker假「UP」但业务必败;一律用launch-*.sh,杀进程禁pkill -f
 
-- [BuyVM 多机分片爬虫走 HTTP 触发非 @Scheduled（scheduling gate 关整个 @EnableScheduling）](reference_buyvm_worker_scheduling_gate_sharding.md) — worker 必关 scheduling 防 12 个无 flag 定时任务 N 重跑；主+管理端口都要错开；CAS 闸门+brands fail-safe；BuyVM 连 CA 走 EIP
-- [A族爬虫 parseDetail 返回null的语义陷阱+别用基类null→SKIPPED守卫修(削弱全爬虫熔断)](reference_crawler_parsedetail_null_contract.md) — 基类crawlOneItem对null draft计FAILED非SKIPPED;改共享基类前枚举全下游隐式依赖跑全量测试
-- [HLS 段 PNG 伪装前缀剥除:定位走 PNG chunk 到 IEND 后再扫 TS 周期(纯周期扫被同相位诱饵误命中)](reference_hls_segment_png_disguise_strip.md) — supjav 段=PNG+填充+真TS,我方未剥致大前缀(500×500 941B)零帧;offset-0纯周期扫会被「真起点−188」同相位0x47误命中少剥188B(1/256/段近千段必中,加大探针无效),必按PNG chunk结构锚IEND;存量R2原地解密-剥-重加密换新段名(绕CF stale)重写m3u8,不删旧段幂等;单测确证端到端待部署[[feedback_goldset_must_play_real_video]]
-- [段被套盗链referer致签名CDN(Google Drive)大面积429断流→referer-agnostic host段豁免](reference_source_referer_ban_agnostic_host_exempt.md) — 换IP/UA无效、唯一判别量是referer(区别IP封的403/challenge);段限流治标referer治本;fMP4/AES key路径会绕过豁免(supjav不触发);同型第5次;姊妹坑[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
-- [跨机房永久边车连通=autossh systemd隧道(受限key permitopen)+pkill -f自匹配杀自己远端shell坑](reference_autossh_sidecar_tunnel_pkill_gotcha.md) — 切换边车用显式PID或pkill -x禁pkill -f含命令行字符串;autossh -M0+ServerAlive断线15s重连;systemd切换顺序避端口/display冲突
-- [长视频抽等距帧必先remux成MP4再keyframe seek](reference_thumbnail_grid_seek_remux_mp4.md) — 对concat/裸TS做-ss是顺序解码慢死长片;缩略图网格/预览montage同款;时长必ffprobe真产物别信EXTINF/部分fixture外推
-- [源站按机房IP封→FlareSolverr双白名单必成对](reference_source_ip_ban_dual_whitelist_flaresolverr.md) — bypass-hosts(走FlareSolverr)与proxy-hosts(走BuyVM干净出口IP)口径不同;漏配proxy=该源断供+熔断静默;症状=某region突然零产出+FlareSolverr 500/63s;第三次同源复发(javxx/123av BL-44→hanime1 BL-50 anime/3d);新增CF保护源必成对评估
-- [告警规则加 label 正则前必验 series 真实存在](reference_alert_rule_series_existence_check.md) — counter series 常动态创建(if count>0 才注册),而"零产出"恰是要监控的故障态本身→规则永不触发;VM 实查 count by(label) + offset 1h 排重启假象;反方向预注册前先问"零值是否正常态"(否则从失明变误报)
-- [env 键归属判定 + systemd EnvironmentFile 累加语义](reference_env_key_ownership_and_systemd_envfile.md) — 判模块是否读某键必追 @Value 所在模块(禁凭类名/yml占位符);drop-in 覆盖 EnvironmentFile 须先空赋值重置
-- [Spring 实例化≠代码引用:给 common 类去 @Value 默认值前必查下游 ComponentScan](reference_spring_bean_instantiation_vs_import.md) — 唯一 import 方是 admin,但 web/data 也扫 common→朴素去默认值炸 6 台 web;修法 @ConditionalOnProperty;验证用 --debug condition report 非 ApplicationContextRunner
-- [部署 jar 必 symlink 切换不覆盖实文件(inode 实证)+迁移 harness 三坑](reference_jar_symlink_vs_inplace_overwrite.md) — install/cp -f 原地覆盖同 inode 与运行中 JVM mmap 竞争;EU 重启数百条 Redis Connection closed 是跨洋在途 stats-async 被切,低峰 0 是时段运气非流程更优
-- [UDF deadRoots 判死无样本门,隐式依赖 REACH_FUSION_ENABLED 贝叶斯先验](reference_deadroots_sample_gate_implicit_contract.md) — 关融合=deadRoots 立失小样本保护;软沉底不删+trace 终裁故非 BLOCKER;REACH_HINT_ENABLED 07-10 已 live
-- [前端错误上报链路怎么验才算真通](reference_frontend_monitor_report_chain_verification.md) — 三坑:__e2e cookie整体禁上报(profile常残留)/sendBeacon不进Playwright网络列表=观测盲区/注入throw无filename不进js_error主桶须走__pushError;三层证据=beacon调用+Redis计数器超噪声增量+fe-rl限流key
-- [SW生命周期+前端逃生测试铁律](reference_sw_lifecycle_escape_testing.md) — SW改动必真浏览器e2e/内存态不跨重启须IDB恢复/缺失导出只warning/harness自己会骗人/老headless SW终止脆弱用xvfb
+- [交接档说「方案随context蒸发」必先去会话jsonl考古再重做](reference_session_jsonl_archaeology_before_redesign.md) — 根因=subagent正文只口头复述从未落档→必须当场整段写进sprint档
+- [交接档「源站无某字段」结论必抓真页面证伪](reference_handoff_source_structure_claim_must_verify.md) — 凭代码注释推断被一次curl翻案;附preview上传不验类型+key复用CF stale坑
+- [金标真值与被评测配置同源=循环论证](reference_goldset_truth_config_same_source_circularity.md) — F1看不见同向传播的噪声;多标签macro类集必须两榜固定一致;同模型双实例≠独立标注员
+- [git push exit 141=SIGPIPE:慢门晾死SSH连接,门绿但一字节没推](reference_git_push_141_sigpipe_slow_gate.md) — push后必核origin真值,禁以「门绿」推断「已推送」
+
+- [BuyVM多机分片爬虫走HTTP触发非@Scheduled](reference_buyvm_worker_scheduling_gate_sharding.md) — 须关全局scheduling防定时任务N重跑;主+管理端口都要错开;CAS闸门+brands fail-safe
+- [A族爬虫 parseDetail 返回null的语义陷阱](reference_crawler_parsedetail_null_contract.md) — 基类对null计FAILED非SKIPPED;改共享基类前须枚举全下游隐式依赖
+- [HLS 段 PNG 伪装前缀剥除](reference_hls_segment_png_disguise_strip.md) — 必按PNG chunk锚IEND,纯周期扫会被同相位诱饵误命中[[feedback_goldset_must_play_real_video]]
+- [段被套盗链referer致签名CDN大面积429断流→referer-agnostic host段豁免](reference_source_referer_ban_agnostic_host_exempt.md) — 换IP/UA无效,唯一判别量是referer[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
+- [跨机房永久边车=autossh systemd隧道+pkill -f自匹配杀自己坑](reference_autossh_sidecar_tunnel_pkill_gotcha.md) — 切边车用显式PID或pkill -x,禁pkill -f含命令行字符串
+- [长视频抽等距帧必先remux成MP4再keyframe seek](reference_thumbnail_grid_seek_remux_mp4.md) — 对concat/裸TS做-ss是顺序解码慢死长片;时长必ffprobe真产物
+- [源站按机房IP封→FlareSolverr双白名单必成对](reference_source_ip_ban_dual_whitelist_flaresolverr.md) — bypass与proxy口径不同,漏配proxy=该源断供+熔断静默;已第三次同源复发
+- [告警规则加label正则前必验series真实存在](reference_alert_rule_series_existence_check.md) — counter常动态创建,而「零产出」恰是要监控的故障态本身→规则永不触发
+- [env键归属判定 + systemd EnvironmentFile累加语义](reference_env_key_ownership_and_systemd_envfile.md) — 归属必追@Value所在模块禁凭类名;drop-in覆盖须先空赋值重置
+- [Spring实例化≠代码引用](reference_spring_bean_instantiation_vs_import.md) — 给common类去@Value默认值前必查下游ComponentScan,朴素去默认值会炸6台web
+- [部署jar必symlink切换不覆盖实文件(inode实证)](reference_jar_symlink_vs_inplace_overwrite.md) — cp -f原地覆盖同inode与运行中JVM mmap竞争;附迁移harness三坑
+- [UDF deadRoots判死无样本门,隐式依赖REACH_FUSION_ENABLED](reference_deadroots_sample_gate_implicit_contract.md) — 关融合=立失小样本保护;REACH_HINT_ENABLED 07-10 已 live
+- [前端错误上报链路怎么验才算真通](reference_frontend_monitor_report_chain_verification.md) — 三坑:__e2e cookie整体禁上报/sendBeacon是观测盲区/注入throw不进js_error主桶
+- [SW生命周期+前端逃生测试铁律](reference_sw_lifecycle_escape_testing.md) — SW改动必真浏览器e2e;内存态不跨重启须IDB恢复;harness自己会骗人
 - [爬虫dry-run三铁律(id撞键/mock LLM/备份漂移)](reference_crawler_dryrun_id_collision_mock_llm.md) — 隔离库AUTO_INCREMENT必设高值
 - [edge nginx 如何用 reach + 覆盖率缺口](reference_edge_reach_coverage_pickp_rpc.md) — 验证必edge /__pick_stats(:81)交叉
 - [前端封面占位/懒加载技术铁律](reference_frontend_image_placeholder_lessons.md) — IO root=scrollRoot
@@ -87,27 +90,29 @@
 - [域名池 TARGET vs N_xxx](reference_domain_pool_target.md) — N_xxx下发列表需手动sync
 - [分类页路由 /subjects](reference_categories_route.md) — 教育伪装
 - [Apple Bot 流量识别](reference_apple_bot_traffic.md) — 17.0.0.0/8=AS714
-- [CN三网国际出口路由分化:电信→EU/移动联通→CA](reference_cn_isp_international_routing_split.md) — per-node telecom=0(CA)/unicom=0(EU)是真实路由非bug
+- [CN三网国际出口路由分化:电信→EU/移动联通→CA](reference_cn_isp_international_routing_split.md) — per-node telecom=0/unicom=0 是真实路由非bug
 - [Claude Code 配置目录在 ~/.claude-work/](reference_claude_config_dir.md)
 - [skill 验证方法规格 v3](reference_skill_verification_redgreen_v3.md) — RED-GREEN+held-out门控
 - [Newworld 项目全景](project_overview.md) — 架构/模块/部署/Sprint v3.3
 
 ## feedback(铁律,长期适用)
-- [Owner 授权:必要时自行拉 agent team + 难任务用 fable 5 subagent-driven](feedback_convene_team_and_fable5_for_hard_tasks.md) — 07-21 站立授权,不必每次等点名;难度高就上最强模型+多视角别省钱;主线程仍保持薄只回收结论
-- [「失败集中在X」先验分母效应:单样本源的分布=样本构成非现象特征,必换构成不同的对照源](feedback_distribution_reflects_sample_not_phenomenon.md) — 07-16 BL-72实事故:「504的94%是CN」被两会话读成GFW针对CN,真相=canary zone用户本就94%CN(分子分母同源);换主域17.rip一查US 504=38.9%>CN 23.9%当场证伪;报比率不报绝对数+反问「成功的那批什么分布」
-- [读SESSION-STATE必先消化档头追加,与BACKLOG交叉核对再开工](feedback_session_state_header_addendum_wins.md) — 07-16实事故:BL-72主线已被追加结案,我仍按正文旧节推荐攻已证伪方向并落档,Owner据此授权错方向一轮;订正旧节须就地标注失效
-- [worktree 一律开在仓库外 /home/test/worktree-<名>，禁 EnterWorktree 默认落点 .claude/worktrees/](feedback_worktree_location_outside_repo.md) — Owner 07-14 指令；用 EnterWorktree path 参数进手动建的仓库外 worktree；node_modules 硬链接克隆 1.9s；dev-workflow skill 已订正(3109e2657)
-- [视频源金标验证必须真点正片播放](feedback_goldset_must_play_real_video.md) — 只验封面+preview 会漏正片不可播(supjav BL-58 潜伏教训);判据用站点真实播放器videoWidth>0非自建Hls默认配置
-- [Bash 工具超时不杀命令只转后台→跑飞必留野进程；真开枪的只有命令自带 timeout](feedback_bash_timeout_does_not_kill_stray_processes.md) — BASH_DEFAULT_TIMEOUT_MS 本机已设 300000 也没救(受控实验:工具 timeout=15s 死循环命令仍在跑);"shell 假死"真相=shell 在尽职 do_wait 等永不退出的孩子(查 /proc/pid/wchan);杀进程组不够(GNU timeout 另开 pgid→孙进程孤儿化)须递归杀整棵树;告警已机制化(Stop hook stray_shell_reminder + nw-reap-stray)
+- [删worktree前必盘点抢救gitignored工作档](feedback_worktree_cleanup_rescue_gitignored_artifacts.md) — merged+pushed双验只保git内容;入库文档禁引用gitignored路径
+- [双账户permissions必同步+allow语法坑Bash(*)无效](feedback_dual_account_permissions_sync_and_allow_syntax.md) — 全放开=裸工具名;Tool(*)在allow被静默跳过;各文件allow非并集、deny一票否决
+- [Owner授权:必要时自行拉agent team + 难任务用fable 5 subagent-driven](feedback_convene_team_and_fable5_for_hard_tasks.md) — 07-21站立授权不必每次等点名;主线程仍保持薄只回收结论
+- [「失败集中在X」先验分母效应:单样本源的分布=样本构成非现象特征](feedback_distribution_reflects_sample_not_phenomenon.md) — 必换构成不同的对照源;报比率不报绝对数+反问「成功的那批什么分布」
+- [读SESSION-STATE必先消化档头追加,与BACKLOG交叉核对再开工](feedback_session_state_header_addendum_wins.md) — 只按正文旧节推荐会让Owner据此授权错方向;订正旧节须就地标注失效
+- [worktree一律开在仓库外/home/test/worktree-<名>,禁EnterWorktree默认落点](feedback_worktree_location_outside_repo.md) — Owner 07-14指令;用path参数进手动建的worktree
+- [视频源金标验证必须真点正片播放](feedback_goldset_must_play_real_video.md) — 只验封面+preview会漏正片不可播;判据用站点真实播放器videoWidth>0非自建Hls
+- [Bash工具超时不杀命令只转后台→跑飞必留野进程;真开枪的只有命令自带timeout](feedback_bash_timeout_does_not_kill_stray_processes.md) — 杀进程组不够须递归杀整棵树;已机制化告警
 
 - [拍板问题必附我的意见和理由](feedback_decisions_with_recommendation.md) — 推荐项放前面,不假装中立
 - [给Owner的反馈输出要简洁明了](feedback_concise_reporting.md) — 结论+拍板点先行,细节落档不进正文,不清楚Owner会单独问
-- [闸门/守卫/告警必造反例红绿双验+未知输入须fail-safe](feedback_gate_redgreen_and_failsafe_direction.md) — 守卫失效是静默的;4实例(backend-pl空转/bash -n漏无后缀/软守卫恒真/N9E datasource_queries NULL)纯读代码全看不出
-- [memory提交用nw-memory-commit;**带尾巴必须--only划范围**(07-10根因订正)](feedback_memory_commit_discipline.md) — ★"写完立刻提交"已被证伪:真相源是symlink到~/claude-shared的全会话共享目录,数分钟编辑窗口内他会话commit照样夹带(实测6d16d068扫走9条订正);转向"不阻止sweep只禁commit说谎",BL-28修于`8d730250`;守卫与sync两侧都必rsync -c(只修守卫侧=没修)
-- [认领backlog/开分支前扫worktree+分支防多会话并行撞车](feedback_check_parallel_worktrees_before_backlog.md) — handleApiRequest空池修复合master后才发现另会话逐字重复;开工前30秒git worktree list即可避免;清理别人worktree前先备份其独立产物
-- [hook=特权基础设施:禁触碰主通道(改写/deny/污染stdout)+实现对齐声明契约 (07-09事故)](feedback_hooks_privileged_infra_invariants.md) — 改hook须隔离行为测试;输出异常先判通道不可信做对照实验
+- [闸门/守卫/告警必造反例红绿双验+未知输入须fail-safe](feedback_gate_redgreen_and_failsafe_direction.md) — 守卫失效是静默的,纯读代码全看不出;★第5种=多跳链路三道守卫全挤在中间跳,最后一跳零守卫→「gate全绿」与「加载的是旧铁律」长期并存;判别法=逐跳问「谁证明生成物真重新生成过」
+- [memory提交用nw-memory-commit;带尾巴必须--only划范围](feedback_memory_commit_discipline.md) — ★「写完立刻提交」已证伪(共享目录编辑窗口内照样被他会话夹带);守卫与sync两侧都必rsync -c
+- [认领backlog/开分支前扫worktree+分支防多会话并行撞车](feedback_check_parallel_worktrees_before_backlog.md) — 开工前30秒git worktree list即可避免;清理别人worktree前先备份其独立产物
+- [hook=特权基础设施:禁触碰主通道(改写/deny/污染stdout)+实现对齐声明契约](feedback_hooks_privileged_infra_invariants.md) — 改hook须隔离行为测试;输出异常先判通道不可信做对照实验
 - [优化成本前先测真实成本结构+机制兜底判断](feedback_measure_real_cost_before_optimizing.md) — 按message.id去重看cache_read累计,别被观测工具瞄错靶;列在清单的skill≠自动触发
-- [1M窗口换会话盈亏模型:看任务相关性+近40%,不看绝对%](feedback_context_switch_breakeven_1m_window.md) — 启动前缀~50K,换会盈亏点≈5轮;18%就/clear=过早;边界+(无关 或 近40%)才换,非一到边界就换
+- [1M窗口换会话盈亏模型:看任务相关性+近40%,不看绝对%](feedback_context_switch_breakeven_1m_window.md) — 启动前缀~50K,盈亏点≈5轮;边界+(无关或近40%)才换,非一到边界就换
 - [domain-health是12.45M键SCAN慢端点smoke禁连发](feedback_domain_health_scan_hammering.md) — 连发耗尽Lettuce连接池致pick-p饥饿+线程满告警
 - [任何时间部署都要Owner拍板,不分峰谷](feedback_owner_approval_all_deploys.md) — 机制层=git-preflight Gate A(OWNER_DEPLOY_APPROVED=1才放行)
 - [门禁运行期间禁同worktree并行maven/改源码](feedback_no_concurrent_maven_during_gates.md) — 部署jar必须无并行窗口重建
@@ -119,7 +124,7 @@
 - [沟通用词:不用简称能中文就中文](feedback_communication_style.md) — 用户铁律
 - [禁手写工具返回的数字](feedback_no_handwritten_numbers_from_tools.md) — 逐字复制原始输出
 - [引用易变事实回原文核不凭记忆](feedback_verify_not_recall.md)
-- [声明部署行为中性/flag off前必查生产DB真值](feedback_verify_live_flag_value_not_code_default.md) — 代码默认≠生产真值,灰度门常被运维翻开;ops查DB才逮住批A"中性"是错的
+- [声明部署行为中性/flag off前必查生产DB真值](feedback_verify_live_flag_value_not_code_default.md) — 代码默认≠生产真值,灰度门常被运维翻开;ops查DB才逮住批A「中性」是错的
 - [指标解读前先验证数据源](feedback_verify_metric_source.md) — grep追写入方
 - [实验结论必落档防重复论证](feedback_experiment_conclusions_to_doc.md) — 含被推翻的
 - [实时性≠准确性](feedback_realtime_vs_accuracy.md) — 禁有损采样
