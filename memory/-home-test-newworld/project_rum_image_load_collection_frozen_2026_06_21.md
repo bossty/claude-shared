@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: 85dc3fe1-5403-474d-941b-c0f0f36ee859
+  modified: 2026-07-22T11:49:42.816Z
 ---
 
 2026-06-21 Owner 决策：**冻结 `rum_image_load` 采集**——停止继续采集（减负载），保留已采 ~42M 行快照备后续分析。
@@ -27,3 +28,7 @@ metadata:
 - `nw_retention_table_rows{table=rum_image_load}` gauge 仍由 `RetentionTableGaugeTask` 采（无害）。
 - ~~`nw_retention_last_cleanup_deleted` gauge 报 NaN~~ **已修（commit 3e2eef65，2026-06-21）**：`meterRegistry.gauge(name,tags,intValue)` 弱引用 autobox 值 GC 后清空报 NaN（RetentionTableGaugeTask 用 `Gauge.builder+AtomicLong` 强引用每 10min 刷新所以同 bug 被掩盖未现；cleanup 每日只 set 一次故首次 GC 后全 NaN）。两处（RedirectTraceConsumer active + RumImageLoadCleanupTask 停用但 @PostConstruct 仍注册报 0）改成 AtomicLong 强引用字段。**教训：Micrometer 低频 `meterRegistry.gauge(name,tags,number)` 必用强引用持有（AtomicLong 字段 + Gauge.builder register 一次），别传 autobox 瞬时值**。
 - redirect_trace 仍活跃：Redis stream redirect:trace:queue → MySQL，15d 保留，稳态 ~19M（阈 30M），护栏保留。
+
+**前史与 durable 教训（2026-06-14 EU Redis 分离 sprint，commit 链 20c1bfdf）**：这表本来**无保留策略、无限增长**（~4M 行/天），一路无声涨到 **5391 万行**没人知道，与 redirect_trace 一起占了 EU 副本 33.54G 里的约 20G——是「本表为何要有护栏」的由来。当时补的是**双层**，缺一层就等于没有：
+- **第一层 保留策略兜底自限**：rum_image_load 加 7d 清理、redirect_trace 30d→15d；批删必须 `DELETE WHERE ts/created_at<阈 LIMIT 10000` **循环 + sleep**（走 idx_ts 驱动），防大事务卡住复制——首清理 rum 删 34.7M 行、redirect 删 6.85M 行（redirect 之前**从没跑过**），EU 复制 lag 峰值只到 4-6s 安全。阈值集中 @Value 可配。
+- **第二层 行数 gauge 告警**：`RetentionTableGaugeTask` emit `nw_retention_table_rows/bytes{table=}`（低基数 2 标签）→ N9E 规则 106，rum>40M / redirect>30M 即报「清理失效」。**光有清理任务不够——任务被注释/挂掉是静默的，gauge 告警才是清理失效的唯一可见信号**（本次冻结正是主动摘掉 rum 那半条件、保留 redirect 条件，防留静默膨胀盲区）。

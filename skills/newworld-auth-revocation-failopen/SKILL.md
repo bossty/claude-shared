@@ -3,6 +3,8 @@ name: newworld-auth-revocation-failopen
 description: JWT/会话校验里黑名单/吊销类 Redis 查询必须 fail-open（基础设施抖动 ≠ 凭证无效）；吞一切的 catch-all 会把 Redis 超时静默变成 401 → 前端清 token 误踢登录。本地校验(签名/过期)与远程吊销(Redis)分层 try。triggers: parseToken, isTokenBlacklisted, 黑名单, JWT 校验, 登录几分钟掉线, fail-open, 401 误踢, RedisCommandTimeout 踢登录, token 失效, 吊销列表
 ---
 
+> **执行机制**：靠判断力（fail-open 分层设计判断）
+
 # newworld 鉴权吊销检查 fail-open 铁律
 
 ## 核心 lesson（2026-06-18 admin 几分钟掉线 RCA 实证）

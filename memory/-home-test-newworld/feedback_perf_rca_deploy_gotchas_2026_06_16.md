@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: c180f4de-418c-4673-8b1e-24d8e011d4e9
+  modified: 2026-07-22T11:49:44.520Z
 ---
 
 **perf-rca sprint（2026-06-16/17）本地构建部署 + 取证踩的坑，复用铁律。**
@@ -19,6 +20,9 @@ metadata:
 5. **Monitor/哨兵 end-message 别写死**——我的复发哨兵收尾串硬编码「无复发」，但它实际 00:28 抓到了 busy=103 复发 → 误导。收尾串必须基于真实 BAD 计数输出。
 6. **gawk 解析大 gz 逐分钟**：`match($0,/\/2026:00:([0-9][0-9]):/,m)` 取分钟 + `match($0,/urt="([0-9.]+)"/,u)` 取 urt，只输出 per-minute 汇总（小输出）。
 
-关联 [[project_perf_rca_zerodowntime_2026_06_16]] [[feedback_local_build_deploy_no_push_pitfalls]]。
+7. **本地有多个未 push commit 时，`mvn` 不带 `-am` 会报假编译错**——不带 `-am` 只 build 目标模块，依赖从 `~/.m2` 取**上次 install 的旧 common**，于是本次改动里 common 的新方法/新签名一律「找不到符号」，看着像自己代码写错，实际是 reactor 没带上依赖模块。构建/验证一律 `mvn -pl newworld-admin -am ...`（2026-06-15 snack upload gate sprint 实证，见 源档 `project_snack_upload_gate_fix_2026_06_15.md`（已于 BL-131 阶段 1 删除，取回 `git show 8c44739c6:claude-shared/memory/-home-test-newworld/project_snack_upload_gate_fix_2026_06_15.md`）；同期 `mvn -pl newworld-admin -am test` = 1847 pass）。`~/.m2` 不隔离是多 worktree 并行的共性坑，别用「clean 一下再试」绕。
+8. **admin host（Ubuntu 26.04）没装 `unzip`，也没有 mysql 客户端**——所以第 1 条那句「`unzip -l|grep 改动类` 验 jar」在 admin 上直接 command not found，别以为是路径问题。查 jar 内容改用 python：`python3 -m zipfile -l /opt/newworld/newworld-admin/deploys/current.jar | grep <类名>`，或 `python3 -c "import zipfile;print([n for n in zipfile.ZipFile('<jar>').namelist() if '<关键字>' in n])"`。要连 DB 得先自己装（2026-06-15 装的是 mysql-client 8.4.9）。本地多 commit / cherry-pick 隔离 build 的场景，这一步是**唯一**能证「prod jar 没夹带别的会话改动」的手段，不能省。
+
+关联 [[project_perf_rca_zerodowntime_2026_06_16]] [[feedback_local_build_deploy_no_push_pitfalls]] 源档 `project_snack_upload_gate_fix_2026_06_15.md`（已于 BL-131 阶段 1 删除，取回 `git show 8c44739c6:claude-shared/memory/-home-test-newworld/project_snack_upload_gate_fix_2026_06_15.md`）。
 
 > ⚠️ 2026-07-10 布局统一后路径已变：三模块统一 `/opt/newworld/newworld-<mod>/deploys/current.jar`，回滚脚本在 `/opt/newworld/bin/rollback-backend.sh`。本档正文里的老路径按当时事实保留。见 [[reference_jar_symlink_vs_inplace_overwrite]]。

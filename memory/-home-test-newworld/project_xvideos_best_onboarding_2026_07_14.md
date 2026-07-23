@@ -1,13 +1,18 @@
 ---
 name: project_xvideos_best_onboarding_2026_07_14
-description: BL-64(原BL-60/63) xvideos best榜接入+20类分类金标1353条,已合master 2aeca89a5;BL-65部署段已完成(migration+data jar+dry-run两轮PASS),挂dry-run待开真采;评测补强待排期
+description: BL-64(原BL-60/63) xvideos best榜接入+20类分类金标1353条,已合master 2aeca89a5;BL-65部署段已完成(migration+data jar+dry-run两轮PASS);★「挂dry-run待开真采」已于07-22实查订正失效——ca-admin常驻cron 07-16已彻底关停(非dry-run),BuyVM三机另跑过一次性真采backfill 5814部已收工空闲,详见正文订正框;评测补强待排期
 metadata:
   type: project
 ---
 
 **BL-64（2026-07-14 收口，编号两迁：占坑 BL-60 被 madou 会话先推占用→改 BL-63 又被 pre-push 轻门会话先推占用→定格 BL-64）。已合 master `2aeca89a5`（--no-ff，慢门后端 2214 tests 0 failures + 前端 web 111/admin 30 测试文件全绿），BACKLOG 收口 `7e6089dca`，分支/worktree 已按 merged+pushed 双验清理。**
 
-**BL-65 部署段已完成（2026-07-14 Owner 授权）**：migration 已跑（best 两行 mandatory→NULL 核对过，ledger `dbef15d26`）；data jar 部署 ca-admin `deploys/20260714-061232-5dd7fd370.jar`（jar 内 BestTask.class/dry-run-slugs/yyyy-MM 三探针 True，启动 0 ERROR）；data.env +2 键（`APP_CRAWLER_XVIDEOS_BEST_ENABLED=true`/`APP_CRAWLER_XVIDEOS_DRY_RUN_SLUGS=xvideos_best`，备份 bak-*-bestdryrun）；dry-run 端到端两轮 PASS（手动 crawl-monthly 27 部 skipped 零入库 + cron HKT 18:30 准点开火，movie 前哨 44513/118750 不变，DRY-RUN 逐条日志证 region 规则+LLM+forbid 管线真跑）。hanime is_uncensored 影响面查清=前台零消费、仅后台编辑框字段，无阻塞。**现挂 dry-run 态每小时空转，开真采=删 DRY_RUN_SLUGS 键+restart，待 Owner 拍板。**
+**BL-65 部署段已完成（2026-07-14 Owner 授权）**：migration 已跑（best 两行 mandatory→NULL 核对过，ledger `dbef15d26`）；data jar 部署 ca-admin `deploys/20260714-061232-5dd7fd370.jar`（jar 内 BestTask.class/dry-run-slugs/yyyy-MM 三探针 True，启动 0 ERROR）；data.env +2 键（`APP_CRAWLER_XVIDEOS_BEST_ENABLED=true`/`APP_CRAWLER_XVIDEOS_DRY_RUN_SLUGS=xvideos_best`，备份 bak-*-bestdryrun）；dry-run 端到端两轮 PASS（手动 crawl-monthly 27 部 skipped 零入库 + cron HKT 18:30 准点开火，movie 前哨 44513/118750 不变，DRY-RUN 逐条日志证 region 规则+LLM+forbid 管线真跑）。hanime is_uncensored 影响面查清=前台零消费、仅后台编辑框字段，无阻塞。~~**现挂 dry-run 态每小时空转，开真采=删 DRY_RUN_SLUGS 键+restart，待 Owner 拍板。**~~
+> **【2026-07-22 订正】该状态已彻底过期，且原文混用了两个不同的东西：**
+> ① **ca-admin 常驻 cron**（本句说的那个）：07-16 已被 Owner 授权**整个关停**，不是 dry-run 也不是真采——生产实查 `data.env` 现为 `APP_CRAWLER_XVIDEOS_BEST_ENABLED=false`，`APP_CRAWLER_XVIDEOS_DRY_RUN_SLUGS` 键已不存在（与 `docs/BACKLOG.md` BL-65「07-16 止血」一致）。重开需先补 BL-69 监控。
+> ② **BuyVM 三机 worker**（另一条线，不是本句说的）：07-15/16 跑过**一次性真实 backfill**（非 dry-run），产出 5814 部 `xvbest-*`（`status=3` 囤库待发布，非自动上线），此后收工；进程至今活着但已空转，当下无在途采集。
+> 证据：生产库 `SELECT MAX(create_time),COUNT(*),SUM(status=3) FROM movie WHERE movie_number LIKE 'xvbest-%'` → `2026-07-15 23:19:41 | 5814 | 5814`；`crawler.log` 尾部有真实 HLS 下载（`总大小=204 MB`）+ R2 上传 + `视频入库存(status=3)`，此后文件再未增长（dry-run 只打 `movieSkipped`，不会有真实字节）；`ss -tnp` 仅见 MySQL/Redis 连接池、无到 xvideos/CDN/R2 的出站连接；`/proc/<PID>/environ` 无任何 dry-run/xvideos 开关键。
+> **未定案**：5814 部中有多少已被 `StockPublisher` 从 status=3 推到 status=1（对外可见）未查；是否有排期重新拉起做增量未确认（只证明了「当下空闲」）。
 详细状态：`docs/sprint/2026-07-13-xvideos-best-onboarding/SESSION-STATE.md`
 
 ## 前置已收口

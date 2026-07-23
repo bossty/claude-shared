@@ -3,6 +3,8 @@ name: newworld-domain-pool
 description: 域名池 TARGET vs N_xxx 区别 — DOMAIN_POOL_*_TARGET 是 active 目标数（active < target → standby 激活 + 补购）；N_DOH/N_POOL/N_PP 是实际下发前端的列表（DomainConfigSyncHelper.update*Config 主动刷新）；maintainInfraPool() 每 10min 末尾无条件刷新，扩容延迟最长 10min；排查"扩容了但前端没看到"先查 N_xxx 不查 TARGET。**S 域 active DNS 必须 apex+wildcard 成对**（addWildcardDnsRecordsGrey 5/21 修了缺 apex 根因 bug）。Triggers on 域名池, domain pool, DOMAIN_POOL_DOH_TARGET, DOMAIN_POOL_PROMO_TARGET, DOMAIN_POOL_RELAY_TARGET, N_DOH, N_POOL, N_PP, TARGET, maintainInfraPool, DomainConfigSyncHelper, updateCdnUrlsConfig, updateDohDomainsConfig, updateRelayConfig, 扩容了但前端没看到, standby active, addWildcardDnsRecordsGrey, ensureWildcardDnsRecords, S 域激活, S 域 DNS, apex wildcard, apex 记录, wildcard 记录, dawn-leaf, hstspreload DNS lookup, dns_records apex.
 ---
 
+> **执行机制**：靠判断力（TARGET vs N_xxx 排查口径）
+
 # Newworld 域名池配置陷阱铁律（2026-04-13 学到）
 
 ## 触发场景

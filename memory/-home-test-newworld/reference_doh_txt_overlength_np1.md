@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: c26c2e1f-72a4-463f-8370-aeecffd81acf
+  modified: 2026-07-22T11:49:21.286Z
 ---
 
 DoH 域名池（加密 base64 的域名列表）写进 B 类域 apex TXT。**CF 单条 TXT 实用上限 ~2048 字符**。
@@ -18,3 +19,7 @@ DoH 域名池（加密 base64 的域名列表）写进 B 类域 apex TXT。**CF 
 - ④**CF apex flattened-CNAME + N 条 TXT 共存**：canary 实证可共存，**三家 DoH provider（Ali/CF/Google）全返回所有 N 条**。
 - 解析 `parseTxtData`：提取所有 `"..."` 段拼接（兼容 CF/Ali 引号多段 + Google 裸串）。
 - provider 策略：阿里优先=三家**并行** + 阿里优先窗口（非串行兜底）；CN 浏览器 DoH 唯一 CORS+可达=阿里（腾讯/华为无 CORS）。
+
+**T6 — 运维两铁律（2026-06-18 迁移过程实踩）**：
+- ①**重启 admin / 改配置前必确认无在途 sync**（`journalctl -u newworld-admin | grep "DoH P1"`）。admin 单实例，重启直接 kill 在途 `syncDohTxtRecords`——实踩：写了 1 片就被 kill、prune 没跑 → 每域留一个孤儿不完整 chunk（靠 ①的撕裂读保护旧完整版存活，前端全程没坏，但留 cruft）。清孤儿用**一次 clean re-sync**（新代码一次写完整版 + prune 旧）代替手工 PATCH+DELETE churn——实踩 40 次 PATCH + 10 次 DELETE 短时大改 TXT RRset → AliDNS 多 POP 缓存抖动、收敛慢。
+- ②**DNS 改动的权威判据 = CF API `dns_records` 返回值，不是单次 public DoH 查询**。AliDNS anycast 收敛是 POP-by-POP 的，单次 query 撞 lagging POP 即假阴（实测 4→7→8/10 逐步爬）。判据 = 权威正确 + 多次采样趋势单调向上 = 收敛中，别据单次 DoH 假阴回滚。

@@ -3,6 +3,8 @@ name: newworld-backend-design
 description: Newworld 后端设计核心 — Result<T> 包装 + EncryptResponse + Web 教育主题伪装路径；TwoLevelCache (Caffeine L1 + Redis L2) + @Cacheable/@CacheEvict + 6 版本号驱动 (contentVersion 等)；推荐系统 3 层硬同步 (data/web/frontend)；配置三层判定 (代码常量 / application.yml / system_config DB)；Bloom Filter write-through + rebuild 兜底，禁 miss-then-DB；Web 模块只读查询标 @Transactional(readOnly=true) 但禁包 Redis 写。Triggers on controller, result wrapper, Result<T>, encryptresponse, cacheable, cacheevict, twolevelcache, contentversion, settings/version, 推荐三层, related, MovieLimit, VideoPlayer, system_config, application.yml, bloomfilter, write-through, miss-then-db, readOnly 事务, 缓存穿透, MovieRecommendationService, CacheConstants, MovieCacheRefreshListener.
 ---
 
+> **执行机制**：靠判断力（Result 包装/两级缓存/推荐三层架构）
+
 # Newworld 后端设计核心铁律
 
 ## 触发场景

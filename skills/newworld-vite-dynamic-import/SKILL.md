@@ -3,6 +3,8 @@ name: newworld-vite-dynamic-import
 description: Vite 禁用 await import('@/...') 别名形式（chunk 间解析不一致），必须 static import 或 await import('./...') 相对路径；catch swallow 必须 console.error + sessionStorage 诊断 patch（不许 console.warn）。silent maintenance 排查直接走 sessionStorage 一锤定音。Triggers on vite, dynamic import, "@/", await import, lazy load, code split, alias 解析, silent maintenance, sessionStorage 诊断, silent failure, showRecovery, showError.
 ---
 
+> **执行机制**：靠判断力（Vite 别名动态 import 陷阱）
+
 # Newworld Vite Dynamic Import 不许用 `@/` 别名铁律（2026-04-27 devatlas26 silent maintenance 事故硬化）
 
 ## 触发场景

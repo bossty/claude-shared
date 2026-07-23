@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: eda7ef50-950e-4d1c-9bb9-e14e4381e2c3
+  modified: 2026-07-22T11:49:17.508Z
 ---
 
 验 newworld 前端错误上报链路（`frontend-web/src/utils/monitor.js` → `POST /api/v1/analytics/quality` → `MonitorController` → `MonitorService`）**是否真通**时，三个坑会让你得出「没上报」的错误结论（2026-07-11 BL-34 上生产实测，见 [[project_bl34_canary_deploy_2026_07_11]]）：
@@ -17,5 +18,7 @@ metadata:
 - 浏览器侧：beacon 真调用（url + payload size）；`BATCH_SIZE=10` 满 10 条立即 flush，否则等 `FLUSH_INTERVAL=30s`。
 - 后端侧：Redis 计数器 `monitor:js-errors:<5min slot>` 出现**超出组织噪声的增量**（该指标组织基线 26–64 条/5min，注入 ≤12 条会淹没在噪声里 → **别用小样本增量当证据**）。
 - 限流器侧：`monitor:fe-rl:<sessionId>:<epoch分钟>` key 落地（BL-34 per-session 120/min，Redis 异常 fail-open 放行）。
+
+**推论：session 级 sendBeacon 字段的落库量本身不可信，禁进 dashboard 公式**（同一个 beacon 盲区的下游后果，2026-05-13 P9 推广渠道 sprint 实证，见 源档 `project_promotion_channel_p9_5_13.md`（已于 BL-131 阶段 1 删除，取回 `git show 8c44739c6:claude-shared/memory/-home-test-newworld/project_promotion_channel_p9_5_13.md`））。`pagehide`/`unload` 时的 `sendBeacon` 经常被浏览器主动 ABORT（5/12 P8-E E2E 实测 `ERR_ABORTED`）→ `recordSession` 上报的 `total_pages` / `total_watch_sec` / `total_browse_sec` 等 session 累加字段**实际落库量 << 用户行为真实量**，是系统性偏小而非随机噪声。实例：gg001 `pv=7 / total_pages=2 / uv=1`，旧公式 `avgPv = total_pages / uv = 2`（数学没错，字段选错），owner 报「人均数据差」的全站 bias 根因就是它。修法是换分子分母，不是补丢包：commit `094c8dd9` 把 `AnalyticsV4Service` 3 处（L171/196/217）`divFloat(totalPages, uv)` → `divFloat(pv, uv)` + javadoc L36 同步。**判据**：`pv` 由前端每次 router 切换实时 `fetch POST recordPage` 计 1 = request-level，准；`total_pages` 是 session 累计页 = beacon-level，丢包。dashboard 公式的分子分母**一律取 request-level 实时 fetch 字段**；session 级字段只配做「行为深度」定性参考，且写公式 javadoc 时必须把这个丢包 bias 明写进字段语义注释，否则后人看公式「像是对的」会照抄。
 
 **一个被证据推翻的怀疑（留档防重复论证，见 [[feedback_experiment_conclusions_to_doc]]）**：曾疑「`payload.sessionId` 只在带 vitals 时才塞（`flush()` 里 `if (hasVitals)`）→ 纯错误 payload 无 sessionId → 后端限流被绕过」。**证伪**：后端读的是 `errors.get(0).get("sessionId")`（**每条 error 对象自带**），不是 `payload.sessionId`；实测纯错误 payload 也创建了限流 key。**BL-34 无此缺口，别再重报。**

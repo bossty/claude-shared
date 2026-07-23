@@ -3,6 +3,8 @@ name: newworld-batch-backfill
 description: 大批量（≥1000 条）预计算/backfill 双铁律：①OOM 防护——方法级禁 @Transactional(readOnly=true)、单批 500、systemd MemoryMax + JVM Xmx 双限、入库走 Redis Set 队列消费而非每条 startVirtualThread，禁止单纯调大 Xmx 绕过；②真覆盖率——multi-key sentinel + DB live 抽样源验证 backfill 真实覆盖（V5 教训），禁以"脚本跑完"当"覆盖完"。Triggers on 批量, oom, batch_size, vthread, 全量, 预计算, 扫描所有, 全量预计算, @Scheduled, computeFor, processAll, batch processing, oom-kill, OutOfMemoryError, 大批量, java heap, backfill, 回填, 覆盖率, multi-key sentinel, 抽样验证.
 ---
 
+> **执行机制**：半机制——OOM 靠 systemd MemoryMax+JVM Xmx 双限，backfill 覆盖率靠判断力（multi-key sentinel+DB 抽样）
+
 # Newworld batch-backfill（2026-07-03 由 newworld-batch-oom + newworld-backfill-coverage 合并而成）
 
 ---
@@ -120,5 +122,5 @@ broken_total = 0  # gate
 
 ## 关联 skill
 - `newworld-batch-oom` — 大批量预计算分批 + readOnly + Redis 节流
-- `newworld-deploy-checklist` — 部署前必查四项
+- `newworld-deploy-runbook` — 部署前必查四项（2026-07-23 由 checklist 并入）
 - `newworld-multi-agent-coord` — 跨服务部署铁律

@@ -3,6 +3,8 @@ name: newworld-java-pitfalls
 description: Java/JVM/Maven 跨版本陷阱 — JDK 24+ HttpClient 默认拒设 Host/Content-Length/Connection/Upgrade restricted headers，需 systemd drop-in JAVA_TOOL_OPTIONS=-Djdk.httpclient.allowRestrictedHeaders=host；本地 JDK 17 测不出 → 必须 prod profile + 目标 JDK 真跑；AWS 服务器 mvn 不在 PATH，必须 export PATH=/opt/apache-maven-3.9.9/bin:$PATH。Triggers on httpclient, HttpRequest.Builder, restricted header, host header, content-length, jdk.httpclient.allowRestrictedHeaders, JAVA_TOOL_OPTIONS, systemd drop-in, picked up java tool options, mvn 找不到, mvn command not found, /opt/apache-maven, maven path, jdk 24, jdk 25.
 ---
 
+> **执行机制**：靠判断力（JDK 跨版本 restricted header 等陷阱）
+
 # Newworld Java/Maven 跨版本陷阱铁律
 
 ## 触发场景

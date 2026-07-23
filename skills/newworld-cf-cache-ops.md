@@ -3,6 +3,8 @@ name: newworld-cf-cache-ops
 description: CF 缓存运维三铁律：①验证必用 GET（curl -s -o /dev/null -D -）——HEAD（curl -I）永远返 cf-cache-status DYNAMIC + no age 会误判没缓存（2026-05-22 ad-image-encrypt 浪费 3 个方向教训）；②多 zone wildcard 子域 URL purge 前必做 DNS 预验证、按 zone 分组（V5 5/7 教训）；③CF 默认遵守 origin Cache-Control 会缓存 404——4xx/5xx no-store 防线按域组分工：A/C/P 唯一防线是 nginx map + add_header always（CF 侧 cache rules 已被 syncCacheRules 主动清空，「双层防御」旧表述已过期），B 域 R2 唯一防线是 configureCdnZoneCache 的 status_code_ttl 400-599=-1（2026-05-01 plyr.js 404 sticky 24h 事故）。Triggers on cf-cache-status, DYNAMIC, CF cache verify, 验证 CF 缓存, cache HIT MISS, curl -I, purge, purge_everything, 多 zone purge, wildcard 子域, CF 缓存清理, zone purge 失败, CF 缓存 404, 404 sticky, no-store, Cache-Control map, nw_lib_cache_control, nw_assets_cache_control, add_header always, 双层防御, syncCacheRules, configureCdnZoneCache, status_code_ttl, stale-while-revalidate, version.js 缓存.
 ---
 
+> **执行机制**：靠判断力（CF 缓存验证必用 GET 等方法论）
+
 # Newworld cf-cache-ops（2026-07-03 由 newworld-cf-cache-verify + newworld-cf-purge-multi-zone 合并而成）
 
 ---
@@ -219,7 +221,7 @@ curl -s -o /dev/null -D - "https://<A域>/lib/<真实文件>.js" | grep -iE '^HT
 ## 关联 skill
 
 - `newworld-secrets` — CF token 取值（`secrets.env` 的 `CF_TOKEN_S` / `system_config.CF_TOKEN_S`）
-- `newworld-deploy-checklist` — 部署后 CF purge 是否要做的判断点
+- `newworld-deploy-runbook` — 部署后 CF purge 是否要做的判断点（部署前必查四项，2026-07-23 由 checklist 并入）
 - `newworld-thirdparty-api` — CF API 必查官方文档
 - `newworld-openresty-deploy` — nginx conf 改动的上线/验证流程
 

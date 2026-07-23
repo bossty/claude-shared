@@ -1,7 +1,9 @@
 ---
 name: newworld-cf-cache-ops
-description: CF 缓存运维两铁律：①验证必用 GET（curl -s -o /dev/null -D -）——HEAD（curl -I）永远返 cf-cache-status DYNAMIC + no age 会误判没缓存（2026-05-22 ad-image-encrypt 浪费 3 个方向教训）；②多 zone wildcard 子域 URL purge 前必做 DNS 预验证、按 zone 分组（V5 5/7 教训）。Triggers on cf-cache-status, DYNAMIC, CF cache verify, 验证 CF 缓存, cache HIT MISS, curl -I, purge, purge_everything, 多 zone purge, wildcard 子域, CF 缓存清理, zone purge 失败.
+description: CF 缓存运维三铁律：①验证必用 GET（curl -s -o /dev/null -D -）——HEAD（curl -I）永远返 cf-cache-status DYNAMIC + no age 会误判没缓存（2026-05-22 ad-image-encrypt 浪费 3 个方向教训）；②多 zone wildcard 子域 URL purge 前必做 DNS 预验证、按 zone 分组（V5 5/7 教训）；③CF 默认遵守 origin Cache-Control 会缓存 404——4xx/5xx no-store 防线按域组分工：A/C/P 唯一防线是 nginx map + add_header always（CF 侧 cache rules 已被 syncCacheRules 主动清空，「双层防御」旧表述已过期），B 域 R2 唯一防线是 configureCdnZoneCache 的 status_code_ttl 400-599=-1（2026-05-01 plyr.js 404 sticky 24h 事故）。Triggers on cf-cache-status, DYNAMIC, CF cache verify, 验证 CF 缓存, cache HIT MISS, curl -I, purge, purge_everything, 多 zone purge, wildcard 子域, CF 缓存清理, zone purge 失败, CF 缓存 404, 404 sticky, no-store, Cache-Control map, nw_lib_cache_control, nw_assets_cache_control, add_header always, 双层防御, syncCacheRules, configureCdnZoneCache, status_code_ttl, stale-while-revalidate, version.js 缓存.
 ---
+
+> **执行机制**：靠判断力（CF 缓存验证必用 GET 等方法论）
 
 # Newworld cf-cache-ops（2026-07-03 由 newworld-cf-cache-verify + newworld-cf-purge-multi-zone 合并而成）
 
@@ -176,13 +178,55 @@ done
 
 ---
 
+> ⬇️ **以下并入自 `docs/CF_CACHE_RULES_2026_05.md`（2026-07-21 BL-111 文档治理：现行知识转入本 skill，原档已删——事故时间线属时点叙事，经 `docs/TOMBSTONES.md` 索引的 git 历史可取回。并入时已按 2026-07-21 代码真值订正：原档「双层防御」表述已过期）**
+
+
+# 4xx/5xx 禁被 CF 边缘缓存的防线（防「CF 缓存 404 sticky」事故类）
+
+## 反直觉核心事实
+
+**CF 默认会缓存 404。** CF 默认 Cache Level=Standard 遵守 origin 的 Cache-Control——origin 对 4xx 也吐 long-cache（如 `max-age=604800, s-maxage=86400`），CF 边缘就把 404 缓存 s-maxage 那么久。2026-05-01 实事故：部署临时删了 `/lib/plyr.js` → origin 404 + long-cache header → CF 缓存该 404 达 24h → 回滚恢复文件后 origin 已 200，CF 仍 sticky serving 404，播放页全员白屏。
+
+## 现行防线分工（以代码为真值；原档「双层防御纵深」已过期）
+
+| 域组 | 唯一防线 | 实现 |
+|------|----------|------|
+| A/C/P（用户访问域，经 OpenResty） | **nginx origin 层** | `$nw_*_cache_control` map + `add_header ... always`，4xx/5xx → `no-store`，CF 遵守 origin 即不缓存 |
+| B（R2 CDN 资源域，不经 nginx） | **CF ruleset 层** | `CloudflareApiService#configureCdnZoneCache`：respect_origin + `status_code_ttl` 2xx=1yr / 400-599=-1（no-store）+ browser_ttl 7d + Smart Tiered Cache |
+
+- **A/C/P 的 CF 侧 cache rules 已被主动清空**：`CloudflareApiService#syncCacheRules` 现行行为 = 对 zone 的 `http_request_cache_settings` ruleset PUT **空 rules 数组**（保留 ruleset 本身防 id 漂移），完全依赖 origin Cache-Control。2026-05-01 撤销原 P8-Tau catch-all 的原因：CF cache_settings 与 origin 不一致会有不可预测行为 + 曾把 `/api/*` 响应缓存出「响应时间戳无效」事故。测试断言 rules 必须为空数组（`CloudflareApiServiceTest`）。**排查 A/C/P 缓存问题时别去 CF dashboard 找 cache rule——空是正常态；发现非空 rule 才是异常**（可能被人手工加过，评估后清掉对齐 syncCacheRules）。
+- 由此 A/C/P 的 4xx no-store 防线是**单层**（仅 nginx），改坏了没有第二层兜底——nginx 侧相关改动必须改后立即验证（见下）。
+
+## nginx origin 层机制（改动时必知）
+
+- 4 个 map 放 `http {}` 块内、`server {}` 块外：`$nw_static_cache_control`（默认 `max-age=604800, s-maxage=86400`）、`$nw_assets_cache_control`（默认 `max-age=31536000, immutable`，hash URL 专用）、`$nw_lib_cache_control`（默认同 static）、`$nw_version_cache_control`（`/version.js` 专用）；四者 `~^4` / `~^5` 分支一律 → `"no-store"`。
+- **`add_header Cache-Control $nw_xxx_cache_control always` 的 `always` 是 load-bearing**：不带 always 时 nginx 仅对 200/204/301/302/304 输出 add_header，4xx/5xx 直接不吐 header → 防线归零。改这些行时禁顺手删 always。
+- `/version.js` 特例（2026-06-06 firstscreen-edge）：2xx = `max-age=60, stale-while-revalidate=86400`（CF 过期后即时吐 stale + 后台异步 revalidate，用户阻塞 RTT≈0）；**禁把 s-maxage 加回该 map**——CF 官方：s-maxage 与 SWR 同用会 disable SWR。
+- **web 与 admin 两份 conf 是同款 map，改一处必同步另一处**：`openresty/web/openresty/nginx/conf/nginx.conf` + `openresty/admin/openresty/nginx/conf/nginx.conf`（历史上正是多份 conf 漂移造成过防线缺口）。改后上线走 `newworld-openresty-deploy`（真 include / reload 后查 [error] / smoke）。
+- 已知边界（有意设计勿"修"）：429 也被一刀切 no-store（若将来需要 429 短缓存，在 map 加 `429 "public, max-age=60";`）；301/302 走 map default 分支 long-cache（降回源 QPS，期望行为）。
+
+## 改动后验证（沿用本 skill 铁律①：GET 不是 HEAD）
+
+```bash
+# 1) 不存在的 path → 404 + no-store（CF 不得缓存）
+curl -s -o /dev/null -D - "https://<A域>/lib/__test_404__.js" | grep -iE '^HTTP|cache-control|cf-cache-status'
+#   期望：404 + cache-control: no-store；cf-cache-status 不得出现 HIT
+# 2) 真实 200 资源 → long-cache 正常，二次 GET 应 HIT
+curl -s -o /dev/null -D - "https://<A域>/lib/<真实文件>.js" | grep -iE '^HTTP|cache-control|cf-cache-status|^age:'
+#   期望：200 + public, max-age=...；复测 cf-cache-status: HIT
+```
+
+---
+
 ## 关联 skill
 
 - `newworld-secrets` — CF token 取值（`secrets.env` 的 `CF_TOKEN_S` / `system_config.CF_TOKEN_S`）
-- `newworld-deploy-checklist` — 部署后 CF purge 是否要做的判断点
+- `newworld-deploy-runbook` — 部署后 CF purge 是否要做的判断点（部署前必查四项，2026-07-23 由 checklist 并入）
 - `newworld-thirdparty-api` — CF API 必查官方文档
+- `newworld-openresty-deploy` — nginx conf 改动的上线/验证流程
 
 ## 关联 docs
 
-- `docs/V5_SPRINT_RETRO.md` §3 T5（5/7 真踩坑详细复盘）
-- `docs/IMG_PROCESSING_STANDARD_v5.md` §11（sentinel + ContentType 反爬规范）
+- ~~`docs/V5_SPRINT_RETRO.md` §3 T5（5/7 真踩坑详细复盘）~~（原档已随 2026-07-21 BL-111 文档治理删除，经 git 历史取回，索引见 `docs/TOMBSTONES.md`）
+- `docs/media/IMG_PROCESSING_STANDARD_v5.md` §11（sentinel + ContentType 反爬规范）
+- `docs/infra/CACHE_ARCHITECTURE.md`（多层缓存总图）

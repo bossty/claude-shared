@@ -3,6 +3,8 @@ name: newworld-sprint-closure-audit
 description: Sprint closure / 收口验收抗虚报铁律 — 类名必带 main 树 path + commit hash / 测试声明必带 mvn 命令或 commit / P9 closure 前 find 自查 / 蓝军最后一条强制抽样 grep 实代码。少一项 = closure 可信度 < 50%，3.25 级 retro。Triggers on sprint closure, 收口, 验收, 完工, closure report, 蓝军 closure, P9 收尾, sprint 关闭, V7 closure, 抽样审计.
 ---
 
+> **执行机制**：靠判断力（抗虚报收口铁律）
+
 # Newworld Sprint Closure 验收抗虚报铁律（2026-05-02 沉淀）
 
 ## 触发场景
@@ -77,7 +79,7 @@ P8 蓝军对 V7 closure 抽样 11 项，可信度 < 50%：
 
 ## 关联铁律
 - `newworld-multi-agent-coord` — 蓝军挑刺 ≥5 条 + 优先级分级；本 skill 是其 closure 阶段的 final layer（抽样 grep 是第 6 条强制项）
-- `newworld-deploy-checklist` — 部署前四查；closure ≠ 部署完成，closure 后仍走部署四查
+- `newworld-deploy-runbook` — 部署前四查；closure ≠ 部署完成，closure 后仍走部署四查（2026-07-23 由 checklist 并入）
 
 ## 违反后果
 - closure 含未带 path/commit 的类 → 整批 closure 退回，P9 重整

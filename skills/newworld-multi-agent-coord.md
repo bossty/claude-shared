@@ -3,6 +3,8 @@ name: newworld-multi-agent-coord
 description: ≥2 模块 / DB schema / 跨服务 API / 架构决策 / 生产敏感场景必须多 agent 交叉验证。蓝军硬门禁 ≥5 条实质矛盾、接口契约 P9 预定义、Phase 2 蓝军必跑动态层（OpenResty TLS 握手 / mvn test / SQL migration+rollback）。Triggers on 蓝军, 交叉验证, p8, p9, p10, 接口契约, consolidation, sprint 派活, blueprint, 三体兼容, multi-agent, sprint coord.
 ---
 
+> **执行机制**：靠判断力；蓝军门禁 ≥5 条实质矛盾定义权威源
+
 # Newworld 多 Agent 交叉验证规范（铁律，2026-04-21 沉淀）
 
 ## 触发场景：以下任一命中 = 必须多 agent 交叉验证

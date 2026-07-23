@@ -3,6 +3,8 @@ name: newworld-multiregion-crossocean-hotpath
 description: 多 region 单 master 拓扑下，请求热路径上的同步跨洋 DB/Redis 操作是 5xx/慢的系统性根因。触发：multi-region / region 慢 / 跨洋 / cross-ocean / settings/snack/analytics 慢 / readOnly 路由 / @Cacheable 自调用 / region upstream / fullcut 5xx
 ---
 
+> **执行机制**：靠判断力（跨洋同步热路径根因）
+
 # newworld-multiregion-crossocean-hotpath SOP
 
 **来源**：2026-06-06 fullcut-5xx-fix sprint（全量切 region 28% 5xx → upstream 根因 + round4/5/6 + 3val 全闭环；region p50 144ms→2-3ms）。

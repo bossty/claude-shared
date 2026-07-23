@@ -3,6 +3,8 @@ name: newworld-openresty-deploy
 description: OpenResty 改 .conf 后必查主 nginx.conf 真 include；access_by_lua 引入新 require 必须确认 lualib 已装；reload 后 3 min 必查 [error]/[emerg]=0 + 真请求 smoke。nginx -t PASS + reload 成功 ≠ 上线安全。Triggers on openresty, nginx.conf, include, lua-resty, reload smoke, configtest, ssl_certificate_by_lua, lua_shared_dict, access_by_lua, init_worker_by_lua.
 ---
 
+> **执行机制**：靠判断力（reload smoke 方法论）
+
 # Newworld OpenResty 配置/依赖部署铁律（2026-04-25 Wave Stats v4 事故硬化）
 
 ## 触发场景

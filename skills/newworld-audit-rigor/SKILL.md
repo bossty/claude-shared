@@ -3,9 +3,11 @@ name: newworld-audit-rigor
 description: 代码审计 / 安全 review / 蓝军挑刺时的「严谨度」铁律 — finding 必须 intended-vs-implemented 双引证（文档铁律 + 代码 file:line）才成立、三类高漏报必查（SSRF·renderer-abuse / PII 流入 logs·traces·analytics / output-encoding≠input-validation）、attacker=victim 不报、豁免必"明确不报+工具证实再报"、证伪式反思过滤 pass。Triggers on 审计, audit, 安全 review, 蓝军, finding, SSRF, PII, output encoding, 误报, 漏报, 豁免, audit-suppressions, false positive, security review.
 ---
 
+> **执行机制**：靠判断力（审计严谨度/漏报三类不可机制化）
+
 # Newworld 审计严谨度铁律（2026-06-27 toolchain 调研吸收，源 phuryn/pm-skills + alibaba/open-code-review + mattpocock/skills）
 
-> 配套 `docs/audit-suppressions.md`（审计前必读的抑制清单）+ `newworld-multi-agent-coord` 蓝军门禁 + `newworld-sprint-closure-audit` 抗虚报。本 skill 补的是**单条 finding 的成立判据 + 高漏报盲区 + 豁免纪律**，防"看似 bug 实误报"与"看似干净实漏报"两头翻车。
+> 配套 `docs/security/audit-suppressions.md`（审计前必读的抑制清单）+ `newworld-multi-agent-coord` 蓝军门禁 + `newworld-sprint-closure-audit` 抗虚报。本 skill 补的是**单条 finding 的成立判据 + 高漏报盲区 + 豁免纪律**，防"看似 bug 实误报"与"看似干净实漏报"两头翻车。
 
 ## 触发场景
 - 代码审计 / 安全 review / 蓝军挑刺产出 finding 时
@@ -63,4 +65,4 @@ description: 代码审计 / 安全 review / 蓝军挑刺时的「严谨度」铁
 - [[newworld-multi-agent-coord]] 蓝军门禁 + 证据传递纪律
 - [[newworld-sprint-closure-audit]] 抗虚报
 - [[newworld-commit-message-precision]] message vs diff 精确
-- `docs/audit-suppressions.md` 抑制清单（审计前必读）
+- `docs/security/audit-suppressions.md` 抑制清单（审计前必读）

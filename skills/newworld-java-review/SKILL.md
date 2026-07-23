@@ -12,6 +12,8 @@ triggers:
   - newworld-admin
 ---
 
+> **执行机制**：靠判断力（确定性规则可 grep/LSP 静态扫，人判兜底）
+
 # newworld-java-review — Java 后端审查 checklist
 
 **用法**：写/审 `newworld-web|admin|data|common` 的 Java、PR/合并前、蓝军 Java 审时逐节过 diff，命中即报 `file:line` + 严重度 + 修法（对齐 [[newworld-audit-rigor]] 双引证）。**能静态查的先 grep/LSP 扫，再人判**（阿里 open-code-review 的确定性管道思路：`${}` 注入、`static SimpleDateFormat` 这类无需推理）。

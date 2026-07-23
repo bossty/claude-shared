@@ -3,10 +3,12 @@ name: newworld-schema-consistency
 description: entity vs DB schema 一致性 + SQL migration 漏跑防再发（2026-05-07 教训）+ MyBatis(-Plus) 下划线列↔驼峰字段映射坑（SELECT * + resultType=POJO 不做驼峰映射、resultMap 漏字段=silent null；5/24 AdMapper encrypted_image_url、B-01、W3 OrphanDetector 同款）。Triggers on SQL migration, schema diff, entity 字段, @TableField, Unknown column, Table doesn't exist, SchemaConsistencyValidator, MyBatis Plus 字段命名, camelToSnake 数字字段, resultType 驼峰, resultMap 漏字段, silent null, mapUnderscoreToCamelCase.
 ---
 
+> **执行机制**：无自动闸门，靠 LSP/grep+判断力；SchemaConsistencyValidator 仅 dev/staging/test profile（需起服务才跑，不进 mvn test）
+
 
 # entity vs DB Schema 一致性铁律
 
-2026-05-07 一周 3 起同种 deploy-checklist 违反（V5 / W3-A4 / W4 sprint）。本 skill 是 `newworld-deploy-checklist` 第 5 项的展开 + 系统性防御。
+2026-05-07 一周 3 起同种 deploy-checklist 违反（V5 / W3-A4 / W4 sprint）。本 skill 是 `newworld-deploy-runbook` 部署前必查四项第 5 项的展开 + 系统性防御（该四项 2026-07-23 由 checklist 并入 runbook）。
 
 ## 真根因
 
@@ -91,7 +93,7 @@ fi
 
 ## 关联
 
-- `newworld-deploy-checklist` 第 5 项（本 skill 是其系统性展开）
+- `newworld-deploy-runbook` 部署前必查四项第 5 项（本 skill 是其系统性展开；2026-07-23 由 checklist 并入）
 - `newworld-deploy-runbook`
 - `newworld-multi-agent-coord`（schema 变更必走 multi-agent）
 - `docs/security/audit-suppressions.md`（DBA-gated 例外抑制清单）

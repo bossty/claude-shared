@@ -3,6 +3,8 @@ name: newworld-local-ci-gates
 description: 本地 git 闸门(pre-commit/pre-push=本地CI)必须处理"本地环境≠干净CI runner"三差异——mvn 加 -Djava.awt.headless=true + env -u DISPLAY(本地 DISPLAY=:99 致 java.awt 图像测试连 X11 假红)、vitest 前 ensure_deps(lockfile 比 node_modules 新→npm ci,防 blurhash 等新增依赖假红)、mvn 不带 -q(surefire summary 可见)。hook 必写进 simple-git-hooks config(否则 npm install 重建清掉手写 hook);hook 命令路径基于仓库根(cd .. 后写 scripts/ 非 ../scripts/);pre-push 读 stdin 跳过删除/无提交 + SKIP_CI_LOCAL 逃生。Triggers on 本地 CI, ci-local, pre-push, pre-commit, git hook, simple-git-hooks, headless, DISPLAY, node_modules 假红, blurhash, npm install 清 hook, push 卡住, push 被拦.
 ---
 
+> **执行机制**：已接管（=机制本体）——`scripts/pre-push-gate.sh`+`ci-local.sh` 逐条对齐，本 skill 是该机制唯一人读入口
+
 # Newworld 本地 CI 闸门铁律（2026-07-02 工程化加固，一次 push 暴露 3 坑）
 
 ## 触发场景

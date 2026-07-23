@@ -3,6 +3,8 @@ name: newworld-sdlc-agent-team
 description: SDLC Agent Team sprint 完整 SOP。触发关键词：newworld-sdlc-agent-team / SDLC sprint / agent team sprint / pm-helper PRD / sprint closeout
 ---
 
+> **执行机制**：靠判断力；spawn 参数表/5-Phase/WARN 案例库为独有内容
+
 # newworld-sdlc-agent-team SOP
 
 **版本**：v1.0（2026-05-16，基于 7 sprint 实战验证，Owner 软门 1 拍板装入）
@@ -116,7 +118,7 @@ max_round=2（超出强制 escalate_to_owner）
 ```yaml
 subagent_type: dev-senior
 tools: [Bash, Read, Edit, Write, Glob, Grep]
-工作目录: .claude/worktrees/<sprint-id>-<module>/
+工作目录: /home/test/worktree-<sprint-id>-<module>/   # 仓库外落点(2026-07-14 Owner 铁律;禁 .claude/worktrees,见 newworld-dev-workflow)
 can_send_to: [测试 senior, 蓝军, lead]
 派工指令必含：
   - worktree 路径 + 模块范围
@@ -181,14 +183,14 @@ recon 结论作为 PRD OQ 的"分析基础"段，让 Owner 软门 1 快速拍板
 
 | 步骤 | 执行者 | 关键铁律 |
 |------|--------|---------|
-| worktree 隔离 | main session + dev-senior | `git worktree add .claude/worktrees/<sprint-id>-<module>` |
+| worktree 隔离 | main session + dev-senior | `git worktree add /home/test/worktree-<sprint-id>-<module> -b <分支> origin/master`（仓库外落点，2026-07-14 Owner 铁律；禁 `.claude/worktrees`，见 newworld-dev-workflow） |
 | 按模块 spawn dev-senior | main session | 每模块独立 worktree，按需并行 |
 | 实施 + commit | dev-senior | commit message 精确量化（+N/-M lines, X files） |
 | 局部编译检查 | dev-senior | `mvn compile -pl <module>`（<30s），不跑全量 mvn |
 | 结束 worktree | dev-senior | 汇报 lead + commit sha 列表 |
 | 权威 mvn 验证 | qa-senior（独立） | `mvn test -pl <所有改动模块>` 无 `-q` |
 
-**软门 3 触发条件**：mvn test 全绿 + e2e 真点 + sprint-closure-audit 通过 + deploy-checklist 四查 OK
+**软门 3 触发条件**：mvn test 全绿 + e2e 真点 + sprint-closure-audit 通过 + newworld-deploy-runbook 部署前必查四项 OK
 
 ### Phase 4 — Deploy（单 session，ops-senior）
 
@@ -199,6 +201,8 @@ recon 结论作为 PRD OQ 的"分析基础"段，让 Owner 软门 1 快速拍板
 memory-keeper 产 sprint-report.md 候选 → 蓝军复核 → Owner 显式 commit 采纳教训 → 更新 skill/memory/CLAUDE.md。
 
 **Agent 不能直接写**：`~/.claude/skills/` / `memory/` / `CLAUDE.md`（spec §4.5 铁律）。
+
+**sprint-report.md 必含「既有铁律生效台账」段**：逐条列本 sprint 真正用上并挡住问题的既有铁律（铁律 → 触发点 → 挡住了什么）。用途是防止铁律在后续 sprint 被当作无效负担删除——**没有生效记录的守卫最容易被误判为死规则**。与 CLAUDE.md「harness/脚手架随模型升级重审」构成对冲：那条要求定期问"现在能停做什么"，本条要求先留证据再判死，缺一即变成单向删守卫。（LSP-2 sprint 5/16 教训）
 
 ---
 
@@ -434,6 +438,15 @@ NOTE: stringRedisTemplate 有 8 处生产调用，不在 C 类清单，@Mock 不
 3. 状态档 AC 段必列每个端点对应的方法绑定（端点 → 调用方法）
 
 **配套**：[[newworld-commit-message-precision]] 强调"声明前 grep 实证"，本规则是 Controller 改动专项化。
+
+### WARN-13：改动边界 vs 预存问题必须显式标注，否则清零验收必假阴（E-sprint 5/16 教训）
+
+**反模式**：dev-senior 修完本 sprint 范围内的错误，但改动文件里仍有范围外的 baseline 预存错误；qa-senior 用文件名 raw grep 核查 → 文件仍报错 → 误判"本 sprint 未清零"。
+
+**规则**：
+1. dev-senior 状态档「验收结果」段，凡改动文件仍含范围外预存问题，必须写明：`注意：此文件含 N 条预存 §X 范围外错误，已在 baseline（commit <sha>），本 sprint 不修`
+2. qa-senior 据此用**精确 grep**（如 `grep "HomeDesktopSections.*TS2322"`）而非 raw filename grep 核查
+3. 判据是**本 sprint 0 新增 regression**（baseline A/B 证），不是"预存套 100% 绿"——否则有 flake 的库永远发不了版（同源判据见 memory `project_region_p1_sprint_2026_06_08`）
 
 ---
 

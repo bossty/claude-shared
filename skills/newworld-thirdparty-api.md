@@ -3,6 +3,8 @@ name: newworld-thirdparty-api
 description: Cloudflare/NameSilo API 调用前必查最新官方文档，不得凭记忆或猜测编写 endpoint/参数。Triggers on cloudflare api, namesilo, 第三方 api, 端点, request format, dns api, domain api, api endpoint, cf api, 创建 dns 记录, create dns record, 注册域名, register domain, cf zone, cloudflare zone, api 文档, api docs, dns 记录, 域名 api.
 ---
 
+> **执行机制**：靠判断力（第三方 API 必查官方文档；含 2026-05-21 0-RTT eventual-consistency 独有教训）
+
 # Newworld 第三方 API 调用铁律
 
 ## 触发场景

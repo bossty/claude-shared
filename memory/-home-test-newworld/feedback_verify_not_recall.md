@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: feedback
   originSessionId: 64b5f5d1-9590-4971-9f5b-8d2e351a83eb
+  modified: 2026-07-22T11:51:52.020Z
 ---
 
 引用快速演变的事实（根因机制、SOT 结论、被多次纠正的归因）时，**一律回原文（banner/CORRECTION/最新 SOT 行号）核对，绝不凭记忆或转述复述**。
@@ -23,4 +24,5 @@ metadata:
 - **状态汇报里的数字/标识符（测试数、grep 计数、marker/注解名、文件名）一律贴新跑/新 grep 的输出，不凭脑子复述**：2026-06-08 同 sprint 又犯——给团队的消息报"23/23"(实 24)、"marker 统一 @MasterReadAllowed"(实读闸是 @RegionReadAllowed，且两 marker 有意分开)；代码全对，错的是消息。蓝军逐行 trace 抓出（claim-vs-实代码是其必查项）。落笔前 `bash test`/`grep -c` 跑一遍贴结果。
 - **浏览器/E2E 验证前必先核"跑的是不是我的代码"**：2026-06-08 nw-region-p1 实施期，chrome-devtools 默认连的 :5566 dev server 跑的是**另一个 git worktree（snack-rename）的旧码**——控制台仍刷旧日志、`fetch('/src/utils/X.js')` 实测 `_myNewSymbol=false`。差点拿旧树证据盖章（会得出"我的 fix 没生效"的假结论）。防线：验证前先 `fetch` 服务端转换后的源码断言我的新符号在；或 `ls -la /proc/$(lsof -ti :PORT)/cwd` 看 server 的 worktree；不对就从 canonical tree 起新端口 server 再验，验完 kill。多 worktree 仓库（`.claude/worktrees/*`）尤其易踩。
 - **"是不是我引入的 regression"用 git stash A/B 对照实验判，不靠猜**：2026-06-08 三个 teammate 都怀疑我 #10 改动致 2 测超时。我 stash 掉我的改动跑 baseline——同 2 测**照样红同时序**=证伪。配 `grep "await.*<埋点>"`=0 证明结构上不阻塞。结论：陈旧测试（PROBE_TIMEOUT 2000→5000 后 fake-timer advance 没跟着改）非我 regression。改相邻文件被怀疑很合理，但**实验证伪 > 接受归咎**。
+- **memory / sprint 档里写着「已改了 X」不等于代码真改了，落笔前必 `git diff` / `git log -S` 实证**：2026-05-12 owner 报「cableav 67055 无 preview」，上一轮 sprint memory 白纸黑字写着「`FfmpegPreviewService.resolveRelative` 4-case 修了」，实际去看代码仍是**单行 `baseDir + rel`**——memory 记的是「当时打算改/改了没提交」，被 linter revert 掉了都不知道（同 sprint 5/11 的 `resolveRelative` / `executeWithProxyFallback` / `Hanime1ScheduledCrawlTask` 三处改动多次被 linter 拆掉）。见 源档 `project_hanime1_cf_5_12_5_13_sprint.md`（已于 BL-131 阶段 1 删除，取回 `git show 8c44739c6:claude-shared/memory/-home-test-newworld/project_hanime1_cf_5_12_5_13_sprint.md`）。**How to apply**：引用「某 fix 已在代码里」时，判据只认 `git log -S'<新符号>' -- <文件>` 有 commit、或 `git show <sha>:<文件> | grep`，不认 memory/交接档的自述；memory 写「已修」时同步记 commit sha（本例 hotfix `2d7269ac` + 主 sprint `edfc1d5f`），没 sha 的「已修」一律当未验证。推论：**改动立即 commit 锁定**，未提交的改动等于不存在。
 - **多引擎截图防 relabel：查引擎指纹**。蓝军验我"双引擎"4 截图时不数张数，查像素格式：Chromium 出 **RGB**、Playwright WebKit 出 **RGBA**——格式差异坐实 WebKit 那 2 张是真 WebKit 非 relabel 的 Chromium。我贴"双引擎"证据时也该自带这种不可伪造的指纹。

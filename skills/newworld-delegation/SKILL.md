@@ -3,6 +3,8 @@ name: newworld-delegation
 description: 主线程 token 成本纪律——何时把活派给 subagent、主线程保持薄。主线程每轮全量重读 context 是最大开销(实测占~70%成本)；读大文件/大范围搜索/翻日志/长探查一律派 subagent(它的重活留在它自己 context,只返结论回主线程)。但**输出能 grep 成几行的确定性验证(跑单个测试/单条 build)别开 subagent**——冷启动 ~47K 前缀 > 收益,主线程直接 `> 文件 2>&1` + grep 结果行更省。大输出命令(mvn/npm/journalctl/大 SELECT)标准减噪 = 落文件只 grep 结果行,FAILURE 才读错误段。符号导航(调用方/定义/影响面)用 LSP find-references(有界输出),非代码/字面量才用 grep。subagent 返回要致密电报式。机械类 subagent 显式 model:sonnet。Triggers on 派 subagent, 委派, delegate, subagent, Explore agent, 读大文件, 大范围搜索, grep 全仓, grep vs LSP, find-references, LSP 导航, 翻日志, journalctl, 跑测试, mvn 落文件, 输出可压缩验证, 长探查, context 太大, 主线程, token 成本, cache_read, 省 token, 该不该开 agent, fan out, 并行 agent.
 ---
 
+> **执行机制**：靠判断力（token 成本委派决策）
+
 # Newworld 委派纪律（主线程 token 成本）
 
 > 2026-07-08 成本审计定案：单会话真实成本 **cache_read（历史 context 每轮全量重读）~70% > output ~18% > cache_creation ~12%**。cache_read ∝ 轮数 × 平均 context。主线程越厚、越长，每轮越贵。委派是把重活成本挡在主线程之外的**最强杠杆**（被 subagent 的 context 隔离机制化，不靠记忆）。

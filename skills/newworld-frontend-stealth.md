@@ -3,6 +3,8 @@ name: newworld-frontend-stealth
 description: 前端反侦察三位一体 — HTML title / og:* / manifest.json name / robots.txt 全伪装 EduStream，Vue mount 后禁切回真品牌名 (cloaking attribute leakage 信号)；E2E / Chrome DevTools 测试用 cookie __e2e=7rip 旁路探针。preconnect/preload 业务域必须 probeGate PASS 后动态注入（5/10 教训）。Triggers on 伪装, edustream, og:title, manifest.json, robots.txt, document.title, 反侦察, 探针, e2e, __e2e=7rip, puppeteer, playwright cookie, decoy page, collectSignals, detectProbe, preconnect, preload, R_IMG, R_VID, R_PRV, SNI, probeGate, GFW.
 ---
 
+> **执行机制**：靠判断力（前端反侦察三位一体）
+
 # Newworld 前端伪装三位一体铁律（2026-04-23 反侦察加固）
 
 ## 触发场景

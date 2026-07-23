@@ -3,6 +3,8 @@ name: newworld-monitoring-ops
 description: N9E v8 监控体系运维 — categraf v0.5 schema 子目录化（input.cpu/cpu.toml）；alert_rule 必填 datasource_queries（不是 datasource_ids/cluster），NULL 则永不 eval；actuator 端口隔离（127.0.0.1 single port，禁公网透传）；target.host_ip 必须 varchar(64) 容 IPv6；toml 正则用单引号 literal 防转义；通知走 notify_rule（内置 telegram channel id=13）。Triggers on n9e, nightingale, categraf, datasource_queries, alert_rule, victoriametrics, host_ip varchar, notify_rule, 监控告警, 添加告警规则, 添加新主机, actuator 端口, management.server.port, input.cpu, input.systemd, telegram channel.
 ---
 
+> **执行机制**：靠判断力（N9E v8 schema 运维）
+
 # Newworld N9E v8 监控运维铁律
 
 ## 触发场景

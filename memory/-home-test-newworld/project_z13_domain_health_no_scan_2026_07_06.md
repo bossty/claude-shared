@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: bad9e248-e91e-4f20-b940-5c3872e06b28
+  modified: 2026-07-22T11:49:19.705Z
 ---
 
 domain-health 端点去全库 SCAN 修复，**实现+lead审查完成，未合master、未部署（Owner 定「实现现做部署等错峰」）**。subagent-driven（dev-senior 实现 + lead 亲审）。
@@ -21,3 +22,7 @@ domain-health 端点去全库 SCAN 修复，**实现+lead审查完成，未合ma
 **分支**：`fix/z13-domain-health-no-scan` @ `97ba91b0`（基于 afc7710a）。
 
 **部署（错峰，安全切换序）**：1) web×6+admin 一起部署(flag 默认 false 零行为改变) 2) 等~10min 索引填充 3) system_config 翻 OPS_Z13_INDEX_ENABLED=true(admin 无需重部署) 4) 验证 domain-health<200ms+penalties 抽样一致+SCAN 负载消失 5) 回滚=flag 翻 false。web peak 20:00-03:00 需 --force-peak，或搭 07-07 06:00 config-tuning 批 D 窗。
+
+**★翻 flag 后必手动 pub-sub 失效，否则最长 30min 不生效**：system_config 走 30min Caffeine 缓存，SQL 直改（INSERT ... ON DUPLICATE KEY UPDATE）**不会**自动失效——须跟一条 `nw-redis ca-admin PUBLISH shared:ch:sysconfig-refresh OPS_Z13_INDEX_ENABLED` 即时生效（替代「bump SYSTEM_VERSION 或重启 admin」的粗办法）。另：system_config 无 encrypted 列，值明文写；SQL 里的反引号会被 bash 命令替换吃掉，直改一律用 stdin 管道喂 mysql 而非 `-e "..."`。
+
+**★峰窗强制参数四个脚本两种写法（不通用，抄错=被 guard 拒）**（2026-07-22 grep 实核仍成立）：`deploy-web.sh` / `deploy-backend.sh` 自己解析 **`--force-peak` flag**（deploy-web.sh:77、deploy-backend.sh:62，命中 20:00–03:00 HKT 无 flag 则 die）；`deploy-openresty.sh` / `deploy-frontend.sh` 走 `source scripts/lib/peak-guard.sh`（:53 / :28），只认 **`FORCE_PEAK=1` env 前缀**，给它们传 `--force-peak` 会当未知参数或直接被 guard 拦。

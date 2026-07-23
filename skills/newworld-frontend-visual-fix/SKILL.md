@@ -3,6 +3,8 @@ name: newworld-frontend-visual-fix
 description: 前端视觉/交互修复必须 **PC/Mobile × Chromium/WebKit 4 象限**双引擎双视口验证 OK 才 commit（2026-05-15 升级，原 PC+Mobile chrome devtools 不够）。禁止"修一端 commit 一端"。chunk 拆分 / vite manualChunks 改动同样必须真浏览器双端 e2e（5/10 TDZ 教训）。Triggers on 播放器尺寸 / hero / sidebar / swiper / 布局 / aspect-ratio / 视觉 / 截图验证 / vite manualChunks / chunk 拆分 / TDZ / 循环依赖 / Safari iOS / WebKit / loading=lazy / viewport-fit / safe-area-inset.
 ---
 
+> **执行机制**：靠判断力（PC/Mobile×Chromium/WebKit 4 象限验证）
+
 # Newworld 前端视觉修复双端验证铁律（2026-05-01 hotfix-3 教训）
 
 ## 触发场景

@@ -3,6 +3,8 @@ name: newworld-monitoring-ops
 description: N9E v8 监控体系运维 — categraf v0.5 schema 子目录化（input.cpu/cpu.toml）；alert_rule 必填 datasource_queries（不是 datasource_ids/cluster），NULL 则永不 eval；actuator 端口隔离（127.0.0.1 single port，禁公网透传）；target.host_ip 必须 varchar(64) 容 IPv6；toml 正则用单引号 literal 防转义；通知走 notify_rule（内置 telegram channel id=13）。Triggers on n9e, nightingale, categraf, datasource_queries, alert_rule, victoriametrics, host_ip varchar, notify_rule, 监控告警, 添加告警规则, 添加新主机, actuator 端口, management.server.port, input.cpu, input.systemd, telegram channel.
 ---
 
+> **执行机制**：靠判断力（N9E v8 schema 运维）
+
 # Newworld N9E v8 监控运维铁律
 
 ## 触发场景
@@ -12,7 +14,7 @@ description: N9E v8 监控体系运维 — categraf v0.5 schema 子目录化（i
 - 改 Spring Boot actuator 暴露策略
 - 排查"告警规则不 eval"或"target host_ip 空"
 
-## 触发后必读：`docs/MONITORING_SETUP.md` § 6（添主机 SOP）/ § 7（添告警 SOP）
+## 触发后必读：`docs/infra/MONITORING_SETUP.md` § 6（添主机 SOP）/ § 7（添告警 SOP）
 
 ## 6 个深坑（按 sprint 沉淀顺序）
 
@@ -81,4 +83,4 @@ NULL → alert engine 完全不 eval，`alert_his_event` 永远 0 条。debug 1+
 
 ## 源
 - CLAUDE.md L886-L910（N9E v8 监控体系）
-- 配套：`docs/MONITORING_SETUP.md` § 6 / § 7
+- 配套：`docs/infra/MONITORING_SETUP.md` § 6 / § 7

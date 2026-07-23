@@ -3,9 +3,11 @@ name: newworld-dev-workflow
 description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界最佳实践固化:TBD/DORA/Fowler/Atlassian/GitHub-GitLab merge queue/Claude Code worktree)。master=唯一可部署 mainline;每会话各自 worktree(仓库外 /home/test/worktree-<名>+EnterWorktree path 进入,禁 name/claude -w 默认落点 .claude/worktrees);从 origin/master 开;短命 feature/fix 每日并 master(≤1-2天本地放宽,DORA原文 a few hours)、rebase-FF;长命安全/发布 track 禁 rebase+禁 flag、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;build/部署前必 sync 最新 master 重测(单 jar 漏并=revert master);禁 rebase 已 push/共享分支;master 串行合+合前重基重测(人肉 merge queue 防 semantic conflict);删 worktree 前 merged+pushed;~/.m2 不隔离用 -am reactor;DB/端口不隔离。triggers: 分支策略, worktree, git worktree, 多会话, 多agent并行, rebase, merge, --no-ff, feature flag, trunk-based, keep main green, merge queue, semantic conflict, 从master开, build前merge master, 单jar revert, isolation worktree, claude -w, 删worktree, .m2隔离, 部署前同步master, 短命分支, 长命track, master可部署基线, git add -A, 共享checkout
 ---
 
+> **执行机制**：靠判断力；worktree 落点铁律权威源（2026-07-14 Owner 定=仓库外 /home/test/worktree-<名>）
+
 # newworld 开发工作流铁律
 
-> 业界最佳实践固化(~15 权威源:git 官方 / Claude Code 官方 / DORA / Fowler / Atlassian / GitHub & GitLab merge queue / trunkbaseddevelopment)。与 CLAUDE.md「分支与上线流程铁律」对齐;细节研究见 `docs/sprint/_archive/2026-06-27-dev-workflow-bestpractices/`。
+> 业界最佳实践固化(~15 权威源:git 官方 / Claude Code 官方 / DORA / Fowler / Atlassian / GitHub & GitLab merge queue / trunkbaseddevelopment)。与 CLAUDE.md「分支与上线流程铁律」对齐;细节研究档已随 BL-111 归档制废除删除,取回见 `docs/TOMBSTONES.md`(墓碑册:删除范围→末版 commit+取回命令)。
 
 **核心模型**:master = 唯一 Release-Ready Mainline(永远已测、可直接部署);每会话/每 agent 各自 worktree(从 origin/master 开);短命 feature/fix(每日并 master)rebase-FF 合;长命安全/发布 track 禁 rebase、--no-ff merge 双向、走专属 DEPLOY-RUNBOOK;合入串行 + 合前并最新 master 重测(人肉 merge queue 防 semantic conflict)。
 
@@ -39,7 +41,7 @@ description: 分支/worktree/合并/keep-main-green 开发工作流铁律(业界
 - **master 串行合并 + 合前重基重测(人肉 merge queue)**:一次只落一个;每分支合入前必并最新 master 在合并态重测;前一个合入后,后续未合分支必须重新并新 master 重测(禁用旧测结果合)。防 semantic conflict(A 测 main、B 测 main,合后 main+A+B 谁都没测→炸)。
 - 中期可引入 merge queue/CI gate(前置=先有 CI 可跑的绿判据);现状人工+Owner+蓝军=人肉 CI gate。
 - commit 粒度:单 commit=最小可独立 revert 单元(不破 build);message 精确量化(承 newworld-commit-message-precision)。
-- **合并后收尾清单(2026-07-05 Owner 定"合并即清理")**:①删远端分支 `git push origin --delete <br>` ②删本地 `git branch -d`(拒绝时用能力级校验 `git merge-base --is-ancestor <br> origin/master` 通过才 `-D`) ③删 worktree+`git worktree prune`。历史查询走 `git log --merges/--first-parent`(--no-ff merge commit 永久保留分支名+全部提交),死分支 ref 只会让别会话误判 supersession。未合活分支(等授权窗口/长命 track)保留。
+- **合并后收尾清单(2026-07-05 Owner 定"合并即清理")**:①删远端分支 `git push origin --delete <br>` ②删本地 `git branch -d`(拒绝时用能力级校验 `git merge-base --is-ancestor <br> origin/master` 通过才 `-D`) ③删 worktree+`git worktree prune` ④**回写该 sprint 的 SESSION-STATE**（BL-134，2026-07-22）:档内所有「未合 master/待 Owner 授权合并」表述**就地标注失效并补合并 sha+日期,禁删原文**;档头 `status:` 只能填闸门认识的值——`active`/`open`=in-flight、`closed`/`superseded`=已收口（判据在 `scripts/doc-sprint-audit.sh:13,25`），**填 `merged` 这类自造值会让该档从两张清单里同时消失**。为什么必须在这一步做:CLAUDE.md 与常驻铁律都要求续接会话先读 SESSION-STATE,陈旧状态会让下个会话按「还没合、还要等授权」开工(实测 4 份档长期停在待授权,而 `git merge-base --is-ancestor` 查出 sha 早在 master);**且这类陈旧多读一份档发现不了,只能与 git 真值交叉核对**——故必须与①②③同一时点同一个人做。历史查询走 `git log --merges/--first-parent`(--no-ff merge commit 永久保留分支名+全部提交),死分支 ref 只会让别会话误判 supersession。未合活分支(等授权窗口/长命 track)保留。
 
 ## 5 — keep-main-green
 - master 可部署性靠**自动化测试门**;人工/Owner 授权只决定"发不发"不替代"代码对不对"。

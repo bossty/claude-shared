@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: df06f417-fb3f-4c81-8486-085852426538
+  modified: 2026-07-22T11:50:26.239Z
 ---
 
 **Dragonfly 高 iowait 是已知 cosmetic 现象，非性能问题**（2026-06-14 三 agent 查官方文档+内核+真机定论）。
@@ -24,5 +25,11 @@ ca-redis（Dragonfly r6i.large）N9E 显示 CPU/iowait ~100%，实为 **io_uring
 **ca-redis 无持久化风险已根治(2026-06-14)**：原因实证=**非性能考虑**——Dragonfly 选型 sprint(docs/sprint/_archive/2026-05-26-dragonfly-research)的部署模板+install 脚本本就 `--snapshot_cron="*/5" --dbfilename=dump`(ops-explorer:`--cache_mode=false 要持久化语义`;gate4 实测 fork-less snapshot <1s 无中断;Redis 存 UV-HLL/Lua统计/JWT 非纯缓存,蓝军列丢失为 MAJOR)。eu-db-slave 继承了(*/10),**ca-redis 在终态B CA重建时漏带=provision 漂移**。另发现 8G 根盘对 12GB maxmemory 欠配(真约束之一)。
 **修复(全程零重启)**：① EBS 根卷 vol-008d45487021a9f4a 在线扩 8G→50G(modify-volume→optimizing+growpart+xfs_growfs,XFS,PID 2677 不变);② runtime 热加 `CONFIG SET snapshot_cron "*/5 * * * *"`+`CONFIG SET dbfilename dump`(+OK,立即生效,snapshot_cron/dbfilename 均 CONFIG SET 可热改);③ durable 改 unit ExecStart 加同样 flag(备份 .bak2-snapshot-2026-06-14,daemon-reload 不重启,systemd argv 确认)。**验收**:手动 SAVE 3.89GB→2.6G/45s;cron */5 实测 17:15 准时触发(文件 mtime 更新),固定 dbfilename=dump 原地覆盖无堆积,磁盘稳 4.8G/46G。重启数据丢失窗口从"全丢"→"≤5min"。
 **通用经验**:Dragonfly snapshot_cron/dbfilename 可 CONFIG SET 运行时热改(无需重启);dbfilename 默认 `dump-{timestamp}` 会堆积撑爆盘,小盘必设固定名 `dump`;DFS 压缩比~2.6G/3.89GB;判 cron 真触发看快照文件 mtime 不看易误解析的 INFO 字段。
+
+**★后续订正(2026-06-18):上面这个 `*/5` 四天后就咬人了,已降 `*/30`**——iowait 是 cosmetic 不假,但**快照本身的 CPU/IO 争用是真的**,别把「iowait 假象」推广成「快照无代价」。ca-redis-master .128(**2 vCPU** r6i.large)在 **8.8M keys / ~12k ops/s** 下,每 5 分钟一次全量快照的 spike 足以击穿 **Lettuce 3s 命令超时**(`RedisCommandTimeoutException: Command timed out after 3 second(s)`),下游后果是 admin `parseToken` 的黑名单 `hasKey` 超时被静默 catch→401→前端清 token,表现为管理员「几分钟掉线」(全链见 源档 `project_admin_logout_redis_snapshot_2026_06_18.md`（已于 BL-131 阶段 1 删除，取回 `git show 8c44739c6:claude-shared/memory/-home-test-newworld/project_admin_logout_redis_snapshot_2026_06_18.md`）)。
+- **诊断金标 = 超时时间戳 vs snapshot cron 节拍对齐**(超时全落 `15:0x`/`15:3x` 这种整点节拍上),不是看 iowait、不是看 load。
+- **修法 = 降快照频率(结构性治本);提高客户端命令超时只是创可贴**,它把窗口糊过去、spike 照旧。
+- 落地:.128 与 EU slave .184 **两台都改** `*/5`→`*/30`(runtime `CONFIG SET snapshot_cron` + systemd unit ExecStart 双写,均**未重启**,各留 `.bak-pre-30min`);实测超时频率降 6×,被踢用户 0。代价=丢数据窗口 5min→30min,Owner 已接受。
+- 推论:**小核盒(≤2 vCPU)上 snapshot_cron 密度是要按 keyspace + ops/s 调的容量参数,不是照抄部署模板的常量**——`*/5` 本身就是 Dragonfly 选型 sprint 模板抄过来的默认值。
 
 关联 [[feedback_cgroup_oom_diagnosis]]、[[feedback_verify_metric_source]]（指标先验证源）。交接档 docs/sprint/2026-06-14-n9e-migration/SESSION-HANDOFF.md §4。

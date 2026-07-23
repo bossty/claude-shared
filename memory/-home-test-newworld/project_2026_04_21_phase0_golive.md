@@ -39,7 +39,12 @@ originSessionId: 93fa30d6-8acf-448f-9897-96d44dbb2453
 - 源码默认值修正 commit 62289088：`or "https://admin.17.rip"` → `or "https://adm.17.rip"`
 
 **edge VPS openresty 环境变量注入方式**（踩坑记录）：
-- 原生 systemd `EnvironmentFile=/etc/newworld/secrets.env` 配置 `(ignore_errors=yes)` 显示已加载，**但 nginx master 进程 env 读不到**（原因未深挖，疑似 fork 时丢失）
+- ~~原生 systemd `EnvironmentFile=/etc/newworld/secrets.env` 显示已加载，但 nginx master 进程 env 读不到（疑似 fork 时丢失）~~ **★ 2026-07-22 实测订正：这条从来就不成立，是判据错不是机制错。**
+  - `/proc/<nginx_master_pid>/environ` **对 nginx 根本不是有效判据**——nginx 的 setproctitle 会复用 argv/environ 内存区改写 `ps` 显示的进程标题，把原始 environ 覆写掉。07-22 在 usca-1 现场 dump 到的正是 `-g 'daemon on; master_process on;'` 这行 argv 尾巴 + 一串 NUL，**不是空、更不是"env 没注入"**。
+  - 反向正证：04-25（本档写完仅 4 天后）wave-stats-v4 W2 sprint 在 aws-web-01/02 上用**纯 EnvironmentFile、无 wrapper** + `systemctl restart`，经 lua `os.getenv()` 反查拿到 `_G._ANALYTICS_V4_ENABLED=true` / `_G._EDGE_OPS_SECRET_len=64` / `_G._REDIS_PWD_len=20`（`docs/design/wave_stats_v4_sprint_closure.md:307-321`，commit `dcedf9d558c`）。同档 §6.4 已明写「验证 env 注入只能通过 lua 内反查 `_G._*` 或 `os.getenv()`」。
+  - 故 **bash wrapper 功能上多余**。但 07-22 现场确认 usca-1/usca-2/aws-s 三台 edge 仍在跑 wrapper（`env-wrapper.conf`），未回退，不阻塞——真要回退需单独排期验证。
+  - 教训：**验证"某机制没生效"必须先确认判据对该被测对象有效**。这里判据（读 `/proc/environ`）对 nginx 天然失效，于是量出假阴、催生了一个不必要的 workaround 并让根因"未查清"挂了 3 个月。同型见 [[reference_negative_control_must_match_probe_semantics]]、[[reference_absence_claims_need_two_independent_probes]]。
+- **另注**：仓库 `ops/systemd-prod/openresty/wave_stats_v4.conf`（纯 EnvironmentFile drop-in）是**僵尸文件，勿照搬启用**——07-22 实查 ca-admin / ca-web-01~04 / eu-web-01/02 共 7 台的 `openresty.service.d/` 均只有 `limits.conf`，该 drop-in 生产哪儿都没装；v4 已于 05-17 退役。
 - Workaround: /etc/systemd/system/openresty.service.d/env-wrapper.conf override ExecStart 用 bash wrapper：
   ```
   ExecStart=/bin/bash -c 'set -a; . /etc/newworld/secrets.env; export ADMIN_BASE_URL=https://adm.17.rip; exec /usr/local/openresty/nginx/sbin/nginx -g "daemon on; master_process on;"'
@@ -71,4 +76,4 @@ originSessionId: 93fa30d6-8acf-448f-9897-96d44dbb2453
 - ⏸ short_redirect timeout 15s → 500ms（理论上已通过 bypass Redis 路径解决，但 rpc_pick_p 里的 timeout 值需再 audit）
 - ⏸ prep-edge-vps.sh 补漏：lua 模块部署 + opm get pintsized/lua-resty-http + /__s_health 80 port + openresty env-wrapper drop-in
 - ⏸ cloudflared client 可选（若要 edge 直连 aws-web 而非经 CF proxy 双跳，可压 RTT 100~200ms）
-- ⏸ systemd EnvironmentFile 机制根因（为什么没传给 nginx master）未查清，用 bash wrapper 绕过
+- ✅ ~~systemd EnvironmentFile 机制根因（为什么没传给 nginx master）未查清，用 bash wrapper 绕过~~ **2026-07-22 结项：不存在该机制问题，是判据错**（`/proc/environ` 被 nginx setproctitle 覆写）。详见上方「edge VPS openresty 环境变量注入方式」段与 `docs/design/wave_stats_v4_sprint_closure.md` §6.4。

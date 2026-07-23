@@ -3,6 +3,7 @@ name: V6 D 档迭代档（2026-04-27 Owner 拍板）
 description: V6 从 38 决策 28.75d C 档改为 D 档（V6-精简 5d + 60d 观察 + V7 数据驱动）
 type: project
 originSessionId: cff1eb9c-f1fd-4a7d-9d6d-249290b9d358
+modified: 2026-07-22T11:49:35.327Z
 ---
 V6 sprint 从 C 档（38 决策全做 28.75d）改为 **D 档**（迭代档）。Owner P9 review 拍板。
 
@@ -42,7 +43,7 @@ V6 sprint **实质已收口**，V7 已启动并做了一大半：
 - **sprint_closure 文档已写**：`docs/design/wave_stats_v6_sprint_closure.md` + `wave_stats_v7_sprint_closure.md`
 - **V6-γ 留尾巴**：nginx env typo 已修（fec6e99a + 9ac05278），但 V5.1-B 完整 cutover（nginx-web.conf 切主 + hmac_secret_agent.init）仍未做；AnalyticsV5Metrics 看似已分拆但需 owner 确认；aws-s git credential 状态不清
 
-**派工铁律**（2026-04-27 更新）：可用 `pua:senior-engineer-p7`（已 fix Edit+Write）或 `general-purpose`，二选一。详见 feedback_pua_p7_agent_tools.md（RESOLVED）。
+~~**派工铁律**（2026-04-27）：可用 `pua:senior-engineer-p7` 或 `general-purpose`~~ —— **2026-07-22 失效**：`pua:*` agent 系列早已退役，现行派工走 plugin 的 `newworld:dev-senior`/`qa-senior`/`ops-senior`/`reviewer`，见 skill `newworld-sdlc-agent-team`。
 
 ## V5.1-B cutover 完成（2026-04-27）+ V6-γ 留尾巴
 

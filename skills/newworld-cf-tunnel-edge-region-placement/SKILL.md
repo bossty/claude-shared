@@ -3,6 +3,8 @@ name: newworld-cf-tunnel-edge-region-placement
 description: 多 region origin 放哪、是否值得跨 region/跨 AZ 的实证方法论。触发：region 选址 / origin placement / CF 边缘 / cloudflared tunnel colo / 同 AZ vs 跨 AZ / us-west-1 vs us-west-2 / cf_ray 分布 / region HA 升级
 ---
 
+> **执行机制**：靠判断力（region 选址实证方法论）
+
 # newworld-cf-tunnel-edge-region-placement SOP
 
 **来源**：2026-06-08 region HA 拓扑分析（fullcut-5xx 后续）。专家团队凭 anycast 理论判"跨 AZ 边缘多样性=伪收益"，owner 坚持实测——实测推翻了双方的简单结论。

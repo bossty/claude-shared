@@ -1,6 +1,6 @@
 ---
 name: newworld-deploy-runbook
-description: Newworld 完整部署流程 — Step1 推送 → Step2 后端按模块 build/deploy + JAR 保留 5 个版本 + symlink 原子切换 → Step3 前端本地 build + scp 分发 6 节点(ca-web-01/02/03/04+eu-web-01/02) + 原子切换 → Step4 验证 / Step5 同步种子。前端铁律：禁止各节点各自 build，必须本地统一 build。Triggers on 部署完整流程, deploy runbook, jar 保留, dist.backup, 回滚, 验证 jar 内类, frontend build, openresty 同步, 种子域名同步, deploy step1, mvn clean package, feature 分支开发, 分支打包部署, 合 master, 测试通过才合并, 上线流程, master 基线.
+description: Newworld 完整部署流程 + 部署前必查四项 + SSH/git/JAR 三坑铁律 — Step1 推送 → Step2 后端按模块 build/deploy + JAR 保留 5 版 + symlink 原子切换 → Step3 前端本地统一 build + scp 分发 6 节点(ca-web-01/02/03/04+eu-web-01/02) → Step4 验证 / Step5 同步种子；部署前必查 SQL migration 已跑 / PageHelper LIMIT / 启动函数注册 / 高风险 schema；SSH heredoc quoted sentinel、服务器 git pre-flight dirty HALT、symlink 指向 current.jar 防 restart loop。前端铁律：禁止各节点各自 build。Triggers on 部署完整流程, deploy runbook, jar 保留, 回滚, 验证 jar 内类, frontend build, openresty 同步, 种子域名同步, mvn clean package, feature 分支开发, 分支打包部署, 合 master, 测试通过才合并, 上线流程, master 基线, 部署, sql migration, schema, PageHelper, prod profile, 启动函数, @PostConstruct, schema 分区, deploy 前, pre-deploy, ssh, heredoc, 远端 expand, sudo bash -s, git pre-flight, dirty, stash, 生产服务器 worktree, git pull, deploy preflight, symlink, current.jar, ExecStart, restart loop, 循环重启, JAR 软链.
 ---
 
 # Newworld 完整部署 Runbook
@@ -22,6 +22,47 @@ description: Newworld 完整部署流程 — Step1 推送 → Step2 后端按模
 - **禁止各 web 节点各自 build**：Vite chunk hash 不同 → 跨机请求 404 → 白屏
 - **必须本地统一 build，deploy-frontend.sh 通过 scp 分发 dist/ 到全部 6 节点（ca-web-01/02/03/04 + eu-web-01/02）**
 
+## 部署前必查四项（并入自 newworld-deploy-checklist，2026-07-23 BL-144 合并）
+
+> 任何后端代码 commit 涉及：sql/ 目录新文件 / Mapper LIMIT 改动 / main.js 或 Application 新增初始化函数 / 表结构 RENAME / 分区改造。**部署前**必须按下列逐条核对，少一项 = 3.25 级事故复盘。
+
+### 1. sql/ 目录里新 migration 全部在生产 DB 执行
+- 任何含 `sql/*.sql` 新文件的 commit，部署**后端代码之前**先在 aws-db 跑 SQL
+- 漏跑后果：新代码引用不存在的表/列 → 生产 500 雪崩
+- 验证：`ssh aws-db 'mysql -e "DESCRIBE <new_table>"'` 表结构必须存在
+- 事故案例：TP-01（`promotion_channel_domain` 表没建 → 1h 内 web-01 30K+ errors）
+
+### 2. 用 PageHelper 的 Mapper 改 LIMIT 必须 prod profile 真跑
+- PageHelper 自动注入 `LIMIT ? OFFSET ?`，MyBatis XML **不能再手写 LIMIT**
+- dev profile mock 不暴露双 LIMIT
+- 验证：本地起 `--spring.profiles.active=prod` + 连本地 mysql prod 镜像 + curl 触发查询，日志 "SQL:" 只有一个 LIMIT
+- 事故案例：P1-3（`findAllLatestMovies ... LIMIT #{limit}` + PageHelper → `LIMIT 1000 LIMIT 20` 语法错）
+
+### 3. 新加的启动期函数必须真调用
+- 定义 `export function initXxx()` 不等于会执行；必须在 main.js / `@PostConstruct` / Spring Bean 真 import + 调用
+- 漏注册后果：代码上线但行为不生效
+- 验证：`grep -rn "initXxx" src/` 必须在 main.js / 启动链路文件命中 import + 调用
+- 事故案例：Sprint 1 TP-02（`initFirstVisitDate()` 定义 25h 但从未被调用 → 灰度 25h 空数据）
+
+### 4. Schema 分区变更必须人工执行
+- `sql/w3_q4_*` / `sql/*partition*` 等表结构重建 / RENAME / 分区改造的 SQL，**不得自动化执行**
+- 必须遵循对应操作手册（如 `docs/W3_Q4_VISITOR_FP_PARTITION.md`）由 DBA / 值班运维逐步执行
+- 前置依赖（如应用层 upsert 语义改造）未完成时禁止执行
+- 验证：部署前 `git grep 'partition' sql/` 命中 → 停自动部署，走 DBA 审批
+- 事故案例：W3 Q4（PK 从 `visitor_id` 变 `(visitor_id, first_seen)` 后 ON DUPLICATE KEY 语义变化 → visit_count 永不累加）
+
+### 5. SQL migration 实际跑了（强制 sprint CHANGELOG sql diff 必查）
+- sprint closure / 部署前**强制**列出 sprint 内 sql 变更：
+  ```bash
+  git log --since=<sprint-start> --name-only -- 'sql/*.sql' | sort -u
+  ```
+- 每个文件必须配套**部署执行日志**（aws-db `mysql < file.sql` 输出）或显式 DBA-gated 抑制（写入 `docs/security/audit-suppressions.md`）
+- 漏跑表面现象：mvn test 全 pass / 代码 review 过 / 部署成功；真实后果：MyBatis SELECT 报 `Unknown column` / `Table doesn't exist`，scheduler 每 tick 报错
+- 5/7 一周内三起同种违反（合并教训）：V5（`rum_image_load` 表新建未跑）/ W3-A4（`movie_tag.description` 加列未跑）/ W4（`silver_user_behavior` + `dispute_queue` 表新建未跑）
+- **机制兜底**（commit `9a502954`，`scripts/deploy-backend.sh` +47/-5）：`last_deploy_ts = stat -c %Y deploys/current.jar` → `git log --since=@<ts> --name-only -- 'sql/*.sql'` 列出部署窗口内 SQL → `grep -iE 'CREATE|ALTER|DROP'` 检 DDL → 交互 prompt 确认已 apply，非交互 `exit 3`，`--skip-sql-check` 给 CI 显式 bypass。把"漏跑 migration"这个人脑健忘点变成 deploy 脚本硬门。配套启动期防御见 `newworld-schema-consistency` skill。
+
+**违反后果**：少一项 = **3.25** 级事故复盘，sprint 末必须文档化。
+
 ## Step 1：本地提交 & 推送
 ```bash
 git add <files> && git commit -m "xxx" && git push
@@ -33,7 +74,7 @@ git add <files> && git commit -m "xxx" && git push
 
 ## Step 1.5：服务器 git pre-flight（铁律，每次必跑）
 
-**Step 2/3 的任何 `git pull` 之前必须**先跑下面这段。dirty tracked 文件 > 0 立即 HALT，**不得**用 `git checkout HEAD -- xxx` 或 `git reset --hard` 自动修复绕过（违反 `newworld-git-preflight` skill L34 铁律 = 累积 dirty 到下次部署爆炸）。
+**Step 2/3 的任何 `git pull` 之前必须**先跑下面这段。dirty tracked 文件 > 0 立即 HALT，**不得**用 `git checkout HEAD -- xxx` 或 `git reset --hard` 自动修复绕过（违反本 Runbook 服务器 git pre-flight 铁律 = 累积 dirty 到下次部署爆炸）。
 
 ```bash
 for host in ca-web-01 ca-web-02 ca-web-03 ca-web-04 ca-admin; do   # eu-web-01/02 按需加入
@@ -46,7 +87,45 @@ done
 
 **事故案例（2026-05-01 Wave 1 部署）**：aws-web-01 + aws-web-02 都有 pre-existing `D frontend-web/index.html` dirty → 首次 build 报 `Could not resolve entry module "index.html"` → Sigma agent emergency `checkout HEAD --` 修复，但**违反铁律**。Root cause 未明（非 git/非 build 脚本），但 fail-fast pre-flight 能在 build 之前捕获，避免 mv dist→dist.backup 后才发现 build 失败的混乱。
 
-详见 `newworld-git-preflight` skill 完整铁律。
+**配套铁律（原 newworld-git-preflight，2026-07-23 并入本 Runbook）**：
+- **冲突态定义**：`M`/`A`/`D`/`R`/`UU`/`AA`/`DD`（tracked 但未 commit 的改动）算冲突；`??` untracked（`dist/`、`*.bak`）放行。
+- **发现冲突必 stash 保留**：`git stash push -u -m "pre-deploy-<TS>"`；**禁止** `--hard reset` 或 `checkout --` 覆盖，stash 留到下次 sprint 人工 review。
+- **生产服务器 worktree read-only 原则**：任何人（含 P7 / DBA）不得直接 ssh 到生产 vim 改 tracked 文件，必须"本地改 → commit → push → git pull"。违反 = 累积 dirty 到下次部署爆炸。
+- 事故案例：2026-04-23 aws-web-02 积累 163 个 dirty 文件（含手改 `CLAUDE.md` / `.claude/settings.local.json` 残留），`git pull` 冲突触发 HALT，靠 `git stash push -u` 变通完成部署。
+
+## SSH 远端执行 heredoc 铁律（并入自 newworld-deploy-pitfalls / 原 newworld-ssh-deploy，2026-04-21 事故硬化）
+
+**触发**：写 SSH 远端执行脚本（部署 / 配置同步 / 证书签发 / openresty reload）；远端用 sed / envsubst / cat heredoc 渲染配置；涉及变量替换 `$VAR` / `$(date)`。
+
+### 1. heredoc 必须 quoted sentinel
+`<<'QUOTED'`（单引号包裹 sentinel）= 所有变量在**远端**才 expand。
+
+错（本地 shell 先 expand，`$VAR` 可能空值）：
+```bash
+ssh usca-1 sudo bash -s <<REMOTE
+  . /etc/newworld/secrets.env
+  sed -e "s|{{ X }}|$X|g" file.j2 > out.conf   # 本地无 $X → 远端拿到空值破坏 conf
+REMOTE
+```
+对（quoted `'REMOTE'`）：
+```bash
+ssh usca-1 sudo bash -s <<'REMOTE'
+  . /etc/newworld/secrets.env
+  sed -e "s|{{ X }}|$X|g" file.j2 > out.conf
+REMOTE
+```
+或整条命令单引号传给 ssh：`ssh usca-1 'sudo bash -c "source /etc/newworld/secrets.env && sed -e \"s|{{ X }}|\$X|g\" ..."'`
+
+### 2. 明确变量来源
+除非明确要在本地 expand（如 `$(date)` 时间戳），否则清楚哪些变量来自本地、哪些来自远端。
+
+### 3. ssh exit code = 0 ≠ 部署成功
+SSH 失败后必须检查 nginx.conf / systemctl status，不能以 `ssh exit code = 0` 万事大吉。
+
+### 4. 部署前验证渲染产物
+远端 `cat` / `head` 渲染后的配置文件，确认占位符都被替换、没有空值。
+
+**违反后果**：按 **3.25** 级处理——本地 shell 提前 expand 把空值渲染进生产 nginx.conf → `nginx -t` 失败 / systemctl failed → 10~30 秒 openresty 挂掉影响线上流量。事故案例：commit `a870a0fc`（2026-04-21）v3.3 Lua SNI 部署 usca-2 / aws-s。
 
 ## Step 2：部署后端（按需，改了哪个模块部署哪个）
 
@@ -147,6 +226,25 @@ ssh ca-admin 'sudo journalctl -u newworld-admin --since "3 min ago" | grep -E "E
 - 用 curl 401 / 200 当成"路由存在"误判 → admin Spring Security 对不存在路径也 401，新 Controller 路径错误时无人察觉
 - 跳过 e2e 真点 → 前后端契约 mismatch（字段名、HTTP method）只在浏览器才暴露
 - 上述任一项漏验证导致用户先发现 = **3.25 级别**事故复盘
+
+### Step 2.5b：JAR symlink 假绿三步校验（并入自 newworld-deploy-pitfalls / 原 newworld-deploy-jar-symlink）
+
+**2026-05-02 教训**：`mvn package` 成功 + `systemctl restart` 成功 + `is-active=active` + `journalctl 无 ERROR` **四绿全 ✓，但 systemd 跑的 `deploys/current.jar` 还指向旧 jar**（mvn 输出在 target/ 没 cp 到 deploys/）→ 新代码完全没在跑。"四绿"全假。生产 admin/data/web JAR 真身是 `/opt/newworld/newworld-<module>/deploys/current.jar` **软链**（2026-07-10 三模块统一前缀），不是 `target/*.jar`。
+
+**强制三步校验**（systemctl restart 之后必做；任一失败立即 `ln -sfn deploys/<previous>.jar current.jar && systemctl restart` 回滚）：
+```bash
+# 1. current.jar 时间戳 ≥ 刚 build 的 target/jar
+test "$(stat -c %Y deploys/current.jar)" -ge "$(stat -c %Y target/newworld-*-*.jar)" || { echo FAIL; exit 1; }
+# 2. md5sum 一致（current.jar 内容 = target jar）
+diff <(md5sum < deploys/current.jar) <(md5sum < target/newworld-*-*.jar) || { echo FAIL; exit 1; }
+# 3. 真接口验证（含新版本特征字段，不仅 actuator/health）
+curl -sf http://localhost:<port>/api/v1/.../<feature> | grep -q "<expected_field>" || { echo FAIL; exit 1; }
+```
+推荐封装 `scripts/deploy-backend.sh <module>` 一键 mvn → cp → symlink → restart → 三步校验。
+
+**stale jar 校验（2026-05-07 增强，commit `c2055a55`）**：`git pull` 后记 `BUILD_START_TS=$(date +%s)` baseline；`mvn clean package` 后校验 `stat -c %Y target/jar ≥ BUILD_START_TS`，mtime < baseline = "stale jar 假绿"立即 `exit 1`；mvn 去 `-q` 改 `--errors --batch-mode`（install 阶段错误不被吞）。防御原理：clean/package 静默失败导致 target/ 没重建时，残留旧 jar mtime 必早于本次 build 起点 → 校验立即捕获。
+
+**反例（错误做法）**：scp 到不存在的 `/newworld/newworld-admin/target/`；scp 后不 systemctl restart（软链未更新）；`mvn package` 在服务器跑后只 restart 没 cp+symlink（target/ 新 jar 但 systemd 跑老 current.jar）← 2026-05-02 真实故障。**symlink 必指向具体 jar**（`deploys/current.jar`，非父目录/target），否则 systemd ExecStart 找不到 jar 循环重启（W9 26 次 restart-loop 教训）。
 
 ## Step 2.6：region 切流前置门禁（仅多 region 放量/切流时；2026-06-08 nw-region-p1）
 
@@ -311,19 +409,18 @@ ssh ca-admin '
 **对应工程师动作**：发现编译期 `cannot find symbol` 引用 newworld-common 新成员 → 跑上面一次性修复 → 重试 deploy。
 
 ## 配套铁律（必读）
-- 部署前四查：见 `newworld-deploy-checklist` skill
-- SSH heredoc：见 `newworld-ssh-deploy` skill
-- 生产 git pre-flight：见 `newworld-git-preflight` skill
+- 部署前四查 / SSH heredoc / 生产 git pre-flight / JAR symlink 假绿校验：**均已并入本 Runbook 上文对应段**（2026-07-23 BL-144，原 `newworld-deploy-checklist` / `newworld-deploy-pitfalls` 已删并入本档）
 - OpenResty reload smoke：见 `newworld-openresty-deploy` skill
+- SQL 一致性 / schema 启动期校验：见 `newworld-schema-consistency` skill
 
 ## 教训补充（shadow-diff-retire sprint 2026-05-17）
 
-- **部署 pre-flight 必确认本地已 push 到 origin——服务器 `git pull` 只见 origin**：shadow-diff-retire Phase 4 首次部署，本地 15 个 commit（本 sprint 删除 + B 档 backlog）从未 `git push`，服务器 `git pull` 只拉到 `origin/master` 旧 HEAD → build 旧代码、web×2 旧码空转 restart。ops-senior 靠 JAR 内类验证发现并 HALT。**规则**：部署前（Step 1 之后）必跑 `git rev-list origin/master..HEAD`——非空就先 `git push`，确认 `0` 才进 Step 1.5。与 `newworld-git-preflight`（服务器侧 dirty 检查）互补：一个查服务器工作树、一个查 origin 是否含全部待部署 commit。
+- **部署 pre-flight 必确认本地已 push 到 origin——服务器 `git pull` 只见 origin**：shadow-diff-retire Phase 4 首次部署，本地 15 个 commit（本 sprint 删除 + B 档 backlog）从未 `git push`，服务器 `git pull` 只拉到 `origin/master` 旧 HEAD → build 旧代码、web×2 旧码空转 restart。ops-senior 靠 JAR 内类验证发现并 HALT。**规则**：部署前（Step 1 之后）必跑 `git rev-list origin/master..HEAD`——非空就先 `git push`，确认 `0` 才进 Step 1.5。与本 Runbook Step 1.5 服务器 git pre-flight（服务器侧 dirty 检查）互补：一个查服务器工作树、一个查 origin 是否含全部待部署 commit。
 - **sprint 收尾标「待部署」的项必须有跟踪，禁无限期搁置**：B 档 backlog 7 commit（前端 + edge Lua）5/17 早些已 commit + qa，但"待部署"被搁置，直到 shadow-diff-retire Phase 4 才偶然捎带上线。**规则**：qa 通过后标"待部署"的改动，24h 内部署或显式登记延期原因 + 责任人，不留无主悬空。
 
 ## 教训补充（anti-adblock sprint 2026-05-21）
 
-- **多并行 worktree merge 后部署必含 Step0：`mvn compile` 主仓全模块验证 + 修 merge artifact**：anti-adblock sprint Phase 4b 5 worktree 合并后 ops-senior 在编译阶段揪 7 个 fix commit（`34841207` AdSlotDTO 重复 String clientFilter / `9636a8d3` AdController HttpServletRequest 类型不匹配 / `19d660e4` AdServiceTest List 同步 / `408b26fd` AdControllerTest @Mock / `b446bba2` AdController GET /{slug} 漏接 UA / `52f0fe10` q.js Q-alias exports / `9fdd3c45` baseline.js runBaselineCheck export）。**根因**：每个 worktree 各自 `mvn compile` 通过，但 `-X theirs` merge 不解决"P1.3 越界 commit 498f2c37 加 `String clientFilter` + P1.4 加 `List<String> clientFilter`"的语义重复，需 ops Step0 手工排雷。**规则**：≥3 个并行 worktree 合并的 sprint，Phase 4 plan 必须显式包含 "Step0：merge artifact 预处理"——所有 worktree merge 进 master 后**先跑 `mvn compile -pl <all-changed-modules>`**，修所有编译错 + grep 重复字段 + 检查前端缺失 export，再进 Step1 deploy-checklist；预留 Step0 时间 buffer（实证 ops 耗 26min + 多次截断）；ops-senior 状态档提前写明"Step0 预计处理 merge artifact，可能有额外 fix commits"。
+- **多并行 worktree merge 后部署必含 Step0：`mvn compile` 主仓全模块验证 + 修 merge artifact**：anti-adblock sprint Phase 4b 5 worktree 合并后 ops-senior 在编译阶段揪 7 个 fix commit（`34841207` AdSlotDTO 重复 String clientFilter / `9636a8d3` AdController HttpServletRequest 类型不匹配 / `19d660e4` AdServiceTest List 同步 / `408b26fd` AdControllerTest @Mock / `b446bba2` AdController GET /{slug} 漏接 UA / `52f0fe10` q.js Q-alias exports / `9fdd3c45` baseline.js runBaselineCheck export）。**根因**：每个 worktree 各自 `mvn compile` 通过，但 `-X theirs` merge 不解决"P1.3 越界 commit 498f2c37 加 `String clientFilter` + P1.4 加 `List<String> clientFilter`"的语义重复，需 ops Step0 手工排雷。**规则**：≥3 个并行 worktree 合并的 sprint，Phase 4 plan 必须显式包含 "Step0：merge artifact 预处理"——所有 worktree merge 进 master 后**先跑 `mvn compile -pl <all-changed-modules>`**，修所有编译错 + grep 重复字段 + 检查前端缺失 export，再进本 Runbook「部署前必查四项」；预留 Step0 时间 buffer（实证 ops 耗 26min + 多次截断）；ops-senior 状态档提前写明"Step0 预计处理 merge artifact，可能有额外 fix commits"。
 
 ## 教训补充（mysql-qps sprint 2026-06-17）
 

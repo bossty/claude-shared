@@ -3,6 +3,8 @@ name: newworld-lua-redis-pubsub
 description: lua-resty-redis pubsub 模式必须 pcall(r.close, r) 显式关连接（不能 set_keepalive）；改完 lua 必 systemctl restart openresty（不是 reload，否则连接翻倍）；Redis 配 timeout 1800 兜底。Triggers on lua redis, sub_loop, pubsub, pcall close, systemctl restart openresty, r:subscribe, connected_clients, channel_whitelist_agent, domain_class_agent, lua-resty-redis, redis 长连接.
 ---
 
+> **执行机制**：靠判断力（lua-resty-redis pubsub 连接管理）
+
 # Newworld OpenResty Lua-Redis 长连接铁律（2026-04-25 sub_loop 泄漏事故硬化）
 
 ## 触发场景
