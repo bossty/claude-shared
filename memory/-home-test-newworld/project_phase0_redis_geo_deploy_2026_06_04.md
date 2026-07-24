@@ -1,6 +1,6 @@
 ---
 name: project_phase0_redis_geo_deploy_2026_06_04
-description: 方案2 多region 全程（Phase0 区域部署+bean崩/Phase0.1 settings/Phase0.2 TwoLevelCache读写分离+ROI/Phase1抓手#1 CN路由切流）；post-compact 先读 docs/sprint/2026-06-04-SESSION-STATE-multiregion.md
+description: 方案2 多region 全程（Phase0 区域部署+bean崩/Phase0.1 settings/Phase0.2 TwoLevelCache读写分离+ROI/Phase1抓手#1 CN路由切流）；锚点档已删(2026-07-23 BL-153)，被 2026-06-13 终态架构 B supersede
 metadata: 
   node_type: memory
   type: project
@@ -9,7 +9,7 @@ metadata:
 
 # 方案2 多 region / Redis geo-HA 全程（2026-06-04，Phase0→Phase1抓手#1）
 
-> ★**post-compact 先读 `docs/sprint/2026-06-04-SESSION-STATE-multiregion.md`**（统一 LIVE 状态+进行中+回滚弹药锚点）。本 memory 是分阶段细节运行记录。
+> ★锚点档 `docs/sprint/2026-06-04-SESSION-STATE-multiregion.md` **已删**（2026-07-23 BL-153 清算，Owner 拍板：被 2026-06-13 终态架构 B 整体 supersede，「region HA」残余随终态 B 关闭；取回 `git log --diff-filter=D` 见 `docs/TOMBSTONES.md`）。本 memory 是分阶段细节运行记录，现行架构真相源见 `docs/generated/server-topology.md`。
 
 ## ★ 当前 LIVE 状态（截至 2026-06-05 晚，prevent compact 混乱）
 - **★★最新(2026-06-05 晚)**：`origin/master = 3960c56f`(已 push)。**闸1 的 3 个真实 A 域 digit-hub/logicpipe26.cc/labwave488.top 已从 lblb.17.rip 迁到「零 17.rip 引用的解耦 geo-LB `tcos.dnsv106.com`」**(独立基建域 dnsv106.com，防旗舰 17.rip 被封 SPOF)。全 200、lb-cohort RUM 比基线 -25~39% 保持、池 3×1/1。**US/EU 均已 m5.xlarge**(EU+US 都纠偏完，非"US 待换"了)；max_connections 已 300→500。**route-mode cohort 埋点**(MonitorService `app.rum.route-mode=lb-cohort` on US/EU)让切换域聚成 lb-cohort 量方案2 真用户 RUM。**解耦 geo-LB 全程细节见 [[reference_cf_lb_always_use_https_loop_universal_ssl]]**(根因=LB 必须与 pool origin 同 zone / owner pool-origin insight 治本 / 测路径金标 / monitor 解耦 / CN 拨测方差 / 5-origin 限升 plan)。**★✅全量已切(2026-06-06 ~00:0x HKT 峰内,含旗舰)**:active A 63 域中 **61 全迁解耦 geo-LB tcos.dnsv106.com,含旗舰 17.rip apex+wild**(原 63594ad3 HK 单区直连→tcos);非 tcos 仅 2 实验臂(eduspace181 方案1/flowzone26 旧 lblb,有意排除防污染三臂)。owner sign-off=「10min 复测无问题就全量含旗舰」,gate 全绿才执行。**容量实证(全量+峰内单台 m5/region):US load 0.36→0.94(非旗舰批)→1.06(+旗舰)/EU 0.14→0.62→0.85,5xx=0 全程,利用率 26%/21% 留 74% 余量,HK master 179/500**。半量阶段 A/B 实证切换域 CN TTFB p50 386 vs 未切 712=快 46-47%(route-mode cohort 天然分桶)。**执行踩坑(已修零生产影响):批量 PATCH 用快照 .zone_id 全 null(CF list dns_records 不回 zone_id)→60 条 7003 全失败但零改动→修法逐域实时 GET zones?name= re-derive zone_id 再 PATCH→60/60**。**回滚:快照 `/tmp/lb-domain-snapshots` 原值=63594ad3 HK tunnel(非 lblb)改回秒级**。**剩余 backlog=region HA ×2(单 region 故障=CF LB fallback 降级非全断);hourly cron 95a17e2e 盯**。详见 RUNBOOK `docs/sprint/_archive/2026-06-05-decoupled-geo-lb/RUNBOOK.md` §8。

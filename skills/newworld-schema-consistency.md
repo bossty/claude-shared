@@ -5,6 +5,8 @@ description: entity vs DB schema 一致性 + SQL migration 漏跑防再发（202
 
 > **执行机制**：无自动闸门，靠 LSP/grep+判断力；SchemaConsistencyValidator 仅 dev/staging/test profile（需起服务才跑，不进 mvn test）
 
+> **2026-07-24 BL-174 边界**：**「新迁移漏跑」的追踪权威已由 Flyway 接管**（`newworld-deploy-runbook` §5 / `docs/design/flyway-migration-versioning.md`）——新迁移落 `newworld-admin/src/main/resources/db/migration/`，admin 启动期 prod=validate 漏跑即红。本 skill 不再是迁移追踪权威源；仍覆盖的是 **entity↔column 级别一致性**（`@TableField` 映射 / resultMap 漏字段 / silent null 等 Flyway 管不到的应用层漂移）。两者互补。
+
 
 # entity vs DB Schema 一致性铁律
 

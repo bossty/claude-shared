@@ -116,7 +116,7 @@
 **以下 3 份原判 MERGE，改为保留补索引**（前两份的知识点目标是 skill 而非 memory，改 skill 须走 home+plugin 同步四步，不在本任务范围；第三份存在未决矛盾）
 - [region 上线就绪门禁（回滚判据）](project_region_readiness_gate_2026_06_08.md) — 回滚只认 origin 5xx 绝对数 + cache-miss RTT，禁用 rate（分母稀释）和客户端 api_fail；★档内 `scripts/check-region-read-routing.sh` 已不存在，现仅 region-readiness-gate.sh 在
 - [首页批量 API 失败 RCA：「缺 LIMIT」可能是设计意图](project_fe_error_rca_2026_06_04.md) — 发现「缺 LIMIT / 缺 X」先 `git log -S` 查是不是被人专门删过——删除即设计意图，加回去 = 重新引入已修的语法错
-- [Phase 0 冷切换（矛盾已于 07-22 实测结案）](project_2026_04_21_phase0_golive.md) — 原「openresty systemd `EnvironmentFile` 传不到 nginx master、须 bash wrapper」**已证伪：从来就不成立，是判据错**——`/proc/<master>/environ` 被 nginx setproctitle 覆写成 argv 尾巴，对 nginx 天然不是有效判据；04-25 用纯 EnvironmentFile + lua `os.getenv()` 反查已正证注入正常（`docs/design/wave_stats_v4_sprint_closure.md:307-321` §6.4）。故 wrapper 功能多余但 3 台 edge 仍在跑（未回退，不阻塞）。副产：仓库 `ops/systemd-prod/openresty/wave_stats_v4.conf` 是僵尸文件，7 台实查生产哪儿都没装，勿照搬。档内 zone_id / IP / aws-monitor 均已退役
+- [Phase 0 冷切换（矛盾已于 07-22 实测结案）](project_2026_04_21_phase0_golive.md) — 原「openresty systemd `EnvironmentFile` 传不到 nginx master、须 bash wrapper」**已证伪：从来就不成立，是判据错**——`/proc/<master>/environ` 被 nginx setproctitle 覆写成 argv 尾巴，对 nginx 天然不是有效判据；04-25 用纯 EnvironmentFile + lua `os.getenv()` 反查已正证注入正常（`docs/design/wave_stats_v4_sprint_closure.md:309-323` §6.4）。故 wrapper 功能多余但 3 台 edge 仍在跑（未回退，不阻塞）。副产：仓库 `ops/systemd-prod/openresty/wave_stats_v4.conf` 是僵尸文件，7 台实查生产哪儿都没装，勿照搬。档内 zone_id / IP / aws-monitor 均已退役
 
 **二阶暗孤儿补索引**（因引用它们的档在本批被删而新失联；未经逐份价值判定，按「不确定则保留可达」处理，留待阶段 2 复核）
 - [cdn-fail 告警 95-98% 是结构性指标假象](project_cdn_fail_metric_artifact_2026_06_21.md) — 成功路径静默无分母，非域名被烧；boce 实证 SNI 没烧→别急着买域；含 F3 双计数 bug
@@ -130,3 +130,44 @@
 **可达性修复（Task 4 批后验证 nw-memory-reachability 揪出的 2 份既有暗孤儿——非本批删除所致，实测本批删除的两档均未 [[wikilink]] 指向它们；此前既无索引行也无入边，属更早期 churn 遗留。均为 KEEP 档故补索引恢复可达）**
 - [kanav 爬虫搁置（非废弃）](project_kanav_crawler_shelved_2026_05_30.md) — Owner 2026-05-30 拍板暂时放弃；KanavCrawlerService 代码保留 gated-off 默认禁用零线上影响、从未部署验收；TOMBSTONES P1 点名的 5 条抢救 topic 之一（`0672f1aa7`），恢复路径/PRD 位置须 git 历史找回
 - [B5 CloudflareApiService 上帝类拆分第一批](project_cf_httpclient_split_b5_2026_07_06.md) — 合 master `400d0db1a`（抽 CfHttpClient 传输层 2580→2114 行、行为逐字保持）；含可复用拆分范式 + 3 个绕过点窄口子接口设计；后续 7 资源域拆分未开工
+
+## 2026-07-23 BL-144 阶段③ Task 5/6 feedback/reference C 桶降级出索引（3 条，文件留盘可搜，仅移出 MEMORY.md 常驻索引）
+
+> 判据全表见 docs/sprint/2026-07-22-bl144-agent-first-restructure/PHASE3-TASK5-FBREF-DISPOSAL.md §四a；Task 6 索引重构记录见同目录 PHASE3-TASK6-INDEX-REPORT.md。降级=仅删 MEMORY.md 索引行，文件本体保留在盘，关键词文件搜索仍可 recall（3 条均已实证命中）。取回=git 历史（本次索引重构 commit）。
+- reference_ad_conversion_drop_misdiagnosis_2026_05.md — 降级出索引。一次性误诊事故复盘（2026-05 灰产落地域轮换周期性被封）；双侧引用面 0；recall 关键词「广告转化」命中原文。
+- reference_cloakbrowser_cf_bypass.md — 降级出索引。一次性评估（Owner 定暂不替 FlareSolverr、留后备）；仅 2 条 memory wikilink（降级后仍解析）、无仓库侧指针；recall 关键词「CloakBrowser」命中。
+- reference_apple_bot_traffic.md — 降级出索引。一次性流量识别（17.0.0.0/8=Apple AS714 属通识）；双侧引用面 0；recall 关键词「17.0.0.0」命中。
+
+## 2026-07-23 归档(Owner 授权,BL-144 阶段③补充)
+
+> reference 段已收口条目降级出常驻索引（29 条），文件本体全部保留在盘、关键词文件搜索仍可 recall。判据：单次事故的诊断结论/已证伪翻案、或高度场景特异（特定采集源手法/特定机器坑）、或教训已被 named skill 机制固化（symlink→newworld-deploy-runbook、域名池 N_xxx→newworld-domain-pool、EnvironmentFile/@Value→newworld-secrets、CF stale→newworld-cf-cache-ops、branch cleanup→newworld-dev-workflow）。保留在主索引的是「再提 X 先走本条」防重复论证条目、高频操作型 SOP/验证方法论、load-bearing 禁删条目。取回=git 历史（本次索引重构 commit）。
+
+- [抓源站视频流必须做frame归属判定](reference_media_stream_attribution_needs_frame_ownership.md) — URL宽松匹配会把广告组件流误认正片,曾据此凭空立项解扰器
+- [采集集体冻结先查/tmp:tmpfs泄漏致池归零](reference_tmpfs_leak_starves_playwright_pool.md) — pool-size=1把一次重建失败放大成永久死亡,全程仅一行log.error
+- [CF 504+origin=0先查protocol=UNK判记账伪影(GFW归因已证伪)](reference_cf_504_unk_protocol_accounting_artifact.md) — 最佳解释=浏览器预连接伪影,无感无需修;地理集中必换对照源验分母
+- [「同几番号反复失败+产出骤降」≠IP封](reference_cover_miss_not_ipban_placeholder_probe.md) — 历史命中URL复测+占位图语义判别;封面miss删行→markDead失效→循环重采堵死hardCap
+- [buyvm best worker:systemd unit vs launch脚本双管理打架](reference_buyvm_best_worker_systemd_vs_launch_script.md) — 会报假READY;判活=ss看ESTAB+CPU时间+线程数,非日志
+- [硬编码cap<每页条数=静默丢片](reference_hardcoded_cap_silent_drop_masked_by_old_concurrency.md) — 旧并发冗余扫描意外补缺口掩盖它,改硬分片才第一次真咬人
+- [手敲启动的worker重启必丢env→回落退役默认值10.0.0.40](reference_handstarted_worker_restart_loses_env.md) — worker假UP但业务必败;一律用launch-*.sh,杀进程禁pkill -f
+- [A族爬虫parseDetail返回null的语义陷阱](reference_crawler_parsedetail_null_contract.md) — 基类对null计FAILED非SKIPPED;改共享基类前须枚举全下游隐式依赖
+- [HLS段PNG伪装前缀剥除](reference_hls_segment_png_disguise_strip.md) — 必按PNG chunk锚IEND,纯周期扫会被同相位诱饵误命中[[feedback_goldset_must_play_real_video]]
+- [段被套盗链referer致签名CDN大面积429→referer-agnostic host段豁免](reference_source_referer_ban_agnostic_host_exempt.md) — 换IP/UA无效唯一判别量是referer[[reference_source_ip_ban_dual_whitelist_flaresolverr]]
+- [跨机房永久边车=autossh systemd隧道+pkill -f自匹配杀自己坑](reference_autossh_sidecar_tunnel_pkill_gotcha.md) — 切边车用显式PID或pkill -x,禁pkill -f含命令行字符串
+- [长视频抽等距帧必先remux成MP4再keyframe seek](reference_thumbnail_grid_seek_remux_mp4.md) — 对concat/裸TS做-ss是顺序解码慢死长片;时长必ffprobe真产物
+- [env键归属判定+systemd EnvironmentFile累加语义](reference_env_key_ownership_and_systemd_envfile.md) — 归属必追@Value所在模块禁凭类名;drop-in覆盖须先空赋值重置
+- [Spring实例化≠代码引用](reference_spring_bean_instantiation_vs_import.md) — 给common类去@Value默认值前必查下游ComponentScan,朴素去默认值会炸6台web
+- [部署jar必symlink切换不覆盖实文件(inode实证)](reference_jar_symlink_vs_inplace_overwrite.md) — cp -f原地覆盖同inode与运行中JVM mmap竞争;附迁移harness三坑
+- [UDF deadRoots判死无样本门,隐式依赖REACH_FUSION_ENABLED](reference_deadroots_sample_gate_implicit_contract.md) — 关融合=立失小样本保护;REACH_HINT_ENABLED 07-10已live
+- [爬虫dry-run三铁律(id撞键/mock LLM/备份漂移)](reference_crawler_dryrun_id_collision_mock_llm.md) — 隔离库AUTO_INCREMENT必设高值
+- [前端封面占位/懒加载技术铁律](reference_frontend_image_placeholder_lessons.md) — IO root=scrollRoot
+- [parked jitter优化(未上线)](reference_parked_jitter_settings_read_cache.md) — patch在memory目录
+- [ca-admin查Redis坑](reference_redis_cli_caadmin_proc_password.md) — 密码在/proc非secrets.env
+- [Dragonfly高iowait是cosmetic](reference_dragonfly_iowait_cosmetic.md) — 判真I/O用write_bytes+iostat%util
+- [N9E搬ca-monitor+AWS走nw-dev](reference_n9e_ca_monitor_aws_access.md) — web节点AWS_PROFILE=nw-dev
+- [广告位图片渲染统一](reference_snack_adslot_render_unify.md) — image_url=裸hash经cdn
+- [前端部署checkout先npm ci](reference_frontend_deploy_checkout_npm_ci.md) — tee掩盖真退出码
+- [部署后版本核验:CF边缘SWR裸curl读旧版假阴](reference_postdeploy_version_verify_cf_swr_stale.md) — 版本核验用浏览器no-store/直读节点文件,别裸curl
+- [安全清理分支/worktree 协议](reference_safe_branch_worktree_cleanup_protocol.md) — 删ref需merged+pushed验
+- [CF immutable+id复用=边缘stale陷阱](reference_cf_immutable_stale_id_reuse.md)
+- [N9E v8 dashboard 真 schema](reference_n9e_v8_dashboard_schema.md) — 唯一权威board_payload非docs
+- [域名池 TARGET vs N_xxx](reference_domain_pool_target.md) — N_xxx下发列表需手动sync

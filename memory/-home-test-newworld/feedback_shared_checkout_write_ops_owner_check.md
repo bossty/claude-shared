@@ -15,3 +15,5 @@ metadata:
 **姊妹坑：`git checkout <branch>` 在该分支已被别的 worktree 占用时静默失败**（2026-06-23 实踩，channel-anomaly 告警去重那次）：`git checkout master >/dev/null 2>&1` 连续两次都没切成功（master 当时挂在 `/home/test/nw-h2` worktree），报的是 exit 128 `fatal: 'master' is already used by worktree at ...`，但重定向把它吞了 → 后续分支基线判断全错、cherry-pick 落错分支。**故切分支后必 `git branch --show-current` 复核实际落在哪个分支**，别信「checkout 命令返回了就等于切过去了」；动手前 `git worktree list` 先看谁占了；要动被占用分支用 `git -C <该 worktree 路径> cherry-pick`。
 
 **How to apply:** ①动手前 `git symbolic-ref HEAD` 认属主 + `git status` 看清 M/untracked 的内容归属（与哪个分支/commit byte 级一致，diff 为 0 才算"确证冗余"）；②共享 checkout 更新 master 永远 `git merge --ff-only`，禁裸 merge；③"清理"也是写操作，同样受 [[audit-methodology]] "不碰你没创建的"约束；④误删活跃 hook 脚本时用 Read+Write（非 Bash）从 worktree/origin 副本恢复。相关 [[deploy-git-preflight-2026-07-05]]；skill 版已固化于 newworld-dev-workflow §1b。
+
+**2026-07-23 增补（doc-truth-program 实证）**：多 agent 共享 checkout 期间，`git add <paths>` 后的裸 `git commit` 会把**其他会话暂存在共享 index 的内容整体夹带**（实测差点带走别 agent 的 190 档删除批，message 说谎 195 文件）。修复=一律 `git commit -o <paths>`（--only 只提交指定路径、不动暂存区其余）；对方侧纪律=stage 后立即 commit 不挂 index。与 [[feedback_memory_commit_discipline]] 同型（那边是 memory 目录版）。

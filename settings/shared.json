@@ -77,7 +77,11 @@
       "ShareOnboardingGuide"
     ],
     "ask": [],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/home/test/claude-shared",
+      "/home/test/.claude-work/projects/-home-test-newworld"
+    ]
   },
   "preferredNotifChannel": "terminal_bell",
   "skillOverrides": {

@@ -5,6 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: a71aa26f-69ff-4daa-8ee0-e32d79403b2e
+  modified: 2026-07-24T06:36:04.473Z
 ---
 
 2026-06-06 全量切流(61 active A 域含旗舰 17.rip 上 tcos geo-LB)后 owner 报"大量告警+数据大跌+CPU100%+大量域名降级"。多 agent team RCA(nw-conn-rca,BSP),最终锤出真故障。
@@ -47,7 +48,8 @@ metadata:
 **监控债(独立 backlog)**:organic_rate 告警加最小分母 guard / categraf cpu 口径排 iowait / health 低流量域加聚合 / route-mode cohort 覆盖 HK 路径 / **判失败用 origin access-log status,判延迟用 nginx urt,别信 health/RUM-TTFB 软信源**。
 
 ## ★LIVE 状态 + 跨会话(post-compact 必读,防重做)
-- **切流已回滚到 HK**:tcos LB `default_pools=[hk]`/region_pools 空/fallback=hk,region 排空、5xx=0、稳定。回滚弹药快照 `aws-data:/tmp/tcos-lb-snapshot-pre-hkfailback.json`。**方案2 全量切=OFF,等修好 F 再切**。
+- **[2026-07-24 BL-183 订正]** 下条「回滚到 HK」为 06-06 时点快照、已失效：HK origin 已整体退役，tcos-canary 现 `default_pools=[ca,eu]` 7 区 geo 全填、两 pool healthy、零 5xx——fullcut 目标已由终态架构 B 事实达成，「再切」无对象。根因双重消除（master 迁 CA 本地写 + P0 write-coalescing f4b939445 在产）。实查证据 `docs/sprint/2026-07-23-doc-truth-program/BL183-LB-REPORT.md`。
+- ~~**切流已回滚到 HK**:tcos LB `default_pools=[hk]`/region_pools 空/fallback=hk,region 排空、5xx=0、稳定。回滚弹药快照 `aws-data:/tmp/tcos-lb-snapshot-pre-hkfailback.json`。**方案2 全量切=OFF,等修好 F 再切**。~~
 - **🔴 前端 dist stale + reload 循环事故 = 其他会话已修(region-origin-mirror sprint),不是我的任务,别重做**。本会话只诊断未碰前端。
   - **★2026-06-16 更正(branch-sweep)**:region-origin-mirror 整套机制(`sync-region.sh`/`sync-region-openresty.sh` parity + deploy-frontend Step9/10 dist 镜像)**已被 v4 零停机 epic 有意退役**——`deploy-openresty.sh --check` 漂移检测「替代退役的 sync-region parity 闸门」(commit 4e671ecc,见 [[project_zero_downtime_hostid_2026_06_16]])。origin/master live `scripts/` 已无 sync-region;那条 region-mirror 分支(`worktree-agent-a4ba16…`)**勿再 resurrect**,已归档 `archive/region-mirror-p1-superseded-20260616`。
 - **AWS 跨区私网已放开(我做,owner 授权)**:5 个 SG 全协议放行 172.31/32/33;aws-monitor+aws-s ufw;**新建 US↔EU peering `pcx-065a7e1f3651592f1`**+双侧路由(原只 hub-spoke)。

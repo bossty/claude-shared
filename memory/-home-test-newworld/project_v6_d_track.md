@@ -39,7 +39,7 @@ V7 候选（60d 观察期触发条件命中才做）：
 V6 sprint **实质已收口**，V7 已启动并做了一大半：
 - **HD2 visitor_alias** + **HD8 acme 双签**：4/27 当天即完成（commit `bc284c66 feat(stats-v6-α+β)` + `a8c1be40 feat(stats-v6-γ)`）
 - **60d 观察期被砍**：commit `541be478 feat(stats-v6-e2e)` 替换为"3d E2E 验证框架 4 块全交付"——是否 owner 拍板需 review
-- **V7 sprint 已启动**：commit `e963e9dd feat(stats-v7-A+coord)` 已做 C-2/C-3/C-4/C-5；C-1 单独 redo（`docs/design/wave_stats_v7_c1_redo.md`）
+- **V7 sprint 已启动**：commit `e963e9dd feat(stats-v7-A+coord)` 已做 C-2/C-3/C-4/C-5；C-1 单独 redo（`docs/design/wave_stats_c1_redo.md`）
 - **sprint_closure 文档已写**：`docs/design/wave_stats_v6_sprint_closure.md` + `wave_stats_v7_sprint_closure.md`
 - **V6-γ 留尾巴**：nginx env typo 已修（fec6e99a + 9ac05278），但 V5.1-B 完整 cutover（nginx-web.conf 切主 + hmac_secret_agent.init）仍未做；AnalyticsV5Metrics 看似已分拆但需 owner 确认；aws-s git credential 状态不清
 
